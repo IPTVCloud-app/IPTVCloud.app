@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-border: var(--border-subtle);
+  --color-input: var(--border-standard);
+  --color-ring: var(--accent);
+  --color-background: var(--bg-page);
+  --color-foreground: var(--text-primary);
+
+  --color-page: var(--bg-page);
+  --color-surface: var(--bg-surface);
+  --color-elevated: var(--bg-elevated);
+  --color-hover: var(--bg-hover);
+  
+  --color-primary: var(--text-primary);
+  --color-secondary: var(--text-secondary);
+  --color-tertiary: var(--text-tertiary);
+  --color-quaternary: var(--text-quaternary);
+  
+  --color-brand: var(--brand);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-success: var(--success);
+  --color-emerald: var(--emerald);
+
+  --font-sans: 'Inter', -apple-system, system-ui, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  --font-mono: 'Berkeley Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
+/*
+  Light Mode Variables (Default)
+*/
+:root {
+  --bg-page: #f7f8f8;
+  --bg-surface: #ffffff;
+  --bg-elevated: #ffffff;
+  --bg-hover: #f3f4f5;
+  --text-primary: #1a1a1e;
+  --text-secondary: #3c3c43;
+  --text-tertiary: #62666d;
+  --text-quaternary: #8a8f98;
+  --brand: #5e6ad2;
+  --accent: #7170ff;
+  --accent-hover: #828fff;
+  --success: #27a644;
+  --emerald: #10b981;
+  --border-primary: #d0d6e0;
+  --border-secondary: #c0c6d0;
+  --border-subtle: #e6e6e6;
+  --border-standard: rgba(0, 0, 0, 0.08);
+  --radius: 0.5rem;
+}
+
+/*
+  Dark Mode Variables
+*/
+.dark {
+  --bg-page: #08090a;
+  --bg-surface: #0f1011;
+  --bg-elevated: #191a1b;
+  --bg-hover: #28282c;
+  --text-primary: #f7f8f8;
+  --text-secondary: #d0d6e0;
+  --text-tertiary: #8a8f98;
+  --text-quaternary: #62666d;
+  --brand: #5e6ad2;
+  --accent: #7170ff;
+  --accent-hover: #828fff;
+  --success: #27a644;
+  --emerald: #10b981;
+  --border-primary: #23252a;
+  --border-secondary: #34343a;
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --border-standard: rgba(255, 255, 255, 0.08);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground transition-colors duration-200;
+    font-family: var(--font-sans);
+    font-feature-settings: "cv01" 1, "ss03" 1;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Custom utilities based on DESIGN.md */
+@layer utilities {
+  .linear-shadow-subtle {
+    box-shadow: rgba(0,0,0,0.03) 0px 1.2px 0px 0px;
+  }
+  .linear-shadow-card {
+    box-shadow: rgba(0,0,0,0.2) 0px 0px 0px 1px, rgba(0,0,0,0.3) 0px 2px 4px 0px;
+  }
+  .linear-shadow-elevated {
+    box-shadow: rgba(0,0,0,0.4) 0px 2px 4px 0px, rgba(0,0,0,0.2) 0px 0px 0px 1px;
+  }
+  .linear-inset {
+    box-shadow: inset rgba(0,0,0,0.2) 0px 0px 12px 0px;
+  }
+  .text-display {
+    font-weight: 510;
+    line-height: 1.0;
+    letter-spacing: -1.056px;
+  }
+  .text-body {
+    font-weight: 400;
+    line-height: 1.6;
+    letter-spacing: -0.165px;
+  }
+}
