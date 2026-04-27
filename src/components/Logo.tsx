@@ -10,7 +10,8 @@ export function Logo() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    const timer = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(timer);
   }, []);
 
   // Use a fallback or skeleton to prevent hydration mismatch
@@ -28,16 +29,22 @@ export function Logo() {
   return (
     <Link href="/" className="flex items-center">
       {/* Desktop Logo */}
-      <img
+      <Image
         src={isDark ? "/brand-white.png" : "/brand.png"}
         alt="IPTVCloud Logo"
+        width={150}
+        height={32}
         className="hidden md:block h-6 w-auto"
+        priority
       />
       {/* Mobile Logo */}
-      <img
+      <Image
         src={isDark ? "/logo-white.png" : "/logo.png"}
         alt="IPTVCloud Logo"
+        width={32}
+        height={32}
         className="md:hidden h-6 w-auto"
+        priority
       />
     </Link>
   );

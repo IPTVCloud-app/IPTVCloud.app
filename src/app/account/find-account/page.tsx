@@ -37,8 +37,12 @@ export default function FindAccountPage() {
 
       setResult(resData);
       toast.success("Account found!");
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("An unexpected error occurred");
+      }
     }
   };
 
@@ -46,7 +50,7 @@ export default function FindAccountPage() {
     <div className="bg-surface border border-border rounded-xl p-8 linear-shadow-card">
       <div className="text-center mb-8">
         <h1 className="text-2xl font-medium tracking-[-0.288px] text-primary mb-2">Find your account</h1>
-        <p className="text-sm text-tertiary">Enter your username and we'll help you identify your registered email.</p>
+        <p className="text-sm text-tertiary">Enter your username and we&apos;ll help you identify your registered email.</p>
       </div>
 
       <AnimatePresence mode="wait">

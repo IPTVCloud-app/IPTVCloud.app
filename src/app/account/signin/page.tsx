@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -21,7 +21,7 @@ const otpSchema = z.object({
 type SignInData = z.infer<typeof signinSchema>;
 type OtpData = z.infer<typeof otpSchema>;
 
-export default function SignInPage() {
+function SignInForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [step, setStep] = useState<"credentials" | "otp">("credentials");
@@ -65,8 +65,12 @@ export default function SignInPage() {
       setStep("otp");
       toast.success("Verification code sent to your email");
       setResendCooldown(60);
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("An unexpected error occurred");
+      }
     }
   };
 
@@ -88,8 +92,12 @@ export default function SignInPage() {
       localStorage.setItem("token", result.token);
       toast.success("Welcome back!");
       router.push("/account");
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("An unexpected error occurred");
+      }
     }
   };
 
@@ -110,8 +118,12 @@ export default function SignInPage() {
 
       toast.success("New code sent!");
       setResendCooldown(60);
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("An unexpected error occurred");
+      }
     }
   };
 
@@ -146,7 +158,7 @@ export default function SignInPage() {
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center">
                   <label className="block text-sm font-medium text-secondary tracking-[-0.182px]">Password</label>
-                  <Link href="/account/forgot-password" size="sm" className="text-xs text-tertiary hover:text-primary transition-colors">Forgot password?</Link>
+                  <Link href="/account/forgot-password" className="text-xs text-tertiary hover:text-primary transition-colors">Forgot password?</Link>
                 </div>
                 <input 
                   type="password" 
@@ -168,10 +180,10 @@ export default function SignInPage() {
 
             <div className="mt-6 space-y-4">
               <div className="text-center text-sm text-tertiary">
-                Don't have an account? <Link href="/account/signup" className="text-accent hover:text-primary transition-colors font-medium">Sign up</Link>
+                Don&apos;t have an account? <Link href="/account/signup" className="text-accent hover:text-primary transition-colors font-medium">Sign up</Link>
               </div>
               <div className="text-center">
-                <Link href="/account/find-account" className="text-xs text-quaternary hover:text-secondary transition-colors">Can't remember your email?</Link>
+                <Link href="/account/find-account" className="text-xs text-quaternary hover:text-secondary transition-colors">Can&apos;t remember your email?</Link>
               </div>
             </div>
           </motion.div>
@@ -237,5 +249,23 @@ export default function SignInPage() {
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={
+      <div className="bg-surface border border-border rounded-xl p-8 linear-shadow-card animate-pulse">
+        <div className="h-8 w-48 bg-[rgba(255,255,255,0.05)] rounded mx-auto mb-4" />
+        <div className="h-4 w-64 bg-[rgba(255,255,255,0.05)] rounded mx-auto mb-8" />
+        <div className="space-y-4">
+          <div className="h-10 bg-[rgba(255,255,255,0.05)] rounded w-full" />
+          <div className="h-10 bg-[rgba(255,255,255,0.05)] rounded w-full" />
+          <div className="h-10 bg-brand/20 rounded w-full mt-4" />
+        </div>
+      </div>
+    }>
+      <SignInForm />
+    </Suspense>
   );
 }

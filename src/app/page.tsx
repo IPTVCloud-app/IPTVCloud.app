@@ -3,10 +3,15 @@
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { Play, Globe, Sparkles, MonitorSmartphone, Zap, Server, Shield, Activity, BarChart, Tv, ChevronDown } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState, useRef } from "react";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { Logo } from "@/components/Logo";
 import { useMousePosition, NodeNetwork, GlitchText, Magnetic } from "./Effects";
+
+const ThemeToggle = dynamic(() => import("@/components/ThemeToggle").then(mod => mod.ThemeToggle), {
+  ssr: false,
+  loading: () => <div className="w-8 h-8 opacity-0" />
+});
 
 // --- Generic UI Primitives ---
 
@@ -102,15 +107,23 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 }
 
 // --- Page Sections ---
-
 function HeroSection({ mousePosition }: { mousePosition: { x: number, y: number } }) {
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   const words = "Stream Everything. Instantly. Anywhere.".split(" ");
 
+  if (!mounted) return (
+    <section className="relative overflow-hidden pt-16 md:pt-24 pb-20 px-8 text-center flex flex-col items-center justify-center min-h-[70vh] opacity-0" />
+  );
+
   return (
     <section className="relative overflow-hidden pt-16 md:pt-24 pb-20 px-8 text-center flex flex-col items-center justify-center min-h-[70vh]">
+...
       {/* Floating data nodes (interactive) */}
       {mounted && (
         <div className="absolute inset-0 z-0 pointer-events-none opacity-50">

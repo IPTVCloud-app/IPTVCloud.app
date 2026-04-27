@@ -12,7 +12,7 @@ const schema = z.object({
   firstName: z.string().min(1, { message: "First name is required" }),
   middleInitial: z.string().max(1, { message: "Must be 1 character" }).optional().or(z.literal("")),
   lastName: z.string().optional().or(z.literal("")),
-  suffix: z.enum(["N/A", "Jr.", "Sr.", "II", "III", "IV", "V"]).default("N/A"),
+  suffix: z.enum(["N/A", "Jr.", "Sr.", "II", "III", "IV", "V"]),
   username: z.string().min(3, { message: "Username must be at least 3 characters" }),
   email: z.string().email({ message: "Invalid email address" }),
   password: z.string().min(8, { message: "Password must be at least 8 characters" }),
@@ -60,8 +60,12 @@ export default function SignUpPage() {
 
       toast.success("Account created! Please verify your email.");
       router.push(`/account/signin?email=${encodeURIComponent(data.email)}`);
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("An unexpected error occurred");
+      }
     }
   };
 
