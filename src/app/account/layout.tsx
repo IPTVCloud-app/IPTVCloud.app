@@ -25,9 +25,9 @@ export default function AccountLayout({
   ];
 
   const settingsActions = [
-    { name: "Profile Settings", href: "/account/settings", icon: <User className="w-4 h-4" /> },
-    { name: "Privacy Settings", href: "/account/settings", icon: <Shield className="w-4 h-4" /> },
     { name: "Personal Settings", href: "/account/settings", icon: <Settings className="w-4 h-4" /> },
+    { name: "Privacy Settings", href: "/account/settings/privacy", icon: <Shield className="w-4 h-4" /> },
+    { name: "Credentials & Security", href: "/account/settings/credentials", icon: <User className="w-4 h-4" /> },
   ];
 
   if (isAuthPage) {

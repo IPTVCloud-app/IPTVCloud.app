@@ -467,7 +467,6 @@ function Footer() {
       
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center pt-8 border-t border-[rgba(255,255,255,0.05)] text-quaternary text-xs gap-4">
         <div className="flex items-center gap-4">
-          <ThemeToggle />
           <span>© 2026 reinfyteam. All rights reserved.</span>
         </div>
         <div className="flex gap-4 md:mt-0">

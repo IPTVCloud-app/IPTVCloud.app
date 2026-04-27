@@ -1,47 +1,195 @@
 "use client";
 
-import { Settings as SettingsIcon, User, Shield, Bell, CreditCard } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Settings as SettingsIcon, Monitor, Sun, Moon, Palette, Video } from "lucide-react";
+import toast from "react-hot-toast";
 
-export default function SettingsPage() {
-  const sections = [
-    { title: "Profile", icon: <User className="w-4 h-4" />, description: "Manage your personal information and avatar." },
-    { title: "Account Security", icon: <Shield className="w-4 h-4" />, description: "Update your password and security settings." },
-    { title: "Notifications", icon: <Bell className="w-4 h-4" />, description: "Choose what alerts you want to receive." },
-    { title: "Billing & Plans", icon: <CreditCard className="w-4 h-4" />, description: "Manage your subscription and payment methods." },
-  ];
+export default function PersonalSettingsPage() {
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [settings, setSettings] = useState({
+    themeMode: "system",
+    themeAccent: "#5e6ad2",
+    playerResolution: "default",
+    playerCc: false,
+  });
+
+  useEffect(() => {
+    // Fetch initial settings
+    const fetchSettings = async () => {
+      try {
+        const token = localStorage.getItem("token"); // Assuming token is stored here for now
+        const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080").replace(/\/$/, "");
+        
+        const res = await fetch(`${apiUrl}/api/account/settings`, {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+        
+        if (res.ok) {
+          const data = await res.json();
+          setSettings({
+            themeMode: data.theme_mode || "system",
+            themeAccent: data.theme_accent || "#5e6ad2",
+            playerResolution: data.player_resolution || "default",
+            playerCc: data.player_cc || false,
+          });
+        }
+      } catch (error) {
+        console.error("Failed to load settings", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchSettings();
+  }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const token = localStorage.getItem("token");
+      const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080").replace(/\/$/, "");
+      
+      const res = await fetch(`${apiUrl}/api/account/settings`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(settings)
+      });
+      
+      if (!res.ok) throw new Error("Failed to save settings");
+      
+      toast.success("Settings saved successfully");
+    } catch (error) {
+      toast.error("An error occurred while saving");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return <div className="p-8 text-tertiary">Loading settings...</div>;
+  }
 
   return (
-    <div className="max-w-4xl">
-      <div className="flex items-center gap-3 mb-8">
+    <div className="max-w-3xl">
+      <div className="flex items-center gap-3 mb-8 pb-4 border-b border-border">
         <div className="w-10 h-10 rounded-lg bg-brand/10 flex items-center justify-center text-brand">
-          <SettingsIcon className="w-6 h-6" />
+          <SettingsIcon className="w-5 h-5" />
         </div>
         <div>
-          <h1 className="text-2xl font-medium tracking-[-0.288px] text-primary">Settings</h1>
-          <p className="text-sm text-tertiary">Manage your account preferences and configurations.</p>
+          <h1 className="text-xl font-medium tracking-tight text-primary">Personal Settings</h1>
+          <p className="text-sm text-tertiary">Customize your interface and viewing experience.</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {sections.map((s) => (
-          <div key={s.title} className="p-6 bg-surface border border-border rounded-xl hover:border-accent transition-colors cursor-pointer group">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-8 h-8 rounded bg-[rgba(255,255,255,0.04)] flex items-center justify-center text-secondary group-hover:text-brand transition-colors">
-                {s.icon}
+      <div className="space-y-8">
+        {/* Theme Settings */}
+        <section>
+          <h2 className="text-sm font-medium uppercase tracking-widest text-quaternary mb-4">Appearance</h2>
+          
+          <div className="bg-surface border border-border rounded-xl p-6 space-y-6">
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-primary mb-3">
+                <Monitor className="w-4 h-4 text-tertiary" />
+                Theme Mode
+              </label>
+              <div className="grid grid-cols-3 gap-3">
+                {['system', 'light', 'dark'].map((mode) => (
+                  <button
+                    key={mode}
+                    onClick={() => setSettings({ ...settings, themeMode: mode })}
+                    className={`flex items-center justify-center gap-2 py-2.5 rounded-lg border text-sm font-medium transition-colors ${
+                      settings.themeMode === mode 
+                        ? "bg-brand/10 border-brand text-brand" 
+                        : "bg-[rgba(255,255,255,0.02)] border-border text-secondary hover:border-accent"
+                    }`}
+                  >
+                    {mode === 'system' && <Monitor className="w-4 h-4" />}
+                    {mode === 'light' && <Sun className="w-4 h-4" />}
+                    {mode === 'dark' && <Moon className="w-4 h-4" />}
+                    <span className="capitalize">{mode}</span>
+                  </button>
+                ))}
               </div>
-              <h3 className="font-medium text-primary">{s.title}</h3>
             </div>
-            <p className="text-sm text-tertiary leading-relaxed">{s.description}</p>
-          </div>
-        ))}
-      </div>
 
-      <div className="mt-12 p-8 border border-dashed border-border rounded-xl flex flex-col items-center text-center">
-        <h3 className="text-lg font-medium text-primary mb-2">Delete Account</h3>
-        <p className="text-sm text-tertiary max-w-md mb-6">Permanently delete your account and all associated data. This action cannot be undone.</p>
-        <button className="px-4 py-2 bg-[rgba(229,72,77,0.1)] text-[#e5484d] border border-[rgba(229,72,77,0.2)] rounded-md text-sm font-medium hover:bg-[rgba(229,72,77,0.15)] transition-colors">
-          Request Deletion
-        </button>
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-primary mb-3">
+                <Palette className="w-4 h-4 text-tertiary" />
+                Accent Color
+              </label>
+              <div className="flex items-center gap-3">
+                <input 
+                  type="color" 
+                  value={settings.themeAccent}
+                  onChange={(e) => setSettings({ ...settings, themeAccent: e.target.value })}
+                  className="w-10 h-10 rounded cursor-pointer border-0 bg-transparent p-0"
+                />
+                <input 
+                  type="text" 
+                  value={settings.themeAccent}
+                  onChange={(e) => setSettings({ ...settings, themeAccent: e.target.value })}
+                  className="bg-transparent border border-input focus:border-brand px-3 py-2 rounded-md text-sm outline-none font-mono uppercase text-secondary w-28"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Player Settings */}
+        <section>
+          <h2 className="text-sm font-medium uppercase tracking-widest text-quaternary mb-4">Playback Defaults</h2>
+          
+          <div className="bg-surface border border-border rounded-xl p-6 space-y-6">
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-primary mb-3">
+                <Video className="w-4 h-4 text-tertiary" />
+                Default Resolution
+              </label>
+              <select 
+                value={settings.playerResolution}
+                onChange={(e) => setSettings({ ...settings, playerResolution: e.target.value })}
+                className="w-full sm:w-64 bg-[rgba(255,255,255,0.02)] text-primary border border-input focus:border-brand px-3 py-2.5 rounded-md text-sm outline-none transition-all cursor-pointer"
+              >
+                <option value="default">Auto (Bandwidth Dependent)</option>
+                <option value="1080p">1080p (High)</option>
+                <option value="720p">720p (Medium)</option>
+                <option value="480p">480p (Data Saver)</option>
+              </select>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-medium text-primary">Closed Captions</h3>
+                <p className="text-xs text-tertiary mt-1">Automatically enable CC when available</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  className="sr-only peer" 
+                  checked={settings.playerCc}
+                  onChange={(e) => setSettings({ ...settings, playerCc: e.target.checked })}
+                />
+                <div className="w-9 h-5 bg-border rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-brand after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <div className="flex justify-end">
+          <button 
+            onClick={handleSave}
+            disabled={saving}
+            className="bg-brand text-white px-6 py-2 rounded-md text-sm font-medium hover:bg-accent transition-colors disabled:opacity-50"
+          >
+            {saving ? "Saving..." : "Save Preferences"}
+          </button>
+        </div>
       </div>
     </div>
   );

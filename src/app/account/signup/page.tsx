@@ -16,7 +16,16 @@ const schema = z.object({
   username: z.string().min(3, { message: "Username must be at least 3 characters" }),
   email: z.string().email({ message: "Invalid email address" }),
   password: z.string().min(8, { message: "Password must be at least 8 characters" }),
-  confirmPassword: z.string()
+  confirmPassword: z.string(),
+  birthday: z.string().refine((dateString) => {
+    if (!dateString) return false;
+    const birthday = new Date(dateString);
+    if (isNaN(birthday.getTime())) return false;
+    const ageDifMs = Date.now() - birthday.getTime();
+    const ageDate = new Date(ageDifMs);
+    const age = Math.abs(ageDate.getUTCFullYear() - 1970);
+    return age >= 13;
+  }, { message: "You must be at least 13 years old to sign up." })
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -49,6 +58,7 @@ export default function SignUpPage() {
           username: data.username,
           email: data.email,
           password: data.password,
+          birthday: data.birthday,
         }),
       });
 
