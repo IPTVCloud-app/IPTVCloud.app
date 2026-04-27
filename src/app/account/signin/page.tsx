@@ -48,7 +48,7 @@ function SignInForm() {
 
   const onSignInSubmit = async (data: SignInData) => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+      const apiUrl = (process.env.PUBLIC_API_URL || "http://localhost:8080").replace(/\/$/, "");
       const response = await fetch(`${apiUrl}/auth/signin/init`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -76,7 +76,7 @@ function SignInForm() {
 
   const onOtpSubmit = async (data: OtpData) => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+      const apiUrl = (process.env.PUBLIC_API_URL || "http://localhost:8080").replace(/\/$/, "");
       const response = await fetch(`${apiUrl}/auth/signin/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -104,7 +104,7 @@ function SignInForm() {
   const handleResendOtp = async () => {
     if (resendCooldown > 0) return;
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+      const apiUrl = (process.env.PUBLIC_API_URL || "http://localhost:8080").replace(/\/$/, "");
       const response = await fetch(`${apiUrl}/auth/otp/resend`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
