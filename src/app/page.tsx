@@ -123,7 +123,6 @@ function HeroSection({ mousePosition }: { mousePosition: { x: number, y: number 
 
   return (
     <section className="relative overflow-hidden pt-16 md:pt-24 pb-20 px-8 text-center flex flex-col items-center justify-center min-h-[70vh]">
-...
       {/* Floating data nodes (interactive) */}
       {mounted && (
         <div className="absolute inset-0 z-0 pointer-events-none opacity-50">
