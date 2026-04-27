@@ -22,7 +22,7 @@ export default function ForgotPasswordPage() {
 
   const onSubmit = async (data: FormData) => {
     try {
-      const apiUrl = (process.env.PUBLIC_API_URL || "http://localhost:8080").replace(/\/$/, "");
+      const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
       const response = await fetch(`${apiUrl}/auth/password/forgot`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

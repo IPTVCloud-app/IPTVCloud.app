@@ -18,7 +18,7 @@ export default function PrivacySettingsPage() {
     const fetchPrivacy = async () => {
       try {
         const token = localStorage.getItem("token");
-        const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080").replace(/\/$/, "");
+        const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
         
         const res = await fetch(`${apiUrl}/api/account/privacy`, {
           headers: { "Authorization": `Bearer ${token}` }
@@ -47,7 +47,7 @@ export default function PrivacySettingsPage() {
     setSaving(true);
     try {
       const token = localStorage.getItem("token");
-      const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080").replace(/\/$/, "");
+      const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
       
       const res = await fetch(`${apiUrl}/api/account/privacy`, {
         method: "PUT",

@@ -3,7 +3,6 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import VerifiedBadge from '@/components/VerifiedBadge';
-import { Navbar } from '@/components/navigation/Navbar';
 
 interface UserProfile {
   user: {
@@ -53,7 +52,7 @@ function ProfileContent() {
 
     const fetchProfile = async () => {
       try {
-        const res = await fetch(`http://localhost:8080/api/social/profile/${username}`);
+        const res = await fetch(`${process.env.PUBLIC_API_URL}/api/social/profile/${username}`);
         if (!res.ok) {
           if (res.status === 404) throw new Error('User not found');
           throw new Error('Failed to load profile');
@@ -76,7 +75,7 @@ function ProfileContent() {
       if (!token || !profile || !username) return;
 
       try {
-        const res = await fetch(`http://localhost:8080/api/social/follow/status/${username}`, {
+        const res = await fetch(`${process.env.PUBLIC_API_URL}/api/social/follow/status/${username}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -102,7 +101,7 @@ function ProfileContent() {
 
     setFollowLoading(true);
     try {
-      const res = await fetch(`http://localhost:8080/api/social/follow/toggle/${username}`, {
+      const res = await fetch(`${process.env.PUBLIC_API_URL}/api/social/follow/toggle/${username}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -225,7 +224,7 @@ function ProfileContent() {
                 <div key={idx} className="bg-white dark:bg-neutral-800 rounded-xl p-4 border border-neutral-200 dark:border-neutral-700 flex items-center gap-4">
                   <div className="w-16 h-10 bg-neutral-200 dark:bg-neutral-700 rounded overflow-hidden flex-shrink-0">
                     <img 
-                      src={`http://localhost:8080/api/channels/thumbnail?id=${item.channel_short_id}`} 
+                      src={`${process.env.PUBLIC_API_URL}/api/channels/thumbnail?id=${item.channel_short_id}`} 
                       alt="Thumbnail"
                       className="w-full h-full object-cover"
                       onError={(e) => {
@@ -253,8 +252,7 @@ function ProfileContent() {
 
 export default function ProfilePage() {
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 flex flex-col font-sans">
-      <Navbar />
+    <div className="flex flex-col font-sans w-full">
       <Suspense fallback={
         <div className="flex-1 flex items-center justify-center text-neutral-500 min-h-[50vh]">
           Loading profile...

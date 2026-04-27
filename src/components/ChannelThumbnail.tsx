@@ -21,7 +21,7 @@ export function ChannelThumbnail({ channelId, name, className = "" }: ChannelThu
 
   useEffect(() => {
     // Reset state when channelId changes
-    const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080").replace(/\/$/, "");
+    const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
     setImgSrc(`${apiUrl}/api/channels/thumbnail?id=${channelId}`);
     setFailed(false);
     setIsCapturing(false);
@@ -46,7 +46,7 @@ export function ChannelThumbnail({ channelId, name, className = "" }: ChannelThu
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080").replace(/\/$/, "");
+    const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
     const streamUrl = `${apiUrl}/api/channels/${channelId}?res=480p`;
 
     if (Hls.isSupported()) {

@@ -15,7 +15,7 @@ export default function CredentialsSettingsPage() {
   const requestOtp = async () => {
     try {
       const token = localStorage.getItem("token");
-      const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080").replace(/\/$/, "");
+      const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
       const res = await fetch(`${apiUrl}/api/account/credentials/request-otp`, {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}` }
@@ -32,7 +32,7 @@ export default function CredentialsSettingsPage() {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080").replace(/\/$/, "");
+      const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
       const res = await fetch(`${apiUrl}/api/account/credentials/${type}`, {
         method: "PUT",
         headers: {

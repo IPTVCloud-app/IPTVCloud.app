@@ -24,7 +24,7 @@ export default function ChannelsExplorerPage() {
   useEffect(() => {
     const fetchChannels = async () => {
       try {
-        const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080").replace(/\/$/, "");
+        const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
         const res = await fetch(`${apiUrl}/api/channels?limit=100`);
         if (res.ok) {
           const data = await res.json();

@@ -20,7 +20,7 @@ function WatchPlayer() {
     if (!id || !videoRef.current) return;
 
     const video = videoRef.current;
-    const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080").replace(/\/$/, "");
+    const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
     const streamUrl = `${apiUrl}/api/channels/${id}`; // Defaults to highest res
 
     let hls: Hls | null = null;

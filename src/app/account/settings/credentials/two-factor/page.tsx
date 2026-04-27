@@ -16,7 +16,7 @@ export default function TwoFactorSettingsPage() {
     const checkStatus = async () => {
       try {
         const token = localStorage.getItem("token");
-        const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080").replace(/\/$/, "");
+        const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
         const res = await fetch(`${apiUrl}/api/account/2fa/status`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
@@ -37,7 +37,7 @@ export default function TwoFactorSettingsPage() {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-      const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080").replace(/\/$/, "");
+      const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
       const res = await fetch(`${apiUrl}/api/account/2fa/setup`, {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}` }
@@ -56,7 +56,7 @@ export default function TwoFactorSettingsPage() {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-      const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080").replace(/\/$/, "");
+      const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
       const res = await fetch(`${apiUrl}/api/account/2fa/${action}`, {
         method: "POST",
         headers: { 

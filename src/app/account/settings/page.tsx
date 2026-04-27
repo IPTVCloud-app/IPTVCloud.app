@@ -19,7 +19,7 @@ export default function PersonalSettingsPage() {
     const fetchSettings = async () => {
       try {
         const token = localStorage.getItem("token"); // Assuming token is stored here for now
-        const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080").replace(/\/$/, "");
+        const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
         
         const res = await fetch(`${apiUrl}/api/account/settings`, {
           headers: {
@@ -50,7 +50,7 @@ export default function PersonalSettingsPage() {
     setSaving(true);
     try {
       const token = localStorage.getItem("token");
-      const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080").replace(/\/$/, "");
+      const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
       
       const res = await fetch(`${apiUrl}/api/account/settings`, {
         method: "PUT",
