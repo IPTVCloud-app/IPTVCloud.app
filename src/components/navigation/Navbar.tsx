@@ -10,8 +10,10 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Logo } from "@/components/Logo";
+import { useAuth } from "@/hooks/useAuth";
 
 export function Navbar() {
+  const { user, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -159,14 +161,31 @@ export function Navbar() {
 
         {/* Right Buttons */}
         <div className="hidden md:flex items-center gap-6">
-          <Link href="/account/signin" className="text-[13px] font-medium text-tertiary hover:text-primary transition-colors flex items-center gap-1.5">
-            <LogIn className="w-4 h-4" />
-            Login
-          </Link>
-          <Link href="/account/signup" className="flex items-center gap-2 bg-brand text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold transition-all hover:bg-accent shadow-lg shadow-brand/20 active:scale-95">
-            <UserPlus className="w-4 h-4" />
-            Get Started
-          </Link>
+          {user ? (
+            <>
+              <Link href="/account" className="text-[13px] font-medium text-tertiary hover:text-primary transition-colors flex items-center gap-1.5">
+                <History className="w-4 h-4" />
+                Account
+              </Link>
+              <button 
+                onClick={logout}
+                className="flex items-center gap-2 bg-zinc-800 text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold transition-all hover:bg-zinc-700 active:scale-95"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/account/signin" className="text-[13px] font-medium text-tertiary hover:text-primary transition-colors flex items-center gap-1.5">
+                <LogIn className="w-4 h-4" />
+                Login
+              </Link>
+              <Link href="/account/signup" className="flex items-center gap-2 bg-brand text-white px-5 py-2.5 rounded-lg text-[13px] font-semibold transition-all hover:bg-accent shadow-lg shadow-brand/20 active:scale-95">
+                <UserPlus className="w-4 h-4" />
+                Get Started
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile Hamburger */}
@@ -240,22 +259,43 @@ export function Navbar() {
               </ul>
               
               <div className="mt-auto pt-10 border-t border-border flex flex-col gap-4 pb-12">
-                <Link 
-                  href="/account/signin" 
-                  className="flex items-center justify-center gap-2 text-base font-bold text-primary text-center py-4 bg-surface border border-border rounded-xl active:scale-95 transition-all"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <LogIn className="w-5 h-5 text-brand" />
-                  Login
-                </Link>
-                <Link 
-                  href="/account/signup" 
-                  className="flex justify-center items-center gap-2 bg-brand text-white px-4 py-4 rounded-xl text-base font-bold transition-all hover:bg-accent shadow-xl shadow-brand/20 active:scale-95"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <UserPlus className="w-5 h-5" />
-                  Get Started
-                </Link>
+                {user ? (
+                  <>
+                    <Link 
+                      href="/account" 
+                      className="flex items-center justify-center gap-2 text-base font-bold text-primary text-center py-4 bg-surface border border-border rounded-xl active:scale-95 transition-all"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <History className="w-5 h-5 text-brand" />
+                      Account
+                    </Link>
+                    <button 
+                      onClick={() => { logout(); setIsOpen(false); }}
+                      className="flex justify-center items-center gap-2 bg-zinc-800 text-white px-4 py-4 rounded-xl text-base font-bold transition-all hover:bg-zinc-700 active:scale-95"
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link 
+                      href="/account/signin" 
+                      className="flex items-center justify-center gap-2 text-base font-bold text-primary text-center py-4 bg-surface border border-border rounded-xl active:scale-95 transition-all"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <LogIn className="w-5 h-5 text-brand" />
+                      Login
+                    </Link>
+                    <Link 
+                      href="/account/signup" 
+                      className="flex justify-center items-center gap-2 bg-brand text-white px-4 py-4 rounded-xl text-base font-bold transition-all hover:bg-accent shadow-xl shadow-brand/20 active:scale-95"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <UserPlus className="w-5 h-5" />
+                      Get Started
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>

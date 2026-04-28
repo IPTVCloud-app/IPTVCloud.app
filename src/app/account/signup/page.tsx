@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import toast from "react-hot-toast";
 import { PasswordStrengthBar } from "./PasswordStrength";
 
@@ -35,6 +36,7 @@ type FormData = z.infer<typeof schema>;
 
 export default function SignUpPage() {
   const router = useRouter();
+  const [authError, setAuthError] = useState<string | null>(null);
   const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -46,6 +48,7 @@ export default function SignUpPage() {
 
   const onSubmit = async (data: FormData) => {
     try {
+      setAuthError(null);
       const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
       const response = await fetch(`${apiUrl}/auth/signup`, {
         method: "POST",
@@ -76,7 +79,9 @@ export default function SignUpPage() {
       toast.success("Account created! Please sign in.");
       router.push(`/account/signin?email=${encodeURIComponent(data.email)}`);
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "An unexpected error occurred");
+      const msg = error instanceof Error ? error.message : "An unexpected error occurred";
+      setAuthError(msg);
+      toast.error(msg);
     }
   };
 
@@ -94,6 +99,12 @@ export default function SignUpPage() {
         <h1 className="text-2xl font-medium tracking-[-0.288px] text-primary mb-2 text-display">Create an account</h1>
         <p className="text-sm text-tertiary text-body">Start streaming with IPTVCloud today</p>
       </div>
+
+      {authError && (
+        <div className="mb-6 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-xs text-center font-medium">
+          {authError}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-4">
         {/* Name Fields Row 1 */}

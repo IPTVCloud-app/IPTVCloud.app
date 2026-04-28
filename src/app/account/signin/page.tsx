@@ -27,6 +27,7 @@ function SignInForm() {
   const [step, setStep] = useState<"credentials" | "otp">("credentials");
   const [email, setEmail] = useState("");
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   const { register: registerSignIn, handleSubmit: handleSignIn, formState: { errors: signinErrors, isSubmitting: isSigninSubmitting } } = useForm<SignInData>({
     resolver: zodResolver(signinSchema),
@@ -68,15 +69,19 @@ function SignInForm() {
 
       setEmail(data.email);
       setStep("otp");
+      setAuthError(null);
       toast.success("Verification code sent to your email");
       setResendCooldown(60);
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "An unexpected error occurred");
+      const msg = error instanceof Error ? error.message : "An unexpected error occurred";
+      setAuthError(msg);
+      toast.error(msg);
     }
   };
 
   const onOtpSubmit = async (data: OtpData) => {
     try {
+      setAuthError(null);
       const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
       const response = await fetch(`${apiUrl}/auth/signin/verify`, {
         method: "POST",
@@ -96,10 +101,13 @@ function SignInForm() {
       }
 
       localStorage.setItem("token", result.token);
+      window.dispatchEvent(new Event('storage'));
       toast.success("Welcome back!");
       router.push("/account");
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "An unexpected error occurred");
+      const msg = error instanceof Error ? error.message : "An unexpected error occurred";
+      setAuthError(msg);
+      toast.error(msg);
     }
   };
 
@@ -147,6 +155,16 @@ function SignInForm() {
               <h1 className="text-2xl font-medium tracking-[-0.288px] text-primary mb-2 text-display">Welcome back</h1>
               <p className="text-sm text-tertiary text-body">Sign in to your IPTVCloud account</p>
             </div>
+
+            {authError && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-xs text-center font-medium"
+              >
+                {authError}
+              </motion.div>
+            )}
 
             <form onSubmit={handleSignIn(onSignInSubmit, onValidationError)} className="space-y-5">
               <div className="space-y-1.5">

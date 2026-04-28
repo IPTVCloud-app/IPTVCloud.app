@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter, notFound } from "next/navigation";
 import Link from "next/link";
 import { 
   ArrowLeft, Star, Share2, MessageSquare, AlertCircle, 
@@ -72,7 +72,7 @@ function WatchPlayer() {
         const response = await fetch(streamUrl, { method: 'GET' });
         if (!response.ok) {
           if (response.status === 403 || response.status === 404) {
-            router.push(`/error?code=${response.status}`);
+            notFound();
             return;
           }
           setError("Channel is currently offline.");

@@ -35,7 +35,7 @@ export default function ChannelsExplorerPage() {
   const [selectedLanguage, setSelectedLanguage] = useState("All");
   const [selectedCountry, setSelectedCountry] = useState("All");
   
-  const [categories, setCategories] = useState<string[]>(["All"]);
+  const [categories, setCategories] = useState<MetadataItem[]>([]);
   const [languages, setLanguages] = useState<MetadataItem[]>([]);
   const [countries, setCountries] = useState<MetadataItem[]>([]);
   
@@ -59,7 +59,7 @@ export default function ChannelsExplorerPage() {
 
         if (catRes.ok) {
           const data = await catRes.json();
-          setCategories(["All", ...data.map((c: any) => c.name).sort()]);
+          setCategories([{ code: "All", name: "All" }, ...data.map((c: any) => ({ code: c.id, name: c.name })).sort((a: any, b: any) => a.name.localeCompare(b.name))]);
         }
         if (langRes.ok) {
           const data = await langRes.json();
@@ -271,15 +271,15 @@ export default function ChannelsExplorerPage() {
         <div className="flex overflow-x-auto gap-2 mb-8 pb-2 no-scrollbar">
           {categories.map((cat) => (
             <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
+              key={cat.code}
+              onClick={() => setSelectedCategory(cat.code)}
               className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap border transition-all duration-200 ${
-                selectedCategory === cat 
+                selectedCategory === cat.code 
                   ? "bg-brand border-brand text-white shadow-lg shadow-brand/20" 
                   : "bg-surface border-border text-secondary hover:border-accent"
               }`}
             >
-              {cat}
+              {cat.name}
             </button>
           ))}
         </div>
