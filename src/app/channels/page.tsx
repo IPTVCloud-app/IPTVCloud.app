@@ -9,6 +9,7 @@ interface Channel {
   id: string;
   name: string;
   logo: string;
+  thumbnail: string;
   category: string;
   country: string;
   quality: string;
@@ -105,6 +106,7 @@ export default function ChannelsExplorerPage() {
                       <ChannelThumbnail 
                         channelId={channel.id} 
                         name={channel.name} 
+                        logoUrl={channel.logo}
                         className="w-full h-full"
                       />
                     </div>
