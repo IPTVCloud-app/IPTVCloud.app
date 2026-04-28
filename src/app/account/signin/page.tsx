@@ -55,7 +55,12 @@ function SignInForm() {
         body: JSON.stringify(data),
       });
 
-      const result = await response.json();
+      let result;
+      try {
+        result = await response.json();
+      } catch (e) {
+        throw new Error("Server returned an invalid response");
+      }
 
       if (!response.ok) {
         throw new Error(result.error || "Invalid credentials");
@@ -66,11 +71,7 @@ function SignInForm() {
       toast.success("Verification code sent to your email");
       setResendCooldown(60);
     } catch (error: unknown) {
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else {
-        toast.error("An unexpected error occurred");
-      }
+      toast.error(error instanceof Error ? error.message : "An unexpected error occurred");
     }
   };
 
@@ -83,7 +84,12 @@ function SignInForm() {
         body: JSON.stringify({ email, code: data.code }),
       });
 
-      const result = await response.json();
+      let result;
+      try {
+        result = await response.json();
+      } catch (e) {
+        throw new Error("Server returned an invalid response");
+      }
 
       if (!response.ok) {
         throw new Error(result.error || "Invalid or expired code");
@@ -93,11 +99,14 @@ function SignInForm() {
       toast.success("Welcome back!");
       router.push("/account");
     } catch (error: unknown) {
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else {
-        toast.error("An unexpected error occurred");
-      }
+      toast.error(error instanceof Error ? error.message : "An unexpected error occurred");
+    }
+  };
+
+  const onValidationError = (errors: any) => {
+    const firstError = Object.values(errors)[0] as any;
+    if (firstError?.message) {
+      toast.error(firstError.message);
     }
   };
 
@@ -119,11 +128,7 @@ function SignInForm() {
       toast.success("New code sent!");
       setResendCooldown(60);
     } catch (error: unknown) {
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else {
-        toast.error("An unexpected error occurred");
-      }
+      toast.error(error instanceof Error ? error.message : "An unexpected error occurred");
     }
   };
 
@@ -139,11 +144,11 @@ function SignInForm() {
             transition={{ duration: 0.3 }}
           >
             <div className="text-center mb-8">
-              <h1 className="text-2xl font-medium tracking-[-0.288px] text-primary mb-2">Welcome back</h1>
-              <p className="text-sm text-tertiary">Sign in to your IPTVCloud account</p>
+              <h1 className="text-2xl font-medium tracking-[-0.288px] text-primary mb-2 text-display">Welcome back</h1>
+              <p className="text-sm text-tertiary text-body">Sign in to your IPTVCloud account</p>
             </div>
 
-            <form onSubmit={handleSignIn(onSignInSubmit)} className="space-y-5">
+            <form onSubmit={handleSignIn(onSignInSubmit, onValidationError)} className="space-y-5">
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium text-secondary tracking-[-0.182px]">Email</label>
                 <input 

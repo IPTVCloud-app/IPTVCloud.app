@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { 
   ArrowLeft, Star, Share2, MessageSquare, AlertCircle, 
@@ -12,6 +12,7 @@ import toast from "react-hot-toast";
 
 function WatchPlayer() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const id = searchParams.get("id");
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -67,15 +68,14 @@ function WatchPlayer() {
         setCurrentTime(0);
         setDuration(0);
 
-        // Probe for geo-blocking
+        // Probe for geo-blocking or not found
         const response = await fetch(streamUrl, { method: 'GET' });
         if (!response.ok) {
-          if (response.status === 403) {
-            const data = await response.json();
-            setError(data.message || "This stream is geo-blocked in your region.");
-          } else {
-            setError("Channel is currently offline.");
+          if (response.status === 403 || response.status === 404) {
+            router.push(`/error?code=${response.status}`);
+            return;
           }
+          setError("Channel is currently offline.");
           setLoading(false);
           return;
         }
@@ -93,7 +93,7 @@ function WatchPlayer() {
           setDuration(prev => Math.max(prev, video.currentTime));
         };
         const onError = () => {
-           setError("Failed to initialize playback. source incompatible.");
+           setError("Failed to initialize playback. Source incompatible.");
            setLoading(false);
         };
 
@@ -126,7 +126,7 @@ function WatchPlayer() {
       video.pause();
       video.src = "";
     };
-  }, [id, currentRes]);
+  }, [id, currentRes, router]);
 
   // 3. UI Handlers
   const togglePlay = () => {
@@ -257,7 +257,7 @@ function WatchPlayer() {
               {error && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900 z-30 px-6 text-center">
                   <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
-                  <h3 className="text-xl font-bold mb-2">Streaming Error</h3>
+                  <h3 className="text-xl font-bold mb-2 text-white">Streaming Error</h3>
                   <p className="text-secondary max-w-md mb-6">{error}</p>
                   <button 
                     onClick={() => window.location.reload()}
@@ -373,7 +373,7 @@ function WatchPlayer() {
                     )}
                   </div>
                   <div>
-                    <h1 className="text-2xl font-bold text-primary mb-1">{channelInfo?.name || "Loading Channel..."}</h1>
+                    <h1 className="text-2xl font-bold text-primary mb-1 text-display">{channelInfo?.name || "Loading Channel..."}</h1>
                     <div className="flex items-center gap-3 text-sm text-tertiary">
                       <span className="px-2 py-0.5 bg-brand/10 text-brand rounded font-medium">{channelInfo?.category || "General"}</span>
                       <span>{channelInfo?.country || "International"}</span>
@@ -427,7 +427,7 @@ function WatchPlayer() {
                   <h4 className="font-medium text-primary mb-1">Join the conversation</h4>
                   <p className="text-sm text-tertiary">Sign in to chat with other viewers and join the community.</p>
                 </div>
-                <Link href="/signin" className="px-6 py-2 bg-surface border border-border hover:border-brand text-secondary rounded-full text-sm font-medium transition-all">
+                <Link href="/account/signin" className="px-6 py-2 bg-surface border border-border hover:border-brand text-secondary rounded-full text-sm font-medium transition-all">
                   Sign In
                 </Link>
               </div>

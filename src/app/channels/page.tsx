@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Search, Filter, Globe, Monitor, Radio, LayoutGrid, List } from "lucide-react";
+import { Search, Filter, Globe, Monitor, Radio, LayoutGrid, List, X, Languages, MapPin, Check } from "lucide-react";
 import { ChannelThumbnail } from "@/components/ChannelThumbnail";
 import { useInView } from "react-intersection-observer";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Channel {
   id: string;
@@ -18,6 +19,11 @@ interface Channel {
   status?: string;
 }
 
+interface MetadataItem {
+  code: string;
+  name: string;
+}
+
 const SHIMMER_CLASS = "relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent";
 
 export default function ChannelsExplorerPage() {
@@ -26,26 +32,46 @@ export default function ChannelsExplorerPage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedLanguage, setSelectedLanguage] = useState("All");
+  const [selectedCountry, setSelectedCountry] = useState("All");
+  
   const [categories, setCategories] = useState<string[]>(["All"]);
+  const [languages, setLanguages] = useState<MetadataItem[]>([]);
+  const [countries, setCountries] = useState<MetadataItem[]>([]);
+  
+  const [showFilters, setShowFilters] = useState(false);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   
   const { ref, inView } = useInView({ threshold: 0 });
+  const filterRef = useRef<HTMLDivElement>(null);
 
-  // 1. Fetch Categories once
+  // 1. Fetch Metadata (Categories, Languages, Countries)
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchMetadata = async () => {
       try {
         const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
-        const res = await fetch(`${apiUrl}/api/channels/categories`);
-        if (res.ok) {
-          const data = await res.json();
-          const catNames = ["All", ...data.map((c: any) => c.name).sort()];
-          setCategories(catNames);
+        const [catRes, langRes, countRes] = await Promise.all([
+          fetch(`${apiUrl}/api/channels/categories`),
+          fetch(`${apiUrl}/api/channels/languages`),
+          fetch(`${apiUrl}/api/channels/countries`)
+        ]);
+
+        if (catRes.ok) {
+          const data = await catRes.json();
+          setCategories(["All", ...data.map((c: any) => c.name).sort()]);
+        }
+        if (langRes.ok) {
+          const data = await langRes.json();
+          setLanguages(data.sort((a: any, b: any) => a.name.localeCompare(b.name)));
+        }
+        if (countRes.ok) {
+          const data = await countRes.json();
+          setCountries(data.sort((a: any, b: any) => a.name.localeCompare(b.name)));
         }
       } catch (err) {}
     };
-    fetchCategories();
+    fetchMetadata();
   }, []);
 
   // 2. Fetch Channels with pagination
@@ -61,6 +87,8 @@ export default function ChannelsExplorerPage() {
       
       if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
       if (selectedCategory !== "All") url += `&category=${encodeURIComponent(selectedCategory)}`;
+      if (selectedLanguage !== "All") url += `&language=${encodeURIComponent(selectedLanguage)}`;
+      if (selectedCountry !== "All") url += `&country=${encodeURIComponent(selectedCountry)}`;
 
       const res = await fetch(url);
       if (res.ok) {
@@ -90,7 +118,7 @@ export default function ChannelsExplorerPage() {
       fetchChannels(0, true);
     }, 500);
     return () => clearTimeout(timer);
-  }, [searchQuery, selectedCategory]);
+  }, [searchQuery, selectedCategory, selectedLanguage, selectedCountry]);
 
   // 4. Handle Infinite Scroll trigger
   useEffect(() => {
@@ -101,6 +129,24 @@ export default function ChannelsExplorerPage() {
     }
   }, [inView]);
 
+  // 5. Close filters on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
+        setShowFilters(false);
+      }
+    };
+    if (showFilters) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showFilters]);
+
+  const activeFilterCount = [
+    selectedLanguage !== "All",
+    selectedCountry !== "All"
+  ].filter(Boolean).length;
+
   return (
     <div className="min-h-[calc(100vh-64px)] bg-page text-primary p-4 md:p-8 lg:p-12">
       <div className="max-w-[1400px] mx-auto">
@@ -108,8 +154,8 @@ export default function ChannelsExplorerPage() {
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
           <div>
-            <h1 className="text-3xl font-medium tracking-tight text-primary mb-2">Channel Explorer</h1>
-            <p className="text-secondary">Discover thousands of live channels globally.</p>
+            <h1 className="text-3xl font-medium tracking-tight text-primary mb-2 text-display">Channel Explorer</h1>
+            <p className="text-secondary text-body">Discover thousands of live channels globally.</p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -123,9 +169,101 @@ export default function ChannelsExplorerPage() {
                 className="w-full bg-surface border border-border focus:border-brand pl-10 pr-4 py-2.5 rounded-lg text-sm outline-none transition-all"
               />
             </div>
-            <button className="flex items-center gap-2 px-4 py-2.5 bg-surface border border-border hover:border-brand rounded-lg text-sm font-medium transition-colors">
-              <Filter className="w-4 h-4" /> Filters
-            </button>
+            
+            <div className="relative" ref={filterRef}>
+              <button 
+                onClick={() => setShowFilters(!showFilters)}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all border ${
+                  showFilters || activeFilterCount > 0
+                    ? "bg-brand border-brand text-white shadow-lg shadow-brand/20" 
+                    : "bg-surface border-border text-secondary hover:border-accent"
+                }`}
+              >
+                <Filter className="w-4 h-4" /> 
+                Filters
+                {activeFilterCount > 0 && (
+                  <span className="ml-1 px-1.5 py-0.5 bg-white text-brand rounded-full text-[10px] font-bold">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </button>
+
+              <AnimatePresence>
+                {showFilters && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute right-0 mt-2 w-80 bg-surface border border-border rounded-xl shadow-2xl z-[60] p-5 overflow-hidden"
+                  >
+                    <div className="flex items-center justify-between mb-5 pb-3 border-b border-border">
+                      <h3 className="font-bold text-primary flex items-center gap-2">
+                        <Filter className="w-4 h-4 text-brand" /> Advanced Filters
+                      </h3>
+                      <button onClick={() => setShowFilters(false)} className="text-tertiary hover:text-primary transition-colors">
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    <div className="space-y-6">
+                      {/* Language Filter */}
+                      <div className="space-y-3">
+                        <label className="text-xs font-bold uppercase tracking-wider text-tertiary flex items-center gap-2">
+                          <Languages className="w-3.5 h-3.5" /> Language
+                        </label>
+                        <select 
+                          value={selectedLanguage}
+                          onChange={(e) => setSelectedLanguage(e.target.value)}
+                          className="w-full bg-page border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-brand transition-colors appearance-none cursor-pointer"
+                        >
+                          <option value="All">All Languages</option>
+                          {languages.map(lang => (
+                            <option key={lang.code} value={lang.code}>{lang.name}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Country Filter */}
+                      <div className="space-y-3">
+                        <label className="text-xs font-bold uppercase tracking-wider text-tertiary flex items-center gap-2">
+                          <MapPin className="w-3.5 h-3.5" /> Country
+                        </label>
+                        <select 
+                          value={selectedCountry}
+                          onChange={(e) => setSelectedCountry(e.target.value)}
+                          className="w-full bg-page border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-brand transition-colors appearance-none cursor-pointer"
+                        >
+                          <option value="All">All Countries</option>
+                          {countries.map(country => (
+                            <option key={country.code} value={country.code}>{country.name}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="flex gap-2 pt-2">
+                        <button 
+                          onClick={() => {
+                            setSelectedLanguage("All");
+                            setSelectedCountry("All");
+                            setSelectedCategory("All");
+                            setSearchQuery("");
+                          }}
+                          className="flex-1 px-4 py-2 bg-page border border-border rounded-lg text-xs font-bold text-secondary hover:bg-hover transition-colors"
+                        >
+                          Reset All
+                        </button>
+                        <button 
+                          onClick={() => setShowFilters(false)}
+                          className="flex-1 px-4 py-2 bg-brand text-white rounded-lg text-xs font-bold shadow-lg shadow-brand/20 hover:bg-accent transition-colors"
+                        >
+                          Show Results
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
 

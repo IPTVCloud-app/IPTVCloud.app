@@ -62,31 +62,40 @@ export default function SignUpPage() {
         }),
       });
 
-      const result = await response.json();
+      let result;
+      try {
+        result = await response.json();
+      } catch (e) {
+        throw new Error("Server returned an invalid response");
+      }
 
       if (!response.ok) {
         throw new Error(result.error || "Failed to create account");
       }
 
-      toast.success("Account created! Please verify your email.");
+      toast.success("Account created! Please sign in.");
       router.push(`/account/signin?email=${encodeURIComponent(data.email)}`);
     } catch (error: unknown) {
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else {
-        toast.error("An unexpected error occurred");
-      }
+      toast.error(error instanceof Error ? error.message : "An unexpected error occurred");
+    }
+  };
+
+  const onError = (errors: any) => {
+    // Toast the first validation error found
+    const firstError = Object.values(errors)[0] as any;
+    if (firstError?.message) {
+      toast.error(firstError.message);
     }
   };
 
   return (
     <div className="bg-surface border border-border rounded-xl p-8 linear-shadow-card">
       <div className="text-center mb-8">
-        <h1 className="text-2xl font-medium tracking-[-0.288px] text-primary mb-2">Create an account</h1>
-        <p className="text-sm text-tertiary">Start streaming with IPTVCloud today</p>
+        <h1 className="text-2xl font-medium tracking-[-0.288px] text-primary mb-2 text-display">Create an account</h1>
+        <p className="text-sm text-tertiary text-body">Start streaming with IPTVCloud today</p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-4">
         {/* Name Fields Row 1 */}
         <div className="grid grid-cols-12 gap-3">
           <div className="col-span-8 space-y-1.5">
