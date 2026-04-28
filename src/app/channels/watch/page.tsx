@@ -1,440 +1,220 @@
 "use client";
 
-import { useEffect, useRef, useState, Suspense } from "react";
-import { useSearchParams, useRouter, notFound } from "next/navigation";
-import Link from "next/link";
-import { 
-  ArrowLeft, Star, Share2, MessageSquare, AlertCircle, 
-  Play, Pause, Volume2, VolumeX, Maximize, Settings, 
-  Info, Shield
-} from "lucide-react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams, notFound } from "next/navigation";
+import { YouTubePlayer } from "@/components/player/YouTubePlayer";
+import { ChannelSlider } from "@/components/ChannelSlider";
+import { Star, Share2, AlertCircle, Info, ThumbsUp, PlusCircle } from "lucide-react";
 import toast from "react-hot-toast";
+
+const SHIMMER_CLASS = "relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent";
 
 function WatchPlayer() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const id = searchParams.get("id");
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [channelInfo, setChannelInfo] = useState<any>(null);
+  const [recommendations, setRecommendations] = useState<any[]>([]);
+  const [isTheaterMode, setIsTheaterMode] = useState(false);
 
-  // Custom UI State
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0); // Viewed session duration
-  const [volume, setVolume] = useState(1);
-  const [isMuted, setIsMuted] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showControls, setShowControls] = useState(true);
-  const [showSettings, setShowSettings] = useState(false);
-  const [currentRes, setCurrentRes] = useState("auto");
-  const [isBuffering, setIsBuffering] = useState(false);
-
-  const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  // 1. Load Channel Metadata
+  // Load Channel Metadata and Recommendations
   useEffect(() => {
     if (!id) return;
     const fetchMeta = async () => {
+      setLoading(true);
       try {
-        const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
+        const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
+        
+        // Fetch current channel
         const res = await fetch(`${apiUrl}/api/channels?search=${id}`);
         if (res.ok) {
           const data = await res.json();
           const channel = data.find((c: any) => c.id === id);
-          if (channel) setChannelInfo(channel);
+          if (channel) {
+             setChannelInfo(channel);
+             
+             // Fetch recommendations based on category or country
+             const recRes = await fetch(`${apiUrl}/api/channels?limit=15&category=${channel.category || ''}`);
+             if (recRes.ok) {
+               const recData = await recRes.json();
+               setRecommendations(recData.filter((c: any) => c.id !== id));
+             }
+          }
         }
-      } catch (err) {}
+      } catch (err) {
+        console.error("Error fetching channel data", err);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchMeta();
   }, [id]);
 
-  // 2. Stream Controller
-  useEffect(() => {
-    if (!id || !videoRef.current) return;
-
-    const video = videoRef.current;
-    const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
-    const streamUrl = `${apiUrl}/api/channels/stream?id=${id}&res=${currentRes}`;
-
-    const startStream = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        setCurrentTime(0);
-        setDuration(0);
-
-        // Probe for geo-blocking or not found
-        const response = await fetch(streamUrl, { method: 'GET' });
-        if (!response.ok) {
-          if (response.status === 403 || response.status === 404) {
-            notFound();
-            return;
-          }
-          setError("Channel is currently offline.");
-          setLoading(false);
-          return;
-        }
-
-        video.src = streamUrl;
-        video.load();
-
-        const onPlay = () => setIsPlaying(true);
-        const onPause = () => setIsPlaying(false);
-        const onWaiting = () => setIsBuffering(true);
-        const onPlaying = () => { setIsBuffering(false); setLoading(false); };
-        const onTimeUpdate = () => {
-          if (!video) return;
-          setCurrentTime(video.currentTime);
-          setDuration(prev => Math.max(prev, video.currentTime));
-        };
-        const onError = () => {
-           setError("Failed to initialize playback. Source incompatible.");
-           setLoading(false);
-        };
-
-        video.addEventListener('play', onPlay);
-        video.addEventListener('pause', onPause);
-        video.addEventListener('waiting', onWaiting);
-        video.addEventListener('playing', onPlaying);
-        video.addEventListener('timeupdate', onTimeUpdate);
-        video.addEventListener('error', onError);
-
-        video.play().catch(() => setLoading(false));
-
-        return () => {
-          video.removeEventListener('play', onPlay);
-          video.removeEventListener('pause', onPause);
-          video.removeEventListener('waiting', onWaiting);
-          video.removeEventListener('playing', onPlaying);
-          video.removeEventListener('timeupdate', onTimeUpdate);
-          video.removeEventListener('error', onError);
-        };
-      } catch (err) {
-        setError("Network error connecting to stream.");
-        setLoading(false);
-      }
-    };
-
-    startStream();
-
-    return () => {
-      video.pause();
-      video.src = "";
-    };
-  }, [id, currentRes, router]);
-
-  // 3. UI Handlers
-  const togglePlay = () => {
-    if (!videoRef.current) return;
-    if (videoRef.current.paused) videoRef.current.play();
-    else videoRef.current.pause();
-  };
-
-  const toggleMute = () => {
-    if (!videoRef.current) return;
-    const nextMute = !isMuted;
-    videoRef.current.muted = nextMute;
-    setIsMuted(nextMute);
-  };
-
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseFloat(e.target.value);
-    if (!videoRef.current) return;
-    videoRef.current.volume = val;
-    setVolume(val);
-    setIsMuted(val === 0);
-  };
-
-  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!videoRef.current || duration === 0) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const pos = (e.clientX - rect.left) / rect.width;
-    videoRef.current.currentTime = pos * duration;
-  };
-
-  const formatTime = (seconds: number) => {
-    if (!seconds || isNaN(seconds)) return "0:00";
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = Math.floor(seconds % 60);
-    if (h > 0) return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-    return `${m}:${s.toString().padStart(2, '0')}`;
-  };
-
-  const toggleFullscreen = () => {
-    if (!containerRef.current) return;
-    if (!document.fullscreenElement) {
-      containerRef.current.requestFullscreen();
-      setIsFullscreen(true);
-    } else {
-      document.exitFullscreen();
-      setIsFullscreen(false);
-    }
-  };
-
-  const handleMouseMove = () => {
-    setShowControls(true);
-    if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
-    controlsTimeoutRef.current = setTimeout(() => {
-      if (isPlaying && !showSettings) setShowControls(false);
-    }, 3000);
-  };
-
-  // 4. Keyboard Shortcuts
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement) return;
-      
-      switch(e.key.toLowerCase()) {
-        case 'k':
-        case ' ':
-          e.preventDefault();
-          togglePlay();
-          break;
-        case 'f':
-          toggleFullscreen();
-          break;
-        case 'm':
-          toggleMute();
-          break;
-        case 'j':
-          if (videoRef.current) videoRef.current.currentTime -= 10;
-          break;
-        case 'l':
-          if (videoRef.current) videoRef.current.currentTime += 10;
-          break;
-      }
-    };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [isPlaying, isMuted, isFullscreen, duration]);
-
   if (!id) return <div className="p-12 text-center text-secondary">No channel ID provided.</div>;
 
   return (
-    <div className="min-h-screen bg-page text-primary p-4 md:p-8 lg:p-12">
-      <div className="max-w-[1400px] mx-auto">
-        <Link href="/channels" className="inline-flex items-center gap-2 text-secondary hover:text-primary transition-colors mb-6 group">
-          <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" /> Back to Explorer
-        </Link>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-6">
+    <div className={`min-h-screen bg-page text-primary ${isTheaterMode ? 'pt-0' : 'p-4 md:p-8 lg:p-6'}`}>
+      <div className={`mx-auto ${isTheaterMode ? 'max-w-full' : 'max-w-[1600px]'}`}>
+        
+        {/* Responsive Layout wrapper */}
+        <div className={`flex flex-col ${isTheaterMode ? '' : 'lg:flex-row'} gap-6`}>
+          
+          {/* Main Content (Player + Info) */}
+          <div className={`w-full ${isTheaterMode ? 'lg:w-full' : 'lg:w-[70%] xl:w-[75%]'}`}>
             
-            {/* YouTube Player Container */}
-            <div 
-              ref={containerRef}
-              onMouseMove={handleMouseMove}
-              onMouseLeave={() => isPlaying && setShowControls(false)}
-              className={`relative aspect-video bg-black rounded-xl overflow-hidden group border border-white/5 shadow-2xl ${isFullscreen ? 'rounded-none' : ''} ${!showControls ? 'cursor-none' : ''}`}
-            >
-              <video 
-                ref={videoRef}
-                className="w-full h-full object-contain"
-                crossOrigin="anonymous"
-                playsInline
-              />
+            {/* Player Container (Sticky on mobile) */}
+            <div className={`w-full sticky top-0 z-50 bg-page ${isTheaterMode ? 'bg-black' : ''}`}>
+              <div className={`${isTheaterMode ? 'max-w-7xl mx-auto' : ''}`}>
+                 <YouTubePlayer 
+                    channelId={id} 
+                    isTheaterMode={isTheaterMode}
+                    onToggleTheater={() => setIsTheaterMode(!isTheaterMode)}
+                 />
+              </div>
+            </div>
 
-              {/* Interaction Overlay */}
-              <div 
-                className="absolute inset-0 z-10"
-                onClick={togglePlay}
-                onDoubleClick={toggleFullscreen}
-              />
-
-              {/* Status Overlays */}
-              {(loading || isBuffering) && !error && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[1px] z-20 pointer-events-none">
-                  <div className="w-12 h-12 border-4 border-white/20 border-t-brand rounded-full animate-spin"></div>
-                </div>
-              )}
-
-              {error && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900 z-30 px-6 text-center">
-                  <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
-                  <h3 className="text-xl font-bold mb-2 text-white">Streaming Error</h3>
-                  <p className="text-secondary max-w-md mb-6">{error}</p>
-                  <button 
-                    onClick={() => window.location.reload()}
-                    className="px-6 py-2 bg-brand rounded-full text-white font-medium hover:bg-accent transition-colors"
-                  >
-                    Retry Connection
-                  </button>
-                </div>
-              )}
-
-              {/* Custom YouTube Controls */}
-              <div className={`absolute inset-x-0 bottom-0 z-40 bg-gradient-to-t from-black/80 via-black/40 to-transparent pt-20 pb-4 px-4 transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-                
-                {/* Progress Bar (DVR Support) */}
-                <div 
-                  onClick={handleSeek}
-                  className="h-1.5 w-full bg-white/20 rounded-full mb-4 relative group/progress cursor-pointer overflow-hidden"
-                >
-                   <div 
-                     className="absolute inset-y-0 left-0 bg-brand shadow-[0_0_8px_rgba(94,106,210,0.8)] transition-all duration-100"
-                     style={{ width: `${(currentTime / (duration || 1)) * 100}%` }}
-                   ></div>
-                   <div 
-                     className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-brand rounded-full scale-0 group-hover/progress:scale-100 transition-transform"
-                     style={{ left: `${(currentTime / (duration || 1)) * 100}%`, transform: 'translate(-50%, -50%)' }}
-                   ></div>
-                </div>
-
-                <div className="flex items-center justify-between">
+            {/* Info Section */}
+            <div className={`mt-4 ${isTheaterMode ? 'max-w-7xl mx-auto px-4' : ''}`}>
+              {loading ? (
+                <div className="space-y-4">
+                  <div className={`h-8 w-1/2 bg-elevated rounded ${SHIMMER_CLASS}`} />
                   <div className="flex items-center gap-4">
-                    <button onClick={togglePlay} className="text-white hover:text-brand transition-colors">
-                      {isPlaying ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current" />}
-                    </button>
-                    
-                    <div className="flex items-center gap-2 group/volume">
-                      <button onClick={toggleMute} className="text-white hover:text-brand transition-colors">
-                        {isMuted || volume === 0 ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
-                      </button>
-                      <input 
-                        type="range" min="0" max="1" step="0.05"
-                        value={isMuted ? 0 : volume}
-                        onChange={handleVolumeChange}
-                        className="w-0 group-hover/volume:w-20 transition-all duration-300 accent-brand h-1"
-                      />
-                    </div>
-
-                    <div className="flex items-center gap-2 text-white font-medium text-sm">
-                       {Math.abs(duration - currentTime) < 10 ? (
-                         <span className="flex items-center gap-1.5 px-2 py-0.5 bg-red-600 rounded text-[10px] tracking-tighter">
-                           <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></div>
-                           LIVE
-                         </span>
-                       ) : (
-                         <button 
-                           onClick={() => { if(videoRef.current) videoRef.current.currentTime = duration; }}
-                           className="flex items-center gap-1.5 px-2 py-0.5 bg-zinc-700 hover:bg-zinc-600 transition-colors rounded text-[10px] tracking-tighter"
-                         >
-                           BACK TO LIVE
-                         </button>
-                       )}
-                       <span className="opacity-80 font-mono tracking-tighter">
-                         {formatTime(currentTime)} / {formatTime(duration)}
-                       </span>
-                    </div>
+                     <div className={`w-12 h-12 rounded-full bg-elevated ${SHIMMER_CLASS}`} />
+                     <div className="space-y-2 flex-1">
+                        <div className={`h-4 w-40 bg-elevated rounded ${SHIMMER_CLASS}`} />
+                        <div className={`h-3 w-24 bg-elevated rounded ${SHIMMER_CLASS}`} />
+                     </div>
                   </div>
-
-                  <div className="flex items-center gap-4 relative">
-                    <div className="relative">
-                      <button 
-                        onClick={() => setShowSettings(!showSettings)}
-                        className={`text-white hover:text-brand transition-all ${showSettings ? 'rotate-45 text-brand' : ''}`}
-                      >
-                        <Settings className="w-6 h-6" />
-                      </button>
-                      
-                      {/* Quality Menu */}
-                      {showSettings && (
-                        <div className="absolute bottom-10 right-0 w-48 bg-zinc-900/95 backdrop-blur-md border border-white/10 rounded-lg overflow-hidden shadow-2xl z-50">
-                           <div className="px-4 py-2 border-b border-white/5 text-xs font-bold text-secondary uppercase tracking-widest">Quality</div>
-                           {["auto", "1080p", "720p", "480p", "SD"].map((res) => (
-                             <button 
-                               key={res}
-                               onClick={() => { setCurrentRes(res); setShowSettings(false); }}
-                               className={`w-full px-4 py-2.5 text-left text-sm hover:bg-white/10 transition-colors flex items-center justify-between ${currentRes === res ? 'text-brand font-bold bg-brand/5' : 'text-secondary'}`}
-                             >
-                               {res.toUpperCase()}
-                               {currentRes === res && <div className="w-1.5 h-1.5 rounded-full bg-brand"></div>}
-                             </button>
-                           ))}
+                </div>
+              ) : (
+                <>
+                  <h1 className="text-xl md:text-2xl font-bold text-primary mb-2 line-clamp-2">
+                    {channelInfo?.name || "Unknown Channel"}
+                  </h1>
+                  
+                  {/* Channel Meta & Actions Bar */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-2 mb-4 border-b border-border/50">
+                    {/* Left: Logo & Name */}
+                    <div className="flex items-center gap-4">
+                      {channelInfo?.logo ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={channelInfo.logo} alt="" className="w-12 h-12 object-contain shrink-0 rounded-full bg-white/5 border border-border" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-brand/10 border border-brand/20 flex items-center justify-center text-brand font-bold text-xl uppercase shrink-0">
+                          {channelInfo?.name?.substring(0, 1) || "C"}
                         </div>
                       )}
-                    </div>
-                    
-                    <button onClick={toggleFullscreen} className="text-white hover:text-brand transition-colors">
-                      <Maximize className="w-6 h-6" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Channel Info */}
-            <div className="bg-surface border border-border rounded-xl p-6 shadow-sm">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-lg bg-page border border-border flex items-center justify-center p-2">
-                    {channelInfo?.logo ? (
-                      <img src={channelInfo.logo} alt="" className="w-full h-full object-contain" />
-                    ) : (
-                      <div className="w-full h-full bg-brand/10 rounded flex items-center justify-center text-brand font-bold text-xl uppercase">
-                        {channelInfo?.name?.substring(0, 1) || "C"}
+                      
+                      <div className="flex flex-col">
+                        <span className="font-bold text-primary text-base">{channelInfo?.name}</span>
+                        <span className="text-xs text-secondary">{channelInfo?.country || "International"} • 1.2K watching</span>
                       </div>
-                    )}
-                  </div>
-                  <div>
-                    <h1 className="text-2xl font-bold text-primary mb-1 text-display">{channelInfo?.name || "Loading Channel..."}</h1>
-                    <div className="flex items-center gap-3 text-sm text-tertiary">
-                      <span className="px-2 py-0.5 bg-brand/10 text-brand rounded font-medium">{channelInfo?.category || "General"}</span>
-                      <span>{channelInfo?.country || "International"}</span>
-                      <span className="flex items-center gap-1"><Info className="w-3.5 h-3.5" /> fMP4 Adaptive</span>
+
+                      <button className="ml-4 px-4 py-2 bg-primary text-page rounded-full text-sm font-bold hover:bg-white/90 transition-colors">
+                        Subscribe
+                      </button>
+                    </div>
+
+                    {/* Right: Actions */}
+                    <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
+                      <div className="flex items-center bg-surface border border-border rounded-full">
+                        <button className="flex items-center gap-2 px-4 py-2 hover:bg-white/5 transition-colors rounded-l-full border-r border-border">
+                          <ThumbsUp className="w-4 h-4" /> <span className="text-sm font-medium">124</span>
+                        </button>
+                      </div>
+
+                      <button 
+                        onClick={() => {
+                          navigator.clipboard.writeText(window.location.href);
+                          toast.success("Link copied!");
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 bg-surface border border-border rounded-full hover:bg-white/5 transition-colors whitespace-nowrap"
+                      >
+                        <Share2 className="w-4 h-4" /> <span className="text-sm font-medium">Share</span>
+                      </button>
+
+                      <button 
+                        onClick={() => toast.success("Feature coming soon!")}
+                        className="flex items-center gap-2 px-4 py-2 bg-surface border border-border rounded-full hover:bg-white/5 transition-colors whitespace-nowrap"
+                      >
+                        <PlusCircle className="w-4 h-4" /> <span className="text-sm font-medium">Save</span>
+                      </button>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex items-center gap-2">
-                  <button 
-                    onClick={() => {
-                      setIsFavorite(!isFavorite);
-                      toast.success(isFavorite ? "Removed from favorites" : "Added to favorites");
-                    }}
-                    className={`p-2.5 rounded-lg border transition-all ${isFavorite ? 'bg-brand/10 border-brand text-brand shadow-sm' : 'bg-surface border-border text-secondary hover:border-brand'}`}
-                  >
-                    <Star className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
-                  </button>
-                  <button 
-                    onClick={() => {
-                      navigator.clipboard.writeText(window.location.href);
-                      toast.success("Link copied to clipboard!");
-                    }}
-                    className="p-2.5 rounded-lg bg-surface border border-border text-secondary hover:border-brand transition-all"
-                  >
-                    <Share2 className="w-5 h-5" />
-                  </button>
-                  <button className="flex items-center gap-2 px-5 py-2.5 bg-brand text-white rounded-lg font-medium hover:bg-accent transition-all shadow-md shadow-brand/20">
-                    Follow Channel
-                  </button>
-                </div>
-              </div>
+                  {/* Description Box */}
+                  <div className="bg-surface border border-border rounded-xl p-4 text-sm mt-4 hover:bg-white/5 transition-colors cursor-pointer">
+                    <div className="font-bold mb-1">
+                      {channelInfo?.category || "General"} Category
+                    </div>
+                    <p className="text-secondary line-clamp-2">
+                      Live stream of {channelInfo?.name}. Available natively through HLS parsing and custom HTML5 video.
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
-          <div className="space-y-6">
-            <div className="bg-surface border border-border rounded-xl flex flex-col h-[600px]">
-              <div className="p-4 border-b border-border flex items-center justify-between bg-page/50 rounded-t-xl">
-                <div className="flex items-center gap-2 font-bold text-sm tracking-tight uppercase text-secondary">
-                  <MessageSquare className="w-4 h-4 text-brand" /> Live Chat
+          {/* Right Column (Recommendations list) */}
+          <div className={`w-full ${isTheaterMode ? 'max-w-7xl mx-auto mt-6' : 'lg:w-[30%] xl:w-[25%]'} flex flex-col gap-4 px-4 lg:px-0`}>
+            {loading ? (
+              Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="flex gap-3 h-[90px]">
+                  <div className={`w-40 shrink-0 bg-elevated rounded-lg ${SHIMMER_CLASS}`} />
+                  <div className="flex flex-col gap-2 flex-1 py-1">
+                     <div className={`h-4 w-full bg-elevated rounded ${SHIMMER_CLASS}`} />
+                     <div className={`h-3 w-1/2 bg-elevated rounded ${SHIMMER_CLASS}`} />
+                  </div>
                 </div>
-                <div className="flex items-center gap-1.5 text-[10px] text-emerald-500 font-mono">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div> 1,240 ONLINE
+              ))
+            ) : (
+              <>
+                {isTheaterMode && <h3 className="font-bold text-lg mb-2">Up Next</h3>}
+                <div className={`${isTheaterMode ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4' : 'flex flex-col gap-3'}`}>
+                  {recommendations.slice(0, isTheaterMode ? 12 : 15).map((rec: any, idx) => (
+                    <a key={idx} href={`/channels/watch?id=${rec.id}`} className="flex gap-3 group">
+                      <div className={`${isTheaterMode ? 'w-full' : 'w-40'} shrink-0 relative aspect-video bg-elevated rounded-lg overflow-hidden`}>
+                         <img src={rec.logo || '/brand.png'} alt="" className="w-full h-full object-cover" />
+                         <div className="absolute bottom-1 right-1 bg-black/80 px-1 py-0.5 rounded text-[10px] font-bold">LIVE</div>
+                      </div>
+                      <div className="flex flex-col py-0.5 flex-1 min-w-0">
+                         <span className="font-medium text-sm leading-tight text-primary group-hover:text-brand transition-colors line-clamp-2">
+                           {rec.name}
+                         </span>
+                         <span className="text-xs text-secondary mt-1">{rec.category || 'General'}</span>
+                         <span className="text-xs text-tertiary">{rec.country || 'International'}</span>
+                      </div>
+                    </a>
+                  ))}
                 </div>
-              </div>
-              <div className="flex-1 p-6 flex flex-col items-center justify-center text-center space-y-4">
-                <div className="w-12 h-12 rounded-full bg-brand/5 flex items-center justify-center">
-                  <Shield className="w-6 h-6 text-brand/40" />
-                </div>
-                <div>
-                  <h4 className="font-medium text-primary mb-1">Join the conversation</h4>
-                  <p className="text-sm text-tertiary">Sign in to chat with other viewers and join the community.</p>
-                </div>
-                <Link href="/account/signin" className="px-6 py-2 bg-surface border border-border hover:border-brand text-secondary rounded-full text-sm font-medium transition-all">
-                  Sign In
-                </Link>
-              </div>
-            </div>
+              </>
+            )}
           </div>
         </div>
+
+        {/* Sliding Categories (Bottom) */}
+        {!isTheaterMode && recommendations.length > 0 && (
+           <div className="mt-8 px-4 lg:px-0 border-t border-border/50 pt-8">
+             <ChannelSlider title="Similar to this channel" channels={recommendations} />
+           </div>
+        )}
       </div>
+
+      <style jsx global>{`
+        @keyframes shimmer {
+          100% { transform: translateX(100%); }
+        }
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </div>
   );
 }

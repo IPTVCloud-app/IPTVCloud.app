@@ -85,10 +85,10 @@ export default function ChannelsExplorerPage() {
       const offset = pageNum * limit;
       let url = `${apiUrl}/api/channels?limit=${limit}&offset=${offset}`;
       
-      if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
-      if (selectedCategory !== "All") url += `&category=${encodeURIComponent(selectedCategory)}`;
-      if (selectedLanguage !== "All") url += `&language=${encodeURIComponent(selectedLanguage)}`;
-      if (selectedCountry !== "All") url += `&country=${encodeURIComponent(selectedCountry)}`;
+      if (searchQuery) url += `&search=${encodeURIComponent(searchQuery.toLowerCase())}`;
+      if (selectedCategory !== "All") url += `&category=${encodeURIComponent(selectedCategory.toLowerCase())}`;
+      if (selectedLanguage !== "All") url += `&language=${encodeURIComponent(selectedLanguage.toLowerCase())}`;
+      if (selectedCountry !== "All") url += `&country=${encodeURIComponent(selectedCountry.toLowerCase())}`;
 
       const res = await fetch(url);
       if (res.ok) {
