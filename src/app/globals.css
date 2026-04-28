@@ -87,7 +87,46 @@
     font-family: var(--font-sans);
     font-feature-settings: "cv01" 1, "ss03" 1;
     -webkit-font-smoothing: antialiased;
+    
+    /* Dot Matrix Background */
+    background-image: radial-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 0);
+    background-size: 24px 24px;
+    background-attachment: fixed;
   }
+  .dark body {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 0);
+  }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+/* Custom Premium Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-page);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-primary);
+  border-radius: 5px;
+  border: 2px solid var(--bg-page);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-primary) var(--bg-page);
 }
 
 /* Custom utilities based on DESIGN.md */

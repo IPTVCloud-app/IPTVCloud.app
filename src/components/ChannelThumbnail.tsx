@@ -16,17 +16,18 @@ export function ChannelThumbnail({ channelId, name, className = "", logoUrl }: C
 
   useEffect(() => {
     const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
-    // Favor provided logoUrl, then fallback to optimized thumbnail API
     setImgSrc(logoUrl || `${apiUrl}/api/channels/thumbnail?id=${channelId}`);
     setFailed(false);
   }, [channelId, logoUrl]);
 
+  const BROKEN_ICON = `data:image/svg+xml;base64,${Buffer.from('<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="12" fill="#141414"/><path d="M35 35L65 65M65 35L35 65" stroke="#333" stroke-width="4" stroke-linecap="round"/></svg>').toString('base64')}`;
+
   return (
     <div className={`relative bg-surface border border-border overflow-hidden group ${className}`}>
-      {imgSrc && !failed ? (
+      {imgSrc ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img 
-          src={imgSrc} 
+          src={failed ? BROKEN_ICON : imgSrc} 
           alt={`${name} logo`}
           className="w-full h-full object-contain p-4 transition-transform duration-700 group-hover:scale-105"
           onError={() => setFailed(true)}
