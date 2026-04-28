@@ -21,12 +21,36 @@ export default function ChannelsExplorerPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [categories, setCategories] = useState<string[]>(["All"]);
 
+  // 1. Fetch Categories once
   useEffect(() => {
-    const fetchChannels = async () => {
+    const fetchCategories = async () => {
       try {
         const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
-        const res = await fetch(`${apiUrl}/api/channels?limit=100`);
+        const res = await fetch(`${apiUrl}/api/channels/categories`);
+        if (res.ok) {
+          const data = await res.json();
+          // data is array of { id, name }
+          const catNames = ["All", ...data.map((c: any) => c.name).sort()];
+          setCategories(catNames);
+        }
+      } catch (err) {}
+    };
+    fetchCategories();
+  }, []);
+
+  // 2. Server-side Search with Debounce
+  useEffect(() => {
+    const fetchChannels = async () => {
+      setLoading(true);
+      try {
+        const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
+        let url = `${apiUrl}/api/channels?limit=100`;
+        if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
+        if (selectedCategory !== "All") url += `&category=${encodeURIComponent(selectedCategory)}`;
+
+        const res = await fetch(url);
         if (res.ok) {
           const data = await res.json();
           setChannels(data);
@@ -37,16 +61,13 @@ export default function ChannelsExplorerPage() {
         setLoading(false);
       }
     };
-    fetchChannels();
-  }, []);
 
-  const categories = ["All", ...Array.from(new Set(channels.map(c => c.category))).filter(Boolean).sort()];
+    const timer = setTimeout(() => {
+      fetchChannels();
+    }, 500);
 
-  const filteredChannels = channels.filter(c => {
-    const matchesSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "All" || c.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+    return () => clearTimeout(timer);
+  }, [searchQuery, selectedCategory]);
 
   return (
     <div className="min-h-[calc(100vh-64px)] bg-page text-primary p-4 md:p-8 lg:p-12">
@@ -97,7 +118,7 @@ export default function ChannelsExplorerPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {filteredChannels.map((channel) => (
+            {channels.map((channel) => (
               <Link key={channel.id} href={`/channels/watch?id=${channel.id}`} className="group block">
                 <div className="bg-surface border border-border rounded-xl overflow-hidden hover:border-brand transition-colors h-full flex flex-col">
                   {/* Aspect ratio 16:9 for thumbnail */}
@@ -148,7 +169,7 @@ export default function ChannelsExplorerPage() {
           </div>
         )}
 
-        {!loading && filteredChannels.length === 0 && (
+        {!loading && channels.length === 0 && (
           <div className="text-center py-20 text-tertiary">
             No channels found matching your criteria.
           </div>
