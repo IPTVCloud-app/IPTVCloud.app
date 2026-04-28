@@ -6,7 +6,7 @@ import Link from "next/link";
 import { 
   ArrowLeft, Star, Share2, MessageSquare, AlertCircle, 
   Play, Pause, Volume2, VolumeX, Maximize, Settings, 
-  Info
+  Info, Shield
 } from "lucide-react";
 import toast from "react-hot-toast";
 
