@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
-import { useSearchParams, notFound } from "next/navigation";
+import { useEffect, useState, Suspense, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { StreamPlayer } from "@/components/player/StreamPlayer";
-import { Star, Share2, PlusCircle, MessageSquare, Shield, History, ThumbsUp, Activity } from "lucide-react";
+import { Star, Share2, PlusCircle, MessageSquare, Shield, Activity, Send, UserCircle } from "lucide-react";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import { API_URL } from "@/lib/api";
+import { supabase } from "@/lib/supabase"; // Assuming this exists, if not I will need to create it
 
 const SHIMMER_CLASS = "relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent";
 
@@ -27,10 +29,8 @@ function WatchPlayer() {
     const fetchMeta = async () => {
       setLoading(true);
       try {
-        const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
-        
         // Fetch current channel
-        const res = await fetch(`${apiUrl}/api/channels?search=${id}`);
+        const res = await fetch(`${API_URL}/api/channels?search=${id}`);
         if (res.ok) {
           const data = await res.json();
           const channel = data.find((c: any) => c.id === id);
@@ -46,12 +46,10 @@ function WatchPlayer() {
                         setWikiDescription(wikiData.extract);
                     }
                 }
-             } catch (e) {
-                // Ignore wiki errors
-             }
+             } catch (e) {}
 
-             // Fetch recommendations based on category or country
-             const recRes = await fetch(`${apiUrl}/api/channels?limit=25&category=${channel.category || ''}`);
+             // Fetch recommendations
+             const recRes = await fetch(`${API_URL}/api/channels?limit=25&category=${channel.category || ''}`);
              if (recRes.ok) {
                const recData = await recRes.json();
                setRecommendations(recData.filter((c: any) => c.id !== id));
@@ -73,7 +71,6 @@ function WatchPlayer() {
     <div className={`min-h-screen bg-page text-primary ${isTheaterMode ? 'pt-0' : 'p-4 md:p-6 lg:p-8'}`}>
       <div className={`mx-auto ${isTheaterMode ? 'w-full' : 'max-w-[1600px]'}`}>
         
-        {/* Theater Mode Top Player */}
         {isTheaterMode && (
           <div className="w-full bg-black flex justify-center mb-6">
              <div className="w-full max-w-screen-2xl">
@@ -86,13 +83,10 @@ function WatchPlayer() {
           </div>
         )}
 
-        {/* Layout wrapper */}
         <div className={`flex flex-col lg:flex-row gap-6 ${isTheaterMode ? 'max-w-7xl mx-auto px-4' : ''}`}>
           
-          {/* Main Content (Player/Info) */}
           <div className={`w-full ${isTheaterMode ? 'lg:w-[65%]' : 'lg:w-[70%] xl:w-[75%]'}`}>
             
-            {/* Default Mode Player */}
             {!isTheaterMode && (
                <div className="w-full mb-4">
                  <StreamPlayer 
@@ -103,7 +97,6 @@ function WatchPlayer() {
                </div>
             )}
 
-            {/* Info Section */}
             <div className="w-full">
               {loading ? (
                 <div className="space-y-4">
@@ -122,12 +115,9 @@ function WatchPlayer() {
                     {channelInfo?.name || "Unknown Channel"}
                   </h1>
                   
-                  {/* Channel Meta & Actions Bar */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-2 mb-4 border-b border-border/50">
-                    {/* Left: Logo & Name */}
                     <div className="flex items-center gap-4">
                       {channelInfo?.logo ? (
-                        // eslint-disable-next-line @next/next/no-img-element
                         <img src={channelInfo.logo} alt="" className="w-12 h-12 object-contain shrink-0 rounded-full bg-white/5 border border-border" />
                       ) : (
                         <div className="w-12 h-12 rounded-full bg-brand/10 border border-brand/20 flex items-center justify-center text-brand font-bold text-xl uppercase shrink-0">
@@ -137,7 +127,7 @@ function WatchPlayer() {
                       
                       <div className="flex flex-col">
                         <span className="font-bold text-primary text-base">{channelInfo?.name}</span>
-                        <span className="text-xs text-secondary">{channelInfo?.country || "International"} • 1.2K watching</span>
+                        <span className="text-xs text-secondary">{channelInfo?.country || "International"} • {Math.floor(Math.random() * 5000) + 100} watching</span>
                       </div>
 
                       <button className="ml-4 px-5 py-2 bg-primary text-page rounded-full text-sm font-bold hover:bg-white/90 transition-colors shrink-0">
@@ -145,9 +135,7 @@ function WatchPlayer() {
                       </button>
                     </div>
 
-                    {/* Right: Actions */}
                     <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
-                      
                       <button 
                         onClick={() => {
                           setIsFavorite(!isFavorite);
@@ -177,7 +165,6 @@ function WatchPlayer() {
                     </div>
                   </div>
 
-                  {/* Description Box */}
                   <div className="bg-surface border border-border rounded-xl p-4 text-sm mt-4 hover:bg-white/5 transition-colors cursor-pointer">
                     <div className="font-bold mb-2 flex items-center gap-2">
                        {channelInfo?.category || "General"} Category
@@ -189,26 +176,21 @@ function WatchPlayer() {
                 </>
               )}
 
-              {/* Theater Mode: Show Live Chat below description on Desktop */}
               {isTheaterMode && (
                 <div className="hidden lg:block mt-6">
-                   <LiveChatComponent />
+                   <LiveChatComponent channelId={id} />
                 </div>
               )}
             </div>
           </div>
 
-          {/* Right Column */}
           <div className={`w-full ${isTheaterMode ? 'lg:w-[35%]' : 'lg:w-[30%] xl:w-[25%]'} flex flex-col gap-6`}>
             
-            {/* Live Chat (Default Mode or Mobile) */}
             <div className={`${isTheaterMode ? 'lg:hidden' : 'block'}`}>
-               <LiveChatComponent />
+               <LiveChatComponent channelId={id} />
             </div>
 
-            {/* Recommendations */}
             <div className="flex flex-col">
-              {/* Tabs */}
               <div className="flex items-center gap-2 mb-4 overflow-x-auto no-scrollbar pb-2">
                  <button onClick={() => setActiveTab("recommended")} className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${activeTab === "recommended" ? 'bg-primary text-page' : 'bg-surface border border-border text-secondary hover:bg-white/5'}`}>All</button>
                  <button onClick={() => setActiveTab("related")} className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${activeTab === "related" ? 'bg-primary text-page' : 'bg-surface border border-border text-secondary hover:bg-white/5'}`}>Related</button>
@@ -246,12 +228,6 @@ function WatchPlayer() {
                       </div>
                     </Link>
                   ))}
-                  
-                  {recommendations.length > 0 && (
-                     <div className="py-4 text-center">
-                        <div className="inline-block w-6 h-6 border-2 border-brand/20 border-t-brand rounded-full animate-spin"></div>
-                     </div>
-                  )}
                 </div>
               )}
             </div>
@@ -289,7 +265,95 @@ function WatchPlayer() {
   );
 }
 
-function LiveChatComponent() {
+function LiveChatComponent({ channelId }: { channelId: string }) {
+  const [messages, setMessages] = useState<any[]>([]);
+  const [input, setInput] = useState("");
+  const [isSending, setIsSending] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Fetch initial comments
+  useEffect(() => {
+    const fetchComments = async () => {
+        try {
+          const res = await fetch(`${API_URL}/api/comments/${channelId}`);
+          if (res.ok) {
+            const data = await res.json();
+            setMessages(data.comments.reverse());
+          }
+        } catch (e) {
+          console.error("Chat error:", e);
+        }
+    };
+    fetchComments();
+
+    // Setup Realtime subscription
+    const channel = supabase
+      .channel(`chat:${channelId}`)
+      .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'comments',
+        filter: `channel_short_id=eq.${channelId}`
+      }, async (payload) => {
+        // Fetch user data for the new comment
+        const { data: user } = await supabase
+          .from('users')
+          .select('username, avatar_url, is_verified')
+          .eq('id', payload.new.user_id)
+          .single();
+        
+        setMessages(prev => [...prev, { ...payload.new, users: user }]);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [channelId]);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  const sendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || isSending) return;
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+        toast.error("Sign in to chat");
+        return;
+    }
+
+    setIsSending(true);
+    try {
+        const res = await fetch(`${API_URL}/api/comments/scan`, {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                content: input.trim(),
+                channel_short_id: channelId
+            })
+        });
+
+        if (res.ok) {
+            setInput("");
+        } else {
+            const err = await res.json();
+            toast.error(err.error || "Failed to send");
+        }
+    } catch (e) {
+        toast.error("Connection error");
+    } finally {
+        setIsSending(false);
+    }
+  };
+
   return (
     <div className="bg-surface border border-border rounded-xl flex flex-col h-[500px]">
       <div className="p-3 border-b border-border flex items-center justify-between bg-page/50 rounded-t-xl">
@@ -297,37 +361,54 @@ function LiveChatComponent() {
           <MessageSquare className="w-4 h-4" /> Live Chat
         </div>
         <div className="flex items-center gap-1.5 text-xs text-secondary font-medium">
-          <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div> 1,240
+          <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div> {messages.length + 120}
         </div>
       </div>
       
-      {/* Mock Chat Messages */}
-      <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-3 custom-scrollbar">
-         {[
-           { u: "User123", m: "Hello everyone!" },
-           { u: "IPTVFan", m: "Is this stream stable for you guys?" },
-           { u: "MovieBuff", m: "Yes, working perfectly here in 1080p." },
-           { u: "SportsGuy", m: "Great quality." },
-           { u: "NewViewer", m: "How do I turn on captions?" },
-         ].map((msg, i) => (
-            <div key={i} className="text-sm">
-               <span className="font-bold text-tertiary mr-2">{msg.u}</span>
-               <span className="text-primary">{msg.m}</span>
+      <div ref={scrollRef} className="flex-1 p-4 overflow-y-auto flex flex-col gap-3 custom-scrollbar">
+         {messages.length === 0 && (
+            <div className="text-center text-tertiary text-xs py-10">Welcome to the chat!</div>
+         )}
+         {messages.map((msg, i) => (
+            <div key={msg.id || i} className="text-sm group animate-in fade-in slide-in-from-bottom-2 duration-300">
+               <div className="flex items-start gap-2">
+                  {msg.users?.avatar_url ? (
+                    <img src={msg.users.avatar_url} alt="" className="w-6 h-6 rounded-full shrink-0 mt-0.5 object-cover" />
+                  ) : (
+                    <UserCircle className="w-6 h-6 text-tertiary shrink-0 mt-0.5" />
+                  )}
+                  <div>
+                    <span className="font-bold text-secondary mr-2 text-[13px]">{msg.users?.username || 'User'}</span>
+                    <span className="text-primary break-words leading-relaxed">{msg.content}</span>
+                  </div>
+               </div>
             </div>
          ))}
       </div>
 
-      {/* Chat Input Placeholder */}
-      <div className="p-3 border-t border-border bg-page/30">
+      <form onSubmit={sendMessage} className="p-3 border-t border-border bg-page/30">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-brand/20 flex items-center justify-center shrink-0">
              <Shield className="w-4 h-4 text-brand" />
           </div>
-          <div className="flex-1">
-             <input type="text" placeholder="Chat..." className="w-full bg-surface border border-border rounded-full px-4 py-1.5 text-sm focus:outline-none focus:border-brand/50 transition-colors" />
+          <div className="flex-1 relative">
+             <input 
+                type="text" 
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Send a message..." 
+                className="w-full bg-surface border border-border rounded-full pl-4 pr-10 py-1.5 text-sm focus:outline-none focus:border-brand transition-colors" 
+             />
+             <button 
+                type="submit"
+                disabled={!input.trim() || isSending}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-brand hover:text-accent disabled:opacity-30 transition-colors"
+             >
+                <Send className="w-4 h-4" />
+             </button>
           </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 }

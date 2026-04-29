@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
+import { API_URL } from "@/lib/api";
 
 const schema = z.object({
   username: z.string().min(3, { message: "Username must be at least 3 characters" }),
@@ -22,8 +23,7 @@ export default function FindAccountPage() {
 
   const onSubmit = async (data: FormData) => {
     try {
-      const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
-      const response = await fetch(`${apiUrl}/auth/find-account`, {
+      const response = await fetch(`${API_URL}/auth/find-account`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),

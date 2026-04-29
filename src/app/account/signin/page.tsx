@@ -8,6 +8,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
+import { API_URL } from "@/lib/api";
 
 const signinSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
@@ -49,8 +50,7 @@ function SignInForm() {
 
   const onSignInSubmit = async (data: SignInData) => {
     try {
-      const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
-      const response = await fetch(`${apiUrl}/auth/signin/init`, {
+      const response = await fetch(`${API_URL}/auth/signin/init`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -82,8 +82,7 @@ function SignInForm() {
   const onOtpSubmit = async (data: OtpData) => {
     try {
       setAuthError(null);
-      const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
-      const response = await fetch(`${apiUrl}/auth/signin/verify`, {
+      const response = await fetch(`${API_URL}/auth/signin/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, code: data.code }),
@@ -121,8 +120,7 @@ function SignInForm() {
   const handleResendOtp = async () => {
     if (resendCooldown > 0) return;
     try {
-      const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
-      const response = await fetch(`${apiUrl}/auth/otp/resend`, {
+      const response = await fetch(`${API_URL}/auth/otp/resend`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),

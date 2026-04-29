@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { PasswordStrengthBar } from "./PasswordStrength";
+import { API_URL } from "@/lib/api";
 
 const schema = z.object({
   firstName: z.string().min(1, { message: "First name is required" }),
@@ -49,8 +50,7 @@ export default function SignUpPage() {
   const onSubmit = async (data: FormData) => {
     try {
       setAuthError(null);
-      const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
-      const response = await fetch(`${apiUrl}/auth/signup`, {
+      const response = await fetch(`${API_URL}/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

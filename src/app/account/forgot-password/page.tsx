@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { motion } from "framer-motion";
+import { API_URL } from "@/lib/api";
 
 const schema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
@@ -22,8 +23,7 @@ export default function ForgotPasswordPage() {
 
   const onSubmit = async (data: FormData) => {
     try {
-      const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
-      const response = await fetch(`${apiUrl}/auth/password/forgot`, {
+      const response = await fetch(`${API_URL}/auth/password/forgot`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
