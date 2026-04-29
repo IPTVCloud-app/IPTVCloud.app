@@ -2,10 +2,10 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, notFound } from "next/navigation";
-import { YouTubePlayer } from "@/components/player/YouTubePlayer";
-import { ChannelSlider } from "@/components/ChannelSlider";
-import { Star, Share2, AlertCircle, Info, ThumbsUp, PlusCircle } from "lucide-react";
+import { StreamPlayer } from "@/components/player/StreamPlayer";
+import { Star, Share2, PlusCircle, MessageSquare, Shield, History, ThumbsUp, Activity } from "lucide-react";
 import toast from "react-hot-toast";
+import Link from "next/link";
 
 const SHIMMER_CLASS = "relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent";
 
@@ -16,8 +16,10 @@ function WatchPlayer() {
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [channelInfo, setChannelInfo] = useState<any>(null);
+  const [wikiDescription, setWikiDescription] = useState<string | null>(null);
   const [recommendations, setRecommendations] = useState<any[]>([]);
   const [isTheaterMode, setIsTheaterMode] = useState(false);
+  const [activeTab, setActiveTab] = useState<"recommended" | "related" | "recent">("recommended");
 
   // Load Channel Metadata and Recommendations
   useEffect(() => {
@@ -35,8 +37,21 @@ function WatchPlayer() {
           if (channel) {
              setChannelInfo(channel);
              
+             // Fetch Wikipedia summary
+             try {
+                const wikiRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(channel.name)}`);
+                if (wikiRes.ok) {
+                    const wikiData = await wikiRes.json();
+                    if (wikiData.extract) {
+                        setWikiDescription(wikiData.extract);
+                    }
+                }
+             } catch (e) {
+                // Ignore wiki errors
+             }
+
              // Fetch recommendations based on category or country
-             const recRes = await fetch(`${apiUrl}/api/channels?limit=15&category=${channel.category || ''}`);
+             const recRes = await fetch(`${apiUrl}/api/channels?limit=25&category=${channel.category || ''}`);
              if (recRes.ok) {
                const recData = await recRes.json();
                setRecommendations(recData.filter((c: any) => c.id !== id));
@@ -55,28 +70,41 @@ function WatchPlayer() {
   if (!id) return <div className="p-12 text-center text-secondary">No channel ID provided.</div>;
 
   return (
-    <div className={`min-h-screen bg-page text-primary ${isTheaterMode ? 'pt-0' : 'p-4 md:p-8 lg:p-6'}`}>
-      <div className={`mx-auto ${isTheaterMode ? 'max-w-full' : 'max-w-[1600px]'}`}>
+    <div className={`min-h-screen bg-page text-primary ${isTheaterMode ? 'pt-0' : 'p-4 md:p-6 lg:p-8'}`}>
+      <div className={`mx-auto ${isTheaterMode ? 'w-full' : 'max-w-[1600px]'}`}>
         
-        {/* Responsive Layout wrapper */}
-        <div className={`flex flex-col ${isTheaterMode ? '' : 'lg:flex-row'} gap-6`}>
+        {/* Theater Mode Top Player */}
+        {isTheaterMode && (
+          <div className="w-full bg-black flex justify-center mb-6">
+             <div className="w-full max-w-screen-2xl">
+               <StreamPlayer 
+                  channelId={id} 
+                  isTheaterMode={isTheaterMode}
+                  onToggleTheater={() => setIsTheaterMode(!isTheaterMode)}
+               />
+             </div>
+          </div>
+        )}
+
+        {/* Layout wrapper */}
+        <div className={`flex flex-col lg:flex-row gap-6 ${isTheaterMode ? 'max-w-7xl mx-auto px-4' : ''}`}>
           
-          {/* Main Content (Player + Info) */}
-          <div className={`w-full ${isTheaterMode ? 'lg:w-full' : 'lg:w-[70%] xl:w-[75%]'}`}>
+          {/* Main Content (Player/Info) */}
+          <div className={`w-full ${isTheaterMode ? 'lg:w-[65%]' : 'lg:w-[70%] xl:w-[75%]'}`}>
             
-            {/* Player Container (Sticky on mobile) */}
-            <div className={`w-full sticky top-0 z-50 bg-page ${isTheaterMode ? 'bg-black' : ''}`}>
-              <div className={`${isTheaterMode ? 'max-w-7xl mx-auto' : ''}`}>
-                 <YouTubePlayer 
+            {/* Default Mode Player */}
+            {!isTheaterMode && (
+               <div className="w-full mb-4">
+                 <StreamPlayer 
                     channelId={id} 
                     isTheaterMode={isTheaterMode}
                     onToggleTheater={() => setIsTheaterMode(!isTheaterMode)}
                  />
-              </div>
-            </div>
+               </div>
+            )}
 
             {/* Info Section */}
-            <div className={`mt-4 ${isTheaterMode ? 'max-w-7xl mx-auto px-4' : ''}`}>
+            <div className="w-full">
               {loading ? (
                 <div className="space-y-4">
                   <div className={`h-8 w-1/2 bg-elevated rounded ${SHIMMER_CLASS}`} />
@@ -112,18 +140,23 @@ function WatchPlayer() {
                         <span className="text-xs text-secondary">{channelInfo?.country || "International"} • 1.2K watching</span>
                       </div>
 
-                      <button className="ml-4 px-4 py-2 bg-primary text-page rounded-full text-sm font-bold hover:bg-white/90 transition-colors">
-                        Subscribe
+                      <button className="ml-4 px-5 py-2 bg-primary text-page rounded-full text-sm font-bold hover:bg-white/90 transition-colors shrink-0">
+                        Follow
                       </button>
                     </div>
 
                     {/* Right: Actions */}
                     <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
-                      <div className="flex items-center bg-surface border border-border rounded-full">
-                        <button className="flex items-center gap-2 px-4 py-2 hover:bg-white/5 transition-colors rounded-l-full border-r border-border">
-                          <ThumbsUp className="w-4 h-4" /> <span className="text-sm font-medium">124</span>
-                        </button>
-                      </div>
+                      
+                      <button 
+                        onClick={() => {
+                          setIsFavorite(!isFavorite);
+                          toast.success(isFavorite ? "Removed from Favorites" : "Added to Favorites");
+                        }}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-full transition-colors whitespace-nowrap border ${isFavorite ? 'bg-brand/10 border-brand text-brand' : 'bg-surface border-border hover:bg-white/5'}`}
+                      >
+                        <Star className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} /> <span className="text-sm font-medium">Favorite</span>
+                      </button>
 
                       <button 
                         onClick={() => {
@@ -136,71 +169,95 @@ function WatchPlayer() {
                       </button>
 
                       <button 
-                        onClick={() => toast.success("Feature coming soon!")}
+                        onClick={() => toast.success("Select a playlist to add to.")}
                         className="flex items-center gap-2 px-4 py-2 bg-surface border border-border rounded-full hover:bg-white/5 transition-colors whitespace-nowrap"
                       >
-                        <PlusCircle className="w-4 h-4" /> <span className="text-sm font-medium">Save</span>
+                        <PlusCircle className="w-4 h-4" /> <span className="text-sm font-medium">Add to Playlist</span>
                       </button>
                     </div>
                   </div>
 
                   {/* Description Box */}
                   <div className="bg-surface border border-border rounded-xl p-4 text-sm mt-4 hover:bg-white/5 transition-colors cursor-pointer">
-                    <div className="font-bold mb-1">
-                      {channelInfo?.category || "General"} Category
+                    <div className="font-bold mb-2 flex items-center gap-2">
+                       {channelInfo?.category || "General"} Category
                     </div>
-                    <p className="text-secondary line-clamp-2">
-                      Live stream of {channelInfo?.name}. Available natively through HLS parsing and custom HTML5 video.
+                    <p className="text-secondary leading-relaxed">
+                      {wikiDescription || `Live broadcast of ${channelInfo?.name}. Available natively through HLS parsing and custom HTML5 video.`}
                     </p>
                   </div>
                 </>
               )}
+
+              {/* Theater Mode: Show Live Chat below description on Desktop */}
+              {isTheaterMode && (
+                <div className="hidden lg:block mt-6">
+                   <LiveChatComponent />
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Right Column (Recommendations list) */}
-          <div className={`w-full ${isTheaterMode ? 'max-w-7xl mx-auto mt-6' : 'lg:w-[30%] xl:w-[25%]'} flex flex-col gap-4 px-4 lg:px-0`}>
-            {loading ? (
-              Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="flex gap-3 h-[90px]">
-                  <div className={`w-40 shrink-0 bg-elevated rounded-lg ${SHIMMER_CLASS}`} />
-                  <div className="flex flex-col gap-2 flex-1 py-1">
-                     <div className={`h-4 w-full bg-elevated rounded ${SHIMMER_CLASS}`} />
-                     <div className={`h-3 w-1/2 bg-elevated rounded ${SHIMMER_CLASS}`} />
-                  </div>
+          {/* Right Column */}
+          <div className={`w-full ${isTheaterMode ? 'lg:w-[35%]' : 'lg:w-[30%] xl:w-[25%]'} flex flex-col gap-6`}>
+            
+            {/* Live Chat (Default Mode or Mobile) */}
+            <div className={`${isTheaterMode ? 'lg:hidden' : 'block'}`}>
+               <LiveChatComponent />
+            </div>
+
+            {/* Recommendations */}
+            <div className="flex flex-col">
+              {/* Tabs */}
+              <div className="flex items-center gap-2 mb-4 overflow-x-auto no-scrollbar pb-2">
+                 <button onClick={() => setActiveTab("recommended")} className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${activeTab === "recommended" ? 'bg-primary text-page' : 'bg-surface border border-border text-secondary hover:bg-white/5'}`}>All</button>
+                 <button onClick={() => setActiveTab("related")} className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${activeTab === "related" ? 'bg-primary text-page' : 'bg-surface border border-border text-secondary hover:bg-white/5'}`}>Related</button>
+                 <button onClick={() => setActiveTab("recent")} className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${activeTab === "recent" ? 'bg-primary text-page' : 'bg-surface border border-border text-secondary hover:bg-white/5'}`}>Recently Watched</button>
+              </div>
+
+              {loading ? (
+                <div className="flex flex-col gap-3">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className="flex gap-3 h-[90px]">
+                      <div className={`w-40 shrink-0 bg-elevated rounded-lg ${SHIMMER_CLASS}`} />
+                      <div className="flex flex-col gap-2 flex-1 py-1">
+                         <div className={`h-4 w-full bg-elevated rounded ${SHIMMER_CLASS}`} />
+                         <div className={`h-3 w-1/2 bg-elevated rounded ${SHIMMER_CLASS}`} />
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))
-            ) : (
-              <>
-                {isTheaterMode && <h3 className="font-bold text-lg mb-2">Up Next</h3>}
-                <div className={`${isTheaterMode ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4' : 'flex flex-col gap-3'}`}>
-                  {recommendations.slice(0, isTheaterMode ? 12 : 15).map((rec: any, idx) => (
-                    <a key={idx} href={`/channels/watch?id=${rec.id}`} className="flex gap-3 group">
-                      <div className={`${isTheaterMode ? 'w-full' : 'w-40'} shrink-0 relative aspect-video bg-elevated rounded-lg overflow-hidden`}>
+              ) : (
+                <div className="flex flex-col gap-3 max-h-[800px] overflow-y-auto pr-2 custom-scrollbar">
+                  {recommendations.slice(0, 20).map((rec: any, idx) => (
+                    <Link key={idx} href={`/channels/watch?id=${rec.id}`} className="flex gap-3 group">
+                      <div className="w-40 shrink-0 relative aspect-video bg-elevated rounded-lg overflow-hidden border border-border group-hover:border-brand/50 transition-colors">
                          <img src={rec.logo || '/brand.png'} alt="" className="w-full h-full object-cover" />
-                         <div className="absolute bottom-1 right-1 bg-black/80 px-1 py-0.5 rounded text-[10px] font-bold">LIVE</div>
+                         <div className="absolute bottom-1 right-1 bg-black/80 px-1 py-0.5 rounded text-[10px] font-bold text-white flex items-center gap-1">
+                           <Activity className="w-2.5 h-2.5 text-red-500" /> LIVE
+                         </div>
                       </div>
                       <div className="flex flex-col py-0.5 flex-1 min-w-0">
-                         <span className="font-medium text-sm leading-tight text-primary group-hover:text-brand transition-colors line-clamp-2">
+                         <span className="font-bold text-sm leading-tight text-primary group-hover:text-brand transition-colors line-clamp-2">
                            {rec.name}
                          </span>
                          <span className="text-xs text-secondary mt-1">{rec.category || 'General'}</span>
                          <span className="text-xs text-tertiary">{rec.country || 'International'}</span>
                       </div>
-                    </a>
+                    </Link>
                   ))}
+                  
+                  {recommendations.length > 0 && (
+                     <div className="py-4 text-center">
+                        <div className="inline-block w-6 h-6 border-2 border-brand/20 border-t-brand rounded-full animate-spin"></div>
+                     </div>
+                  )}
                 </div>
-              </>
-            )}
+              )}
+            </div>
+
           </div>
         </div>
-
-        {/* Sliding Categories (Bottom) */}
-        {!isTheaterMode && recommendations.length > 0 && (
-           <div className="mt-8 px-4 lg:px-0 border-t border-border/50 pt-8">
-             <ChannelSlider title="Similar to this channel" channels={recommendations} />
-           </div>
-        )}
       </div>
 
       <style jsx global>{`
@@ -214,7 +271,63 @@ function WatchPlayer() {
           -ms-overflow-style: none;
           scrollbar-width: none;
         }
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.2);
+        }
       `}</style>
+    </div>
+  );
+}
+
+function LiveChatComponent() {
+  return (
+    <div className="bg-surface border border-border rounded-xl flex flex-col h-[500px]">
+      <div className="p-3 border-b border-border flex items-center justify-between bg-page/50 rounded-t-xl">
+        <div className="flex items-center gap-2 font-bold text-sm text-primary">
+          <MessageSquare className="w-4 h-4" /> Live Chat
+        </div>
+        <div className="flex items-center gap-1.5 text-xs text-secondary font-medium">
+          <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div> 1,240
+        </div>
+      </div>
+      
+      {/* Mock Chat Messages */}
+      <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-3 custom-scrollbar">
+         {[
+           { u: "User123", m: "Hello everyone!" },
+           { u: "IPTVFan", m: "Is this stream stable for you guys?" },
+           { u: "MovieBuff", m: "Yes, working perfectly here in 1080p." },
+           { u: "SportsGuy", m: "Great quality." },
+           { u: "NewViewer", m: "How do I turn on captions?" },
+         ].map((msg, i) => (
+            <div key={i} className="text-sm">
+               <span className="font-bold text-tertiary mr-2">{msg.u}</span>
+               <span className="text-primary">{msg.m}</span>
+            </div>
+         ))}
+      </div>
+
+      {/* Chat Input Placeholder */}
+      <div className="p-3 border-t border-border bg-page/30">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-brand/20 flex items-center justify-center shrink-0">
+             <Shield className="w-4 h-4 text-brand" />
+          </div>
+          <div className="flex-1">
+             <input type="text" placeholder="Chat..." className="w-full bg-surface border border-border rounded-full px-4 py-1.5 text-sm focus:outline-none focus:border-brand/50 transition-colors" />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
