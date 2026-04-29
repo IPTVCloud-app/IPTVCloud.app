@@ -64,7 +64,7 @@ function SignInForm() {
       }
 
       if (!response.ok) {
-        throw new Error(result.error || "Invalid credentials");
+        throw new Error(result.error || result.message || "Invalid credentials");
       }
 
       setEmail(data.email);
@@ -96,7 +96,7 @@ function SignInForm() {
       }
 
       if (!response.ok) {
-        throw new Error(result.error || "Invalid or expired code");
+        throw new Error(result.error || result.message || "Invalid or expired code");
       }
 
       localStorage.setItem("token", result.token);
@@ -128,7 +128,7 @@ function SignInForm() {
 
       if (!response.ok) {
         const result = await response.json();
-        throw new Error(result.error || "Failed to resend code");
+        throw new Error(result.error || result.message || "Failed to resend code");
       }
 
       toast.success("New code sent!");
@@ -139,7 +139,7 @@ function SignInForm() {
   };
 
   return (
-    <div className="bg-surface border border-border rounded-xl p-8 linear-shadow-card overflow-hidden">
+    <div className="bg-surface border border-border rounded-xl p-8 linear-shadow-card overflow-hidden relative z-10">
       <AnimatePresence mode="wait">
         {step === "credentials" ? (
           <motion.div
@@ -173,7 +173,6 @@ function SignInForm() {
                   placeholder="name@example.com"
                   className={`w-full bg-[rgba(255,255,255,0.02)] text-primary border ${signinErrors.email ? 'border-[#e5484d]' : 'border-input focus:border-accent'} px-3.5 py-2.5 rounded-md text-sm outline-none transition-all focus:ring-2 focus:ring-[rgba(113,112,255,0.1)]`}
                 />
-                {signinErrors.email && <p className="text-[11px] text-[#e5484d] mt-1">{signinErrors.email.message}</p>}
               </div>
 
               <div className="space-y-1.5">
@@ -187,7 +186,6 @@ function SignInForm() {
                   placeholder="••••••••"
                   className={`w-full bg-[rgba(255,255,255,0.02)] text-primary border ${signinErrors.password ? 'border-[#e5484d]' : 'border-input focus:border-accent'} px-3.5 py-2.5 rounded-md text-sm outline-none transition-all focus:ring-2 focus:ring-[rgba(113,112,255,0.1)]`}
                 />
-                {signinErrors.password && <p className="text-[11px] text-[#e5484d] mt-1">{signinErrors.password.message}</p>}
               </div>
 
               <button 
@@ -202,9 +200,6 @@ function SignInForm() {
             <div className="mt-6 space-y-4">
               <div className="text-center text-sm text-tertiary">
                 Don&apos;t have an account? <Link href="/account/signup" className="text-accent hover:text-primary transition-colors font-medium">Sign up</Link>
-              </div>
-              <div className="text-center">
-                <Link href="/account/find-account" className="text-xs text-quaternary hover:text-secondary transition-colors">Can&apos;t remember your email?</Link>
               </div>
             </div>
           </motion.div>
@@ -231,7 +226,6 @@ function SignInForm() {
                   className={`w-full bg-[rgba(255,255,255,0.02)] text-primary border ${otpErrors.code ? 'border-[#e5484d]' : 'border-input focus:border-accent'} px-3.5 py-4 rounded-md text-2xl font-mono tracking-[0.5em] text-center outline-none transition-all focus:ring-2 focus:ring-[rgba(113,112,255,0.1)]`}
                   autoFocus
                 />
-                {otpErrors.code && <p className="text-[11px] text-[#e5484d] mt-1">{otpErrors.code.message}</p>}
               </div>
 
               <div className="space-y-3">
@@ -275,17 +269,7 @@ function SignInForm() {
 
 export default function SignInPage() {
   return (
-    <Suspense fallback={
-      <div className="bg-surface border border-border rounded-xl p-8 linear-shadow-card animate-pulse">
-        <div className="h-8 w-48 bg-[rgba(255,255,255,0.05)] rounded mx-auto mb-4" />
-        <div className="h-4 w-64 bg-[rgba(255,255,255,0.05)] rounded mx-auto mb-8" />
-        <div className="space-y-4">
-          <div className="h-10 bg-[rgba(255,255,255,0.05)] rounded w-full" />
-          <div className="h-10 bg-[rgba(255,255,255,0.05)] rounded w-full" />
-          <div className="h-10 bg-brand/20 rounded w-full mt-4" />
-        </div>
-      </div>
-    }>
+    <Suspense fallback={<div className="h-96 animate-pulse bg-surface border border-border rounded-xl" />}>
       <SignInForm />
     </Suspense>
   );

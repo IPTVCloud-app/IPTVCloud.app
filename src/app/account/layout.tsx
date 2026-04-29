@@ -33,6 +33,18 @@ export default function AccountLayout({
   if (isAuthPage) {
     return (
       <div className="min-h-[calc(100vh-64px)] flex flex-col items-center justify-center bg-page p-4 relative overflow-hidden">
+        {/* Interactive Background Effects */}
+        <div className="fixed inset-0 pointer-events-none z-0">
+          <NodeNetwork />
+          <motion.div 
+            className="absolute inset-0"
+            animate={{ x: mouse.x * -0.5, y: mouse.y * -0.5 }}
+            transition={{ type: "spring", stiffness: 50, damping: 20 }}
+          >
+            <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+          </motion.div>
+        </div>
+
         {/* Improved Spotlight Cursor Effect */}
         <motion.div
           className="fixed inset-0 z-10 pointer-events-none"
@@ -43,29 +55,6 @@ export default function AccountLayout({
             ].join(', ')
           }}
         />
-
-        {/* Grain / Noise Overlay */}
-        <div className="fixed inset-0 z-50 pointer-events-none opacity-[0.03] mix-blend-overlay">
-          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-            <filter id="noiseFilter">
-              <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
-            </filter>
-            <rect width="100%" height="100%" filter="url(#noiseFilter)" />
-          </svg>
-        </div>
-
-        {/* Interactive Node Network Background */}
-        <NodeNetwork />
-
-        {/* Global Interactive Dot Matrix Background */}
-        <motion.div 
-          className="fixed inset-0 z-0 pointer-events-none"
-          animate={{ x: mouse.x * -0.5, y: mouse.y * -0.5 }}
-          transition={{ type: "spring", stiffness: 50, damping: 20 }}
-        >
-          <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
-          <div className="absolute inset-0 bg-page [mask-image:radial-gradient(ellipse_80%_80%_at_50%_50%,transparent_0%,#000_100%)] opacity-60"></div>
-        </motion.div>
 
         <div className="w-full max-w-md relative z-20">
           <div className="flex justify-center mb-8">

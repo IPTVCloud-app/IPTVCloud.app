@@ -50,6 +50,8 @@ export default function SignUpPage() {
   const onSubmit = async (data: FormData) => {
     try {
       setAuthError(null);
+      
+      // Fixing the API URL - ensure it uses the full path
       const response = await fetch(`${API_URL}/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -73,7 +75,7 @@ export default function SignUpPage() {
       }
 
       if (!response.ok) {
-        throw new Error(result.error || "Failed to create account");
+        throw new Error(result.error || result.message || "Failed to create account");
       }
 
       toast.success("Account created! Please sign in.");
@@ -86,7 +88,6 @@ export default function SignUpPage() {
   };
 
   const onError = (errors: any) => {
-    // Toast the first validation error found
     const firstError = Object.values(errors)[0] as any;
     if (firstError?.message) {
       toast.error(firstError.message);
@@ -94,7 +95,7 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="bg-surface border border-border rounded-xl p-8 linear-shadow-card">
+    <div className="bg-surface border border-border rounded-xl p-8 linear-shadow-card relative z-10">
       <div className="text-center mb-8">
         <h1 className="text-2xl font-medium tracking-[-0.288px] text-primary mb-2 text-display">Create an account</h1>
         <p className="text-sm text-tertiary text-body">Start streaming with IPTVCloud today</p>
@@ -107,7 +108,6 @@ export default function SignUpPage() {
       )}
 
       <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-4">
-        {/* Name Fields Row 1 */}
         <div className="grid grid-cols-12 gap-3">
           <div className="col-span-8 space-y-1.5">
             <label className="block text-xs font-medium text-secondary tracking-tight">First Name *</label>
@@ -117,7 +117,6 @@ export default function SignUpPage() {
               placeholder="John"
               className={`w-full bg-[rgba(255,255,255,0.02)] text-primary border ${errors.firstName ? 'border-[#e5484d] focus:border-[#e5484d]' : 'border-input focus:border-accent'} px-3.5 py-2 rounded-md text-sm outline-none transition-all focus:ring-2 focus:ring-[rgba(113,112,255,0.1)]`}
             />
-            {errors.firstName && <p className="text-[10px] text-[#e5484d]">{errors.firstName.message}</p>}
           </div>
           <div className="col-span-4 space-y-1.5">
             <label className="block text-xs font-medium text-secondary tracking-tight">M.I.</label>
@@ -131,7 +130,6 @@ export default function SignUpPage() {
           </div>
         </div>
 
-        {/* Name Fields Row 2 */}
         <div className="grid grid-cols-12 gap-3">
           <div className="col-span-8 space-y-1.5">
             <label className="block text-xs font-medium text-secondary tracking-tight">Last Name</label>
@@ -167,7 +165,6 @@ export default function SignUpPage() {
             placeholder="johndoe88"
             className={`w-full bg-[rgba(255,255,255,0.02)] text-primary border ${errors.username ? 'border-[#e5484d] focus:border-[#e5484d]' : 'border-input focus:border-accent'} px-3.5 py-2 rounded-md text-sm outline-none transition-all focus:ring-2 focus:ring-[rgba(113,112,255,0.1)]`}
           />
-          {errors.username && <p className="text-[10px] text-[#e5484d]">{errors.username.message}</p>}
         </div>
 
         <div className="space-y-1.5">
@@ -178,7 +175,15 @@ export default function SignUpPage() {
             placeholder="name@example.com"
             className={`w-full bg-[rgba(255,255,255,0.02)] text-primary border ${errors.email ? 'border-[#e5484d] focus:border-[#e5484d]' : 'border-input focus:border-accent'} px-3.5 py-2 rounded-md text-sm outline-none transition-all focus:ring-2 focus:ring-[rgba(113,112,255,0.1)]`}
           />
-          {errors.email && <p className="text-[10px] text-[#e5484d]">{errors.email.message}</p>}
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="block text-xs font-medium text-secondary tracking-tight">Birthday *</label>
+          <input 
+            type="date" 
+            {...register("birthday")}
+            className={`w-full bg-[rgba(255,255,255,0.02)] text-primary border ${errors.birthday ? 'border-[#e5484d] focus:border-[#e5484d]' : 'border-input focus:border-accent'} px-3.5 py-2 rounded-md text-sm outline-none transition-all focus:ring-2 focus:ring-[rgba(113,112,255,0.1)]`}
+          />
         </div>
 
         <div className="space-y-1.5">
@@ -189,7 +194,6 @@ export default function SignUpPage() {
             placeholder="••••••••"
             className={`w-full bg-[rgba(255,255,255,0.02)] text-primary border ${errors.password ? 'border-[#e5484d] focus:border-[#e5484d]' : 'border-input focus:border-accent'} px-3.5 py-2 rounded-md text-sm outline-none transition-all focus:ring-2 focus:ring-[rgba(113,112,255,0.1)]`}
           />
-          {errors.password && <p className="text-[10px] text-[#e5484d]">{errors.password.message}</p>}
           <PasswordStrengthBar password={passwordValue} />
         </div>
 
@@ -201,7 +205,6 @@ export default function SignUpPage() {
             placeholder="••••••••"
             className={`w-full bg-[rgba(255,255,255,0.02)] text-primary border ${errors.confirmPassword ? 'border-[#e5484d] focus:border-[#e5484d]' : 'border-input focus:border-accent'} px-3.5 py-2 rounded-md text-sm outline-none transition-all focus:ring-2 focus:ring-[rgba(113,112,255,0.1)]`}
           />
-          {errors.confirmPassword && <p className="text-[10px] text-[#e5484d]">{errors.confirmPassword.message}</p>}
         </div>
 
         <button 

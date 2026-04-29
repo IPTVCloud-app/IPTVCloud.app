@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
-import { Send, Mail, MapPin, Phone, Globe, Shield, Zap } from "lucide-react";
+import { Twitter, Github, MessageSquare, Send, Mail, MapPin, Phone, Globe, Shield, Zap } from "lucide-react";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -38,14 +38,14 @@ export function Footer() {
   ];
 
   const socialLinks = [
-    { icon: <Send className="w-5 h-5" />, name: "Twitter" },
-    { icon: <Globe className="w-5 h-5" />, name: "Global" },
-    { icon: <Shield className="w-5 h-5" />, name: "Secure" },
-    { icon: <Zap className="w-5 h-5" />, name: "Fast" },
+    { icon: <Twitter className="w-5 h-5" />, name: "Twitter", href: "https://twitter.com/iptvcloud" },
+    { icon: <Github className="w-5 h-5" />, name: "GitHub", href: "https://github.com/iptvcloud" },
+    { icon: <MessageSquare className="w-5 h-5" />, name: "Discord", href: "https://discord.gg/iptvcloud" },
+    { icon: <Send className="w-5 h-5" />, name: "Telegram", href: "https://t.me/iptvcloud" },
   ];
 
   return (
-    <footer className="bg-page border-t border-border/50 pt-20 pb-10 px-6">
+    <footer className="bg-page border-t border-border/50 pt-20 pb-10 px-6 relative z-10">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
           
@@ -58,12 +58,16 @@ export function Footer() {
             </p>
             <div className="flex items-center gap-4">
               {socialLinks.map((social, i) => (
-                <div 
+                <a 
                   key={i} 
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="w-10 h-10 rounded-full bg-surface border border-border flex items-center justify-center text-secondary hover:text-brand hover:border-brand/50 transition-all cursor-pointer"
+                  title={social.name}
                 >
                   {social.icon}
-                </div>
+                </a>
               ))}
             </div>
           </div>
