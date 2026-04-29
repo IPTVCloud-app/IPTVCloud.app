@@ -23,12 +23,12 @@ export default function CredentialsSettingsPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to request OTP");
       toast.success(data.message);
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "An unknown error occurred");
     }
   };
 
-  const handleUpdate = async (type: 'password' | 'email' | 'username', bodyData: any) => {
+  const handleUpdate = async (type: 'password' | 'email' | 'username', bodyData: Record<string, string>) => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
@@ -49,8 +49,8 @@ export default function CredentialsSettingsPage() {
       setPasswordForm({ current: "", new: "", authCode: "" });
       setEmailForm({ newEmail: "", authCode: "" });
       setUsernameForm({ newUsername: "", authCode: "" });
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "An unknown error occurred");
     } finally {
       setLoading(false);
     }

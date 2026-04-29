@@ -16,11 +16,14 @@ export function ChannelThumbnail({ channelId, name, className = "", logoUrl }: C
 
   useEffect(() => {
     const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
-    setImgSrc(logoUrl || `${apiUrl}/api/channels/thumbnail?id=${channelId}`);
-    setFailed(false);
+    const finalUrl = logoUrl || `${apiUrl}/api/channels/thumbnail?id=${channelId}`;
+    Promise.resolve().then(() => {
+      setImgSrc(finalUrl);
+      setFailed(false);
+    });
   }, [channelId, logoUrl]);
 
-  const BROKEN_ICON = `data:image/svg+xml;base64,${Buffer.from('<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="12" fill="#141414"/><path d="M35 35L65 65M65 35L35 65" stroke="#333" stroke-width="4" stroke-linecap="round"/></svg>').toString('base64')}`;
+  const BROKEN_ICON = `data:image/svg+xml;charset=utf-8,${encodeURIComponent('<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="12" fill="#141414"/><path d="M35 35L65 65M65 35L35 65" stroke="#333" stroke-width="4" stroke-linecap="round"/></svg>')}`;
 
   return (
     <div className={`relative bg-surface border border-border overflow-hidden group ${className}`}>

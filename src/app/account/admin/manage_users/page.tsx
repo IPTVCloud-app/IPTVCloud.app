@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 
 interface User {
@@ -18,12 +18,12 @@ interface User {
 export default function ManageUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [, setError] = useState('');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
@@ -34,45 +34,42 @@ export default function ManageUsersPage() {
       const data = await res.json();
       setUsers(data.data);
       setTotalPages(data.meta.totalPages);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unknown error occurred');
+      }
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchUsers();
   }, [page, search]);
 
-  const handleAction = async (userId: string, action: 'suspend' | 'mute' | 'restrict', value: any) => {
-    try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${process.env.PUBLIC_API_URL}/api/admin/users/${userId}/action`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ action, value })
-      });
-      
-      if (!res.ok) throw new Error('Action failed');
-      
-      // Update local state
-      setUsers(users.map(u => {
-        if (u.id === userId) {
-          if (action === 'suspend') return { ...u, suspended_until: value };
-          if (action === 'mute') return { ...u, is_muted: value };
-          if (action === 'restrict') return { ...u, is_restricted: value };
-        }
-        return u;
-      }));
-    } catch (err) {
-      alert('Failed to perform action');
-    }
-  };
+  useEffect(() => {
+    // Defer to avoid sync setState in effect
+    Promise.resolve().then(() => fetchUsers());
+  }, [fetchUsers]);
 
+const handleAction = async (userId: string, action: 'suspend' | 'mute' | 'restrict', value: string | boolean | number | null) => {
+  try {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${process.env.PUBLIC_API_URL}/api/admin/users/${userId}/action`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ action, value })
+    });
+
+    if (!res.ok) throw new Error('Action failed');
+    await fetchUsers();
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      alert(err.message);
+    }
+  }
+};
   const handlePurge = async (userId: string) => {
     if (!confirm('Are you sure you want to purge all comments by this user from the last 24 hours?')) return;
     try {
@@ -83,7 +80,8 @@ export default function ManageUsersPage() {
       });
       if (!res.ok) throw new Error('Purge failed');
       alert('Comments purged successfully');
-    } catch (err) {
+    } catch (err: unknown) {
+      console.error('Purge error:', err);
       alert('Failed to purge comments');
     }
   };

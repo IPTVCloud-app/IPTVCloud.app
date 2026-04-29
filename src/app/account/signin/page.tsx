@@ -59,7 +59,7 @@ function SignInForm() {
       let result;
       try {
         result = await response.json();
-      } catch (e) {
+      } catch {
         throw new Error("Server returned an invalid response");
       }
 
@@ -91,7 +91,7 @@ function SignInForm() {
       let result;
       try {
         result = await response.json();
-      } catch (e) {
+      } catch {
         throw new Error("Server returned an invalid response");
       }
 
@@ -110,8 +110,8 @@ function SignInForm() {
     }
   };
 
-  const onValidationError = (errors: any) => {
-    const firstError = Object.values(errors)[0] as any;
+  const onValidationError = (errors: Record<string, { message?: string }>) => {
+    const firstError = Object.values(errors)[0];
     if (firstError?.message) {
       toast.error(firstError.message);
     }

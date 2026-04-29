@@ -6,7 +6,7 @@ import {
   Menu, X, ChevronDown, Home, Compass, HelpCircle, 
   ShieldAlert, Book, FileText, Tv, CalendarDays, 
   LifeBuoy, Mail, Activity, History, ShieldCheck,
-  LogIn, UserPlus, ChevronRight
+  ChevronRight
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Logo } from "@/components/Logo";

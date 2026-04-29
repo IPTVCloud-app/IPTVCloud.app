@@ -1,19 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { ListVideo, Play, Plus, Trash2, Edit2 } from "lucide-react";
+import { ListVideo, Plus, Trash2, Edit2 } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
 
+interface Playlist {
+  id: string;
+  name: string;
+  description?: string;
+  created_at: string;
+  is_public: boolean;
+}
+
 export default function PlaylistsPage() {
   const { user, loading } = useAuth();
-  const [playlists, setPlaylists] = useState<any[]>([]);
+  const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [isFetching, setIsFetching] = useState(true);
 
-  const fetchPlaylists = async () => {
+  const fetchPlaylists = useCallback(async () => {
     if (!user) return;
     try {
+      await Promise.resolve(); // Defer to avoid cascading renders
       setIsFetching(true);
       const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
       const res = await fetch(`${apiUrl}/api/playlists`, {
@@ -24,17 +33,20 @@ export default function PlaylistsPage() {
         setPlaylists(data);
       }
     } catch (err) {
-      console.error(err);
+      console.error("Failed to fetch playlists:", err);
       toast.error("Failed to load playlists");
     } finally {
       setIsFetching(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
-    if (!loading && user) fetchPlaylists();
-    else if (!loading && !user) setIsFetching(false);
-  }, [user, loading]);
+    if (!loading && user) {
+      Promise.resolve().then(() => fetchPlaylists());
+    } else if (!loading && !user) {
+      Promise.resolve().then(() => setIsFetching(false));
+    }
+  }, [user, loading, fetchPlaylists]);
 
   const deletePlaylist = async (id: string) => {
     if (!confirm("Are you sure you want to delete this playlist?")) return;
@@ -51,6 +63,7 @@ export default function PlaylistsPage() {
         toast.error("Failed to delete");
       }
     } catch (err) {
+      console.error(err);
       toast.error("Error deleting playlist");
     }
   };

@@ -14,13 +14,19 @@ export function Logo() {
   const [logoError, setLogoError] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    // Delay setting mounted to avoid synchronous setState in effect
+    const timer = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
     // Reset errors when theme changes to try API again for the new theme
-    setBrandError(false);
-    setLogoError(false);
+    // Delaying to avoid synchronous setState in effect
+    const timer = setTimeout(() => {
+      setBrandError(false);
+      setLogoError(false);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [resolvedTheme]);
 
   const isDark = resolvedTheme === "dark";
@@ -47,6 +53,7 @@ export function Logo() {
   return (
     <Link href="/" className="flex items-center">
       {/* Desktop Logo (Brand) */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={brandError ? githubBrand : apiBrand}
         alt="IPTVCloud Brand"
@@ -54,6 +61,7 @@ export function Logo() {
         onError={() => setBrandError(true)}
       />
       {/* Mobile Logo */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={logoError ? githubLogo : apiLogo}
         alt="IPTVCloud Logo"

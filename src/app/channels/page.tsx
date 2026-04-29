@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { Search, Filter, Globe, Monitor, Radio, LayoutGrid, List, X, Languages, MapPin, Check } from "lucide-react";
+import { Search, Filter, Globe, Radio, X, Languages, MapPin } from "lucide-react";
 import { ChannelThumbnail } from "@/components/ChannelThumbnail";
 import { useInView } from "react-intersection-observer";
 import { motion, AnimatePresence } from "framer-motion";
@@ -40,7 +40,7 @@ export default function ChannelsExplorerPage() {
   const [countries, setCountries] = useState<MetadataItem[]>([]);
   
   const [showFilters, setShowFilters] = useState(false);
-  const [page, setPage] = useState(0);
+  const [_page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   
   const { ref, inView } = useInView({ threshold: 0 });
@@ -59,23 +59,25 @@ export default function ChannelsExplorerPage() {
 
         if (catRes.ok) {
           const data = await catRes.json();
-          setCategories([{ code: "All", name: "All" }, ...data.map((c: any) => ({ code: c.id, name: c.name })).sort((a: any, b: any) => a.name.localeCompare(b.name))]);
+          setCategories([{ code: "All", name: "All" }, ...data.map((c: { id: string; name: string }) => ({ code: c.id, name: c.name })).sort((a: MetadataItem, b: MetadataItem) => a.name.localeCompare(b.name))]);
         }
         if (langRes.ok) {
           const data = await langRes.json();
-          setLanguages(data.sort((a: any, b: any) => a.name.localeCompare(b.name)));
+          setLanguages(data.sort((a: MetadataItem, b: MetadataItem) => a.name.localeCompare(b.name)));
         }
         if (countRes.ok) {
           const data = await countRes.json();
-          setCountries(data.sort((a: any, b: any) => a.name.localeCompare(b.name)));
+          setCountries(data.sort((a: MetadataItem, b: MetadataItem) => a.name.localeCompare(b.name)));
         }
-      } catch (err) {}
+      } catch (err) {
+        console.error("Failed to fetch metadata", err);
+      }
     };
     fetchMetadata();
   }, []);
 
   // 2. Fetch Channels with pagination
-  const fetchChannels = async (pageNum: number, isInitial = false) => {
+  const fetchChannels = useCallback(async (pageNum: number, isInitial = false) => {
     if (pageNum > 0) setLoadingMore(true);
     else setLoading(true);
 
@@ -109,7 +111,7 @@ export default function ChannelsExplorerPage() {
       setLoading(false);
       setLoadingMore(false);
     }
-  };
+  }, [searchQuery, selectedCategory, selectedLanguage, selectedCountry]);
 
   // 3. Handle search/filter reset
   useEffect(() => {
@@ -118,16 +120,20 @@ export default function ChannelsExplorerPage() {
       fetchChannels(0, true);
     }, 500);
     return () => clearTimeout(timer);
-  }, [searchQuery, selectedCategory, selectedLanguage, selectedCountry]);
+  }, [fetchChannels]);
 
   // 4. Handle Infinite Scroll trigger
   useEffect(() => {
     if (inView && hasMore && !loading && !loadingMore) {
-      const nextPage = page + 1;
-      setPage(nextPage);
-      fetchChannels(nextPage);
+      Promise.resolve().then(() => {
+        setPage(prev => {
+          const nextPage = prev + 1;
+          fetchChannels(nextPage);
+          return nextPage;
+        });
+      });
     }
-  }, [inView]);
+  }, [inView, hasMore, loading, loadingMore, fetchChannels]);
 
   // 5. Close filters on outside click
   useEffect(() => {
@@ -354,7 +360,7 @@ export default function ChannelsExplorerPage() {
            )}
            {!hasMore && channels.length > 0 && (
              <div className="text-tertiary text-sm font-medium border-t border-border w-full pt-10 text-center">
-                You've reached the end of the global index.
+                You&apos;ve reached the end of the global index.
              </div>
            )}
         </div>

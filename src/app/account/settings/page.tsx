@@ -65,6 +65,7 @@ export default function PersonalSettingsPage() {
       
       toast.success("Settings saved successfully");
     } catch (error) {
+      console.error(error);
       toast.error("An error occurred while saving");
     } finally {
       setSaving(false);

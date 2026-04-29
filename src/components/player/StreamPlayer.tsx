@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import Hls from "hls.js";
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import Hls, { type Level, type ManifestParsedData, type ErrorData } from "hls.js";
 import { 
   Play, Pause, Volume2, VolumeX, Maximize, Minimize, Settings, 
   SkipForward, SkipBack, Subtitles, Moon, PictureInPicture, 
-  AlertCircle, Globe2
+  AlertCircle
 } from "lucide-react";
 import { AmbientBackground } from "./AmbientBackground";
 import { motion, AnimatePresence } from "framer-motion";
@@ -26,8 +26,9 @@ export function StreamPlayer({ channelId, onNext, onPrev, isTheaterMode, onToggl
   const [isPlaying, setIsPlaying] = useState(false);
   const [isBuffering, setIsBuffering] = useState(true);
   const [volume, setVolume] = useState(1);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isPip, setIsPip] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
@@ -39,7 +40,7 @@ export function StreamPlayer({ channelId, onNext, onPrev, isTheaterMode, onToggl
   // Settings state
   const [ambientMode, setAmbientMode] = useState(true);
   const [qualityLevel, setQualityLevel] = useState(-1); // -1 = auto
-  const [levels, setLevels] = useState<any[]>([]);
+  const [levels, setLevels] = useState<Level[]>([]);
   const [showCaptions, setShowCaptions] = useState(false);
   const [captionLang, setCaptionLang] = useState("English (Auto)");
   
@@ -64,8 +65,10 @@ export function StreamPlayer({ channelId, onNext, onPrev, isTheaterMode, onToggl
     const streamUrl = `${apiUrl}/api/channels/stream?id=${channelId}&hls=true`;
 
     const initHls = () => {
-      setIsBuffering(true);
-      setError(null);
+      Promise.resolve().then(() => {
+        setIsBuffering(true);
+        setError(null);
+      });
 
       if (hlsRef.current) {
         hlsRef.current.destroy();
@@ -82,16 +85,16 @@ export function StreamPlayer({ channelId, onNext, onPrev, isTheaterMode, onToggl
         hls.loadSource(streamUrl);
         hls.attachMedia(video);
 
-        hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
+        hls.on(Hls.Events.MANIFEST_PARSED, (_event: string, data: ManifestParsedData) => {
           setLevels(data.levels);
-          video.play().catch(e => {
+          video.play().catch(() => {
               setIsMuted(true);
               video.muted = true;
               video.play().catch(console.error);
           });
         });
 
-        hls.on(Hls.Events.ERROR, (event, data) => {
+        hls.on(Hls.Events.ERROR, (_event: string, data: ErrorData) => {
           if (data.fatal) {
             switch (data.type) {
               case Hls.ErrorTypes.NETWORK_ERROR:
@@ -116,7 +119,7 @@ export function StreamPlayer({ channelId, onNext, onPrev, isTheaterMode, onToggl
       } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
         video.src = streamUrl;
         video.addEventListener("loadedmetadata", () => {
-          video.play().catch(e => {
+          video.play().catch(() => {
               setIsMuted(true);
               video.muted = true;
               video.play();
@@ -183,20 +186,20 @@ export function StreamPlayer({ channelId, onNext, onPrev, isTheaterMode, onToggl
   }, []);
 
   // Controls visibility timeout
-  const resetControlsTimeout = () => {
+  const resetControlsTimeout = useCallback(() => {
     setShowControls(true);
     if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
     controlsTimeoutRef.current = setTimeout(() => {
       if (isPlaying && !showSettings) setShowControls(false);
     }, 3000);
-  };
+  }, [isPlaying, showSettings]);
 
   useEffect(() => {
-    resetControlsTimeout();
+    Promise.resolve().then(() => resetControlsTimeout());
     return () => {
       if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
     };
-  }, [isPlaying, showSettings]);
+  }, [resetControlsTimeout]);
 
   // Actions
   const togglePlay = () => {
@@ -452,7 +455,7 @@ export function StreamPlayer({ channelId, onNext, onPrev, isTheaterMode, onToggl
                 </div>
 
                 {/* PiP Mode */}
-                {/* @ts-ignore */}
+                {/* @ts-expect-error - Some browsers use webkit prefix */}
                 {(document.pictureInPictureEnabled || document.webkitPictureInPictureEnabled) && (
                   <button onClick={togglePiP} className="hover:opacity-80 transition-opacity" title="Picture in Picture">
                     <PictureInPicture className="w-5 h-5 md:w-6 md:h-6" />

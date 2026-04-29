@@ -39,7 +39,7 @@ export function AmbientBackground({ videoRef, isActive }: AmbientBackgroundProps
 
           try {
             ctx.drawImage(video, 0, 0, width, height);
-          } catch (e) {
+          } catch {
             // Ignore CrossOrigin errors if the stream isn't configured right
           }
           lastDrawTime = time;

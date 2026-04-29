@@ -6,10 +6,28 @@ import { StreamPlayer } from "@/components/player/StreamPlayer";
 import { Star, Share2, PlusCircle, MessageSquare, Shield, Activity, Send, UserCircle } from "lucide-react";
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { API_URL } from "@/lib/api";
-import { supabase } from "@/lib/supabase"; // Assuming this exists, if not I will need to create it
+import { supabase } from "@/lib/supabase";
 
 const SHIMMER_CLASS = "relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent";
+
+interface ChannelInfo {
+  id: string;
+  name: string;
+  logo: string;
+  category?: string;
+  country?: string;
+}
+
+interface Message {
+  id: string;
+  content: string;
+  user_id: string;
+  users: {
+    username: string;
+    avatar_url?: string;
+    is_verified?: boolean;
+  };
+}
 
 function WatchPlayer() {
   const searchParams = useSearchParams();
@@ -17,23 +35,31 @@ function WatchPlayer() {
   
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
-  const [channelInfo, setChannelInfo] = useState<any>(null);
+  const [channelInfo, setChannelInfo] = useState<ChannelInfo | null>(null);
   const [wikiDescription, setWikiDescription] = useState<string | null>(null);
-  const [recommendations, setRecommendations] = useState<any[]>([]);
+  const [recommendations, setRecommendations] = useState<ChannelInfo[]>([]);
   const [isTheaterMode, setIsTheaterMode] = useState(false);
   const [activeTab, setActiveTab] = useState<"recommended" | "related" | "recent">("recommended");
+  const [viewerCount, setViewerCount] = useState<number>(0);
 
   // Load Channel Metadata and Recommendations
   useEffect(() => {
     if (!id) return;
+    
+    // Set random viewer count once on mount/id change
+    Promise.resolve().then(() => {
+      setViewerCount(Math.floor(Math.random() * 5000) + 100);
+    });
+
     const fetchMeta = async () => {
       setLoading(true);
       try {
+        const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
         // Fetch current channel
-        const res = await fetch(`${API_URL}/api/channels?search=${id}`);
+        const res = await fetch(`${apiUrl}/api/channels?search=${id}`);
         if (res.ok) {
           const data = await res.json();
-          const channel = data.find((c: any) => c.id === id);
+          const channel = data.find((c: ChannelInfo) => c.id === id);
           if (channel) {
              setChannelInfo(channel);
              
@@ -46,13 +72,15 @@ function WatchPlayer() {
                         setWikiDescription(wikiData.extract);
                     }
                 }
-             } catch (e) {}
+             } catch (e) {
+                console.error("Wiki fetch error:", e);
+             }
 
              // Fetch recommendations
-             const recRes = await fetch(`${API_URL}/api/channels?limit=25&category=${channel.category || ''}`);
+             const recRes = await fetch(`${apiUrl}/api/channels?limit=25&category=${channel.category || ''}`);
              if (recRes.ok) {
                const recData = await recRes.json();
-               setRecommendations(recData.filter((c: any) => c.id !== id));
+               setRecommendations(recData.filter((c: ChannelInfo) => c.id !== id));
              }
           }
         }
@@ -118,6 +146,7 @@ function WatchPlayer() {
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-2 mb-4 border-b border-border/50">
                     <div className="flex items-center gap-4">
                       {channelInfo?.logo ? (
+                        // eslint-disable-next-line @next/next/no-img-element
                         <img src={channelInfo.logo} alt="" className="w-12 h-12 object-contain shrink-0 rounded-full bg-white/5 border border-border" />
                       ) : (
                         <div className="w-12 h-12 rounded-full bg-brand/10 border border-brand/20 flex items-center justify-center text-brand font-bold text-xl uppercase shrink-0">
@@ -127,7 +156,7 @@ function WatchPlayer() {
                       
                       <div className="flex flex-col">
                         <span className="font-bold text-primary text-base">{channelInfo?.name}</span>
-                        <span className="text-xs text-secondary">{channelInfo?.country || "International"} • {Math.floor(Math.random() * 5000) + 100} watching</span>
+                        <span className="text-xs text-secondary">{channelInfo?.country || "International"} • {viewerCount} watching</span>
                       </div>
 
                       <button className="ml-4 px-5 py-2 bg-primary text-page rounded-full text-sm font-bold hover:bg-white/90 transition-colors shrink-0">
@@ -211,9 +240,10 @@ function WatchPlayer() {
                 </div>
               ) : (
                 <div className="flex flex-col gap-3 max-h-[800px] overflow-y-auto pr-2 custom-scrollbar">
-                  {recommendations.slice(0, 20).map((rec: any, idx) => (
+                  {recommendations.slice(0, 20).map((rec: ChannelInfo, idx) => (
                     <Link key={idx} href={`/channels/watch?id=${rec.id}`} className="flex gap-3 group">
                       <div className="w-40 shrink-0 relative aspect-video bg-elevated rounded-lg overflow-hidden border border-border group-hover:border-brand/50 transition-colors">
+                         {/* eslint-disable-next-line @next/next/no-img-element */}
                          <img src={rec.logo || '/brand.png'} alt="" className="w-full h-full object-cover" />
                          <div className="absolute bottom-1 right-1 bg-black/80 px-1 py-0.5 rounded text-[10px] font-bold text-white flex items-center gap-1">
                            <Activity className="w-2.5 h-2.5 text-red-500" /> LIVE
@@ -266,7 +296,7 @@ function WatchPlayer() {
 }
 
 function LiveChatComponent({ channelId }: { channelId: string }) {
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -275,13 +305,14 @@ function LiveChatComponent({ channelId }: { channelId: string }) {
   useEffect(() => {
     const fetchComments = async () => {
         try {
-          const res = await fetch(`${API_URL}/api/comments/${channelId}`);
+          const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
+          const res = await fetch(`${apiUrl}/api/comments/${channelId}`);
           if (res.ok) {
             const data = await res.json();
             setMessages(data.comments.reverse());
           }
-        } catch (e) {
-          console.error("Chat error:", e);
+        } catch (err) {
+          console.error("Chat error:", err);
         }
     };
     fetchComments();
@@ -302,7 +333,19 @@ function LiveChatComponent({ channelId }: { channelId: string }) {
           .eq('id', payload.new.user_id)
           .single();
         
-        setMessages(prev => [...prev, { ...payload.new, users: user }]);
+        if (user) {
+          const newMessage: Message = {
+            id: payload.new.id,
+            content: payload.new.content,
+            user_id: payload.new.user_id,
+            users: {
+              username: user.username,
+              avatar_url: user.avatar_url || undefined,
+              is_verified: user.is_verified || false
+            }
+          };
+          setMessages(prev => [...prev, newMessage]);
+        }
       })
       .subscribe();
 
@@ -329,7 +372,8 @@ function LiveChatComponent({ channelId }: { channelId: string }) {
 
     setIsSending(true);
     try {
-        const res = await fetch(`${API_URL}/api/comments/scan`, {
+        const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
+        const res = await fetch(`${apiUrl}/api/comments/scan`, {
             method: "POST",
             headers: { 
                 "Content-Type": "application/json",
@@ -347,8 +391,9 @@ function LiveChatComponent({ channelId }: { channelId: string }) {
             const err = await res.json();
             toast.error(err.error || "Failed to send");
         }
-    } catch (e) {
+    } catch (err) {
         toast.error("Connection error");
+        console.error("Send message error:", err);
     } finally {
         setIsSending(false);
     }
@@ -373,6 +418,7 @@ function LiveChatComponent({ channelId }: { channelId: string }) {
             <div key={msg.id || i} className="text-sm group animate-in fade-in slide-in-from-bottom-2 duration-300">
                <div className="flex items-start gap-2">
                   {msg.users?.avatar_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img src={msg.users.avatar_url} alt="" className="w-6 h-6 rounded-full shrink-0 mt-0.5 object-cover" />
                   ) : (
                     <UserCircle className="w-6 h-6 text-tertiary shrink-0 mt-0.5" />

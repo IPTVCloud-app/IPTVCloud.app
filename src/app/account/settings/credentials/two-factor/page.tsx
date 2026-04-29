@@ -45,8 +45,8 @@ export default function TwoFactorSettingsPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to initialize setup");
       setSetupData(data);
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "An unknown error occurred");
     } finally {
       setLoading(false);
     }
@@ -72,8 +72,8 @@ export default function TwoFactorSettingsPage() {
       setIsEnabled(action === 'verify');
       setSetupData(null);
       setAuthCode("");
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "An unknown error occurred");
     } finally {
       setLoading(false);
     }

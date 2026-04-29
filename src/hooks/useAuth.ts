@@ -3,8 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
+export interface AuthUser {
+  loggedIn: boolean;
+  access_token?: string;
+}
+
 export function useAuth() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -15,8 +20,8 @@ export function useAuth() {
         try {
           // Decode basic info from JWT if needed, or just assume valid for now
           // For now, let's just check if token exists
-          setUser({ loggedIn: true });
-        } catch (e) {
+          setUser({ loggedIn: true, access_token: token });
+        } catch {
           localStorage.removeItem('token');
           setUser(null);
         }

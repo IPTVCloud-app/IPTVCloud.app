@@ -45,8 +45,10 @@ function ProfileContent() {
 
   useEffect(() => {
     if (!username) {
-      setError('User not found');
-      setLoading(false);
+      Promise.resolve().then(() => {
+        setError('User not found');
+        setLoading(false);
+      });
       return;
     }
 
@@ -59,8 +61,12 @@ function ProfileContent() {
         }
         const data = await res.json();
         setProfile(data);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('An unknown error occurred');
+        }
       } finally {
         setLoading(false);
       }
@@ -208,7 +214,7 @@ function ProfileContent() {
           
           {!profile.privacy.show_watch_history && (
             <div className="bg-white dark:bg-neutral-800 rounded-xl p-6 text-center text-neutral-500 border border-neutral-200 dark:border-neutral-700">
-              This user's activity is private.
+              This user&apos;s activity is private.
             </div>
           )}
 

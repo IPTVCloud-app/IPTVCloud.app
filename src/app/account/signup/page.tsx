@@ -70,7 +70,7 @@ export default function SignUpPage() {
       let result;
       try {
         result = await response.json();
-      } catch (e) {
+      } catch {
         throw new Error("Server returned an invalid response");
       }
 
@@ -87,8 +87,8 @@ export default function SignUpPage() {
     }
   };
 
-  const onError = (errors: any) => {
-    const firstError = Object.values(errors)[0] as any;
+  const onError = (errors: Record<string, { message?: string }>) => {
+    const firstError = Object.values(errors)[0];
     if (firstError?.message) {
       toast.error(firstError.message);
     }

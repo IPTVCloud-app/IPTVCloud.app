@@ -42,8 +42,8 @@ export default function AdminDashboard() {
 
         const data = await res.json();
         setStats(data);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An unknown error occurred');
       } finally {
         setLoading(false);
       }

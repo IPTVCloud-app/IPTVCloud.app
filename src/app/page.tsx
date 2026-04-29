@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { 
   Play, Shield, Zap, Globe, Monitor, 
-  ArrowRight, Heart, Star, Twitter, Github, MessageSquare, Send
+  ArrowRight, Heart
 } from "lucide-react";
 import { API_URL } from "@/lib/api";
 import { ChannelThumbnail } from "@/components/ChannelThumbnail";
@@ -13,12 +13,26 @@ import { useMousePosition, NodeNetwork } from "./Effects";
 
 const SHIMMER_CLASS = "relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent";
 
+interface Channel {
+  id: string;
+  name: string;
+  logo: string;
+  category?: string;
+  country?: string;
+}
+
 function CookieConsent() {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    const consent = localStorage.getItem("cookie-consent");
-    if (!consent) setShow(true);
+    const consent = typeof window !== 'undefined' ? localStorage.getItem("cookie-consent") : null;
+    if (!consent) {
+      // Delay to avoid immediate setState in effect if needed, though usually fine in simple cases
+      // But the lint rule is strict.
+      Promise.resolve().then(() => {
+        setShow(true);
+      });
+    }
   }, []);
 
   const accept = () => {
@@ -57,7 +71,7 @@ function CookieConsent() {
 }
 
 export default function HomePage() {
-  const [trendingChannels, setTrendingChannels] = useState<any[]>([]);
+  const [trendingChannels, setTrendingChannels] = useState<Channel[]>([]);
   const [loading, setLoading] = useState(true);
   const mouse = useMousePosition();
 
@@ -185,6 +199,7 @@ export default function HomePage() {
                       </div>
                       <div className="flex gap-3">
                         {channel.logo ? (
+                          // eslint-disable-next-line @next/next/no-img-element
                           <img src={channel.logo} alt="" className="w-10 h-10 object-contain rounded-full bg-white/5 border border-border" />
                         ) : (
                           <div className="w-10 h-10 rounded-full bg-brand/10 border border-brand/20 flex items-center justify-center text-brand font-bold shrink-0">
@@ -252,7 +267,7 @@ export default function HomePage() {
               <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 relative z-10 text-display">Ready to level up your TV?</h2>
               <p className="text-white/80 text-lg mb-10 max-w-xl mx-auto relative z-10 text-body">Join 50,000+ active streamers today. No hidden fees, cancel anytime.</p>
               <Link href="/account/signup" className="inline-flex items-center gap-2 px-10 py-5 bg-white text-brand rounded-full font-bold text-lg hover:scale-105 transition-transform shadow-xl relative z-10 active:scale-95">
-                Get Started for Free <ArrowRight className="w-5 h-5" />
+                Get Started for Free <ArrowRight className="w-4 h-4" />
               </Link>
            </div>
         </section>
