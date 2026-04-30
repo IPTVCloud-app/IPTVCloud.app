@@ -27,8 +27,6 @@ function CookieConsent() {
   useEffect(() => {
     const consent = typeof window !== 'undefined' ? localStorage.getItem("cookie-consent") : null;
     if (!consent) {
-      // Delay to avoid immediate setState in effect if needed, though usually fine in simple cases
-      // But the lint rule is strict.
       Promise.resolve().then(() => {
         setShow(true);
       });
@@ -109,7 +107,7 @@ export default function HomePage() {
 
       <div className="relative z-10">
         {/* Hero Section */}
-        <section className="relative pt-20 pb-20 md:pt-32 md:pb-32 px-6 overflow-hidden">
+        <section className="relative pt-24 pb-16 md:pt-32 md:pb-24 px-6 overflow-hidden">
           {/* Animated background blobs */}
           <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand/10 blur-[120px] rounded-full animate-pulse" />
           <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/10 blur-[120px] rounded-full animate-pulse delay-700" />
@@ -120,7 +118,7 @@ export default function HomePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand/10 border border-brand/20 text-brand text-xs font-bold uppercase tracking-wider mb-6">
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand/10 border border-brand/20 text-brand text-xs font-bold uppercase tracking-wider mb-6 mt-8">
                 <Zap className="w-3 h-3 fill-current" /> Next-Gen IPTV Experience
               </span>
               <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 bg-gradient-to-r from-white via-white to-white/40 bg-clip-text text-transparent">
@@ -271,7 +269,6 @@ export default function HomePage() {
               </Link>
            </div>
         </section>
-
       </div>
 
       <CookieConsent />
@@ -279,30 +276,6 @@ export default function HomePage() {
       <style jsx global>{`
         @keyframes shimmer {
           100% { transform: translateX(100%); }
-        }
-      `}</style>
-    </div>
-  );
-}
-ointer-events-auto flex items-center justify-center gap-2 w-full py-4 bg-brand text-white rounded-2xl font-bold shadow-2xl shadow-brand/40 animate-bounce-slow">
-              Get Started for Free <ArrowRight className="w-4 h-4" />
-           </Link>
-        </div>
-
-      </div>
-
-      <CookieConsent />
-
-      <style jsx global>{`
-        @keyframes shimmer {
-          100% { transform: translateX(100%); }
-        }
-        @keyframes bounce-slow {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
-        }
-        .animate-bounce-slow {
-          animation: bounce-slow 3s ease-in-out infinite;
         }
       `}</style>
     </div>
