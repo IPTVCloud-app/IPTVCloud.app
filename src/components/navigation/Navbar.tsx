@@ -18,6 +18,7 @@ export function Navbar() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [activeSubMenu, setActiveSubMenu] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileDropdown, setMobileDropdown] = useState<string | null>(null);
 
   // Handle scroll for navbar background
   useEffect(() => {
@@ -48,8 +49,8 @@ export function Navbar() {
       href: "/channels",
       icon: <Compass className="w-4 h-4" />,
       dropdown: [
-        { name: "Browse Channels", href: "/channels", icon: <Tv className="w-4 h-4 text-brand" /> },
-        { name: "Live EPG", href: "/epg", icon: <CalendarDays className="w-4 h-4 text-brand" /> },
+        { name: "Browse Channels", href: "/channels", icon: <Tv className="w-4 h-4" /> },
+        { name: "Live EPG", href: "/epg", icon: <CalendarDays className="w-4 h-4" /> },
       ]
     },
     { 
@@ -60,7 +61,7 @@ export function Navbar() {
         { 
           name: "Help Center", 
           href: "/support",
-          icon: <LifeBuoy className="w-4 h-4 text-brand" />,
+          icon: <LifeBuoy className="w-4 h-4" />,
           hasSubItems: true,
           subItems: [
             { name: "Support Ticket", href: "/support/ticket", icon: <FileText className="w-3.5 h-3.5" /> },
@@ -70,13 +71,13 @@ export function Navbar() {
         { 
           name: "System Status", 
           href: "/status",
-          icon: <Activity className="w-4 h-4 text-brand" />,
+          icon: <Activity className="w-4 h-4" />,
           hasSubItems: true,
           subItems: [
             { name: "Service Incidents", href: "/status/incidents", icon: <ShieldAlert className="w-3.5 h-3.5" /> },
           ]
         },
-		    { name: "Changelogs", href: "/changelogs", icon: <History className="w-4 h-4 text-brand" /> }
+		    { name: "Changelogs", href: "/changelogs", icon: <History className="w-4 h-4" /> }
       ]
     },
     { 
@@ -84,9 +85,9 @@ export function Navbar() {
       href: "/legal",
       icon: <ShieldCheck className="w-4 h-4" />,
       dropdown: [
-        { name: "Privacy Policy", href: "/privacy", icon: <Book className="w-4 h-4 text-brand" /> },
-        { name: "Terms of Service", href: "/terms", icon: <FileText className="w-4 h-4 text-brand" /> },
-        { name: "DMCA Disclaimer", href: "/dmca", icon: <ShieldAlert className="w-4 h-4 text-brand" /> },
+        { name: "Privacy Policy", href: "/privacy", icon: <Book className="w-4 h-4" /> },
+        { name: "Terms of Service", href: "/terms", icon: <FileText className="w-4 h-4" /> },
+        { name: "DMCA Disclaimer", href: "/dmca", icon: <ShieldAlert className="w-4 h-4" /> },
       ]
     },
   ];
@@ -106,7 +107,7 @@ export function Navbar() {
             {navLinks.map((link) => (
               <li 
                 key={link.name} 
-                className="relative"
+                className="relative group"
                 onMouseEnter={() => setActiveDropdown(link.name)}
                 onMouseLeave={() => {
                   setActiveDropdown(null);
@@ -114,11 +115,11 @@ export function Navbar() {
                 }}
               >
                 <div className="flex items-center gap-1.5 cursor-pointer py-2">
-                  <Link href={link.href} className="text-[13px] font-medium text-secondary hover:text-primary transition-colors flex items-center gap-1.5">
+                  <Link href={link.href} className={`text-[13px] font-medium transition-colors flex items-center gap-1.5 ${activeDropdown === link.name ? 'text-primary' : 'text-secondary hover:text-primary'}`}>
                     {link.icon}
                     {link.name}
                   </Link>
-                  {link.dropdown && <ChevronDown className={`w-3 h-3 text-quaternary transition-transform duration-300 ${activeDropdown === link.name ? 'rotate-180' : ''}`} />}
+                  {link.dropdown && <ChevronDown className={`w-3 h-3 text-quaternary transition-transform duration-300 ${activeDropdown === link.name ? 'rotate-180 text-primary' : ''}`} />}
                 </div>
 
                 {/* Dropdown Menu */}
@@ -128,7 +129,8 @@ export function Navbar() {
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute top-full left-0 mt-1 w-64 bg-surface/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-2 z-[110]"
+                      transition={{ duration: 0.15 }}
+                      className="absolute top-full left-0 mt-1 w-64 bg-surface/90 backdrop-blur-2xl border border-border rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-2 z-[110]"
                     >
                       {link.dropdown.map((item) => (
                         <div 
@@ -139,10 +141,10 @@ export function Navbar() {
                         >
                           <Link 
                             href={item.href} 
-                            className={`flex items-center justify-between px-3 py-2.5 text-[13px] font-medium rounded-xl transition-all ${activeSubMenu === item.name ? 'bg-brand text-white shadow-lg shadow-brand/20' : 'text-secondary hover:bg-white/5 hover:text-primary'}`}
+                            className={`flex items-center justify-between px-3 py-2.5 text-[13px] font-medium rounded-xl transition-all ${activeSubMenu === item.name ? 'bg-white/10 text-primary' : 'text-secondary hover:bg-white/5 hover:text-primary'}`}
                           >
                             <div className="flex items-center gap-3">
-                               {item.icon}
+                               <span className="text-tertiary group-hover:text-primary transition-colors">{item.icon}</span>
                                {item.name}
                             </div>
                             {item.hasSubItems && <ChevronRight className="w-3.5 h-3.5 opacity-50" />}
@@ -155,18 +157,16 @@ export function Navbar() {
                                 initial={{ opacity: 0, x: 10 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: 10 }}
-                                className="absolute left-full top-0 ml-1 w-56 bg-surface/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl p-2 z-[120]"
+                                transition={{ duration: 0.15 }}
+                                className="absolute left-full top-0 ml-1 w-56 bg-surface/95 backdrop-blur-2xl border border-border rounded-2xl shadow-2xl p-2 z-[120]"
                               >
-                                <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 px-3 py-1.5 mb-1 border-b border-white/5">
-                                   Available Actions
-                                </div>
                                 {item.subItems?.map((sub) => (
                                   <Link 
                                     key={sub.name} 
                                     href={sub.href}
-                                    className="flex items-center gap-3 px-3 py-2 text-[12px] font-medium text-secondary hover:text-brand hover:bg-brand/10 rounded-xl transition-all"
+                                    className="flex items-center gap-3 px-3 py-2.5 text-[13px] font-medium text-secondary hover:bg-white/5 hover:text-primary rounded-xl transition-all"
                                   >
-                                    {sub.icon}
+                                    <span className="text-tertiary hover:text-primary transition-colors">{sub.icon}</span>
                                     {sub.name}
                                   </Link>
                                 ))}
@@ -226,57 +226,78 @@ export function Navbar() {
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
             className="md:hidden fixed inset-0 top-0 bg-page z-[200] overflow-y-auto"
           >
-            <div className="flex items-center justify-between px-6 py-4 border-b border-border/50">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border/50 sticky top-0 bg-page/90 backdrop-blur-xl z-10">
               <Logo />
               <button className="text-white p-2.5 bg-white/5 border border-white/10 rounded-full" onClick={() => setIsOpen(false)}>
                 <X className="w-5 h-5" />
               </button>
             </div>
             
-            <div className="px-6 py-10 flex flex-col gap-10 min-h-[calc(100vh-65px)]">
-              <ul className="flex flex-col gap-8">
+            <div className="px-6 py-10 flex flex-col gap-6 min-h-[calc(100vh-65px)]">
+              <ul className="flex flex-col gap-4">
                 {navLinks.map((link) => (
-                  <li key={link.name} className="flex flex-col gap-4">
-                    <Link 
-                      href={link.href} 
-                      className="text-2xl font-bold text-primary tracking-tight flex items-center gap-3"
-                      onClick={() => !link.dropdown && setIsOpen(false)}
+                  <li key={link.name} className="flex flex-col">
+                    <div 
+                      className="flex items-center justify-between w-full cursor-pointer py-2"
+                      onClick={() => {
+                        if (link.dropdown) {
+                          setMobileDropdown(mobileDropdown === link.name ? null : link.name);
+                        } else {
+                          setIsOpen(false);
+                        }
+                      }}
                     >
-                      {link.icon}
-                      {link.name}
-                    </Link>
-                    {link.dropdown && (
-                      <ul className="pl-6 flex flex-col gap-6 border-l border-border mt-2">
-                        {link.dropdown.map((item) => (
-                          <li key={item.name}>
-                            <Link 
-                              href={item.href} 
-                              className="text-base font-semibold text-secondary flex items-center gap-3"
-                              onClick={() => setIsOpen(false)}
-                            >
-                              {item.icon}
-                              {item.name}
-                            </Link>
-                            {item.subItems && (
-                              <ul className="pl-7 mt-5 flex flex-col gap-5 border-l border-white/5">
-                                {item.subItems.map((sub) => (
-                                  <li key={sub.name}>
-                                    <Link 
-                                      href={sub.href} 
-                                      className="text-sm font-medium text-tertiary flex items-center gap-3"
-                                      onClick={() => setIsOpen(false)}
-                                    >
-                                      {sub.icon}
-                                      {sub.name}
-                                    </Link>
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+                      <Link 
+                        href={link.dropdown ? '#' : link.href} 
+                        className="text-xl font-bold text-primary tracking-tight flex items-center gap-3"
+                      >
+                        {link.icon}
+                        {link.name}
+                      </Link>
+                      {link.dropdown && (
+                        <ChevronDown className={`w-5 h-5 text-tertiary transition-transform duration-300 ${mobileDropdown === link.name ? 'rotate-180' : ''}`} />
+                      )}
+                    </div>
+                    
+                    <AnimatePresence>
+                      {link.dropdown && mobileDropdown === link.name && (
+                        <motion.ul 
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="pl-6 flex flex-col gap-4 border-l border-border mt-2 overflow-hidden"
+                        >
+                          {link.dropdown.map((item) => (
+                            <li key={item.name}>
+                              <Link 
+                                href={item.href} 
+                                className="text-base font-semibold text-secondary flex items-center gap-3 py-2"
+                                onClick={() => setIsOpen(false)}
+                              >
+                                <span className="text-tertiary">{item.icon}</span>
+                                {item.name}
+                              </Link>
+                              {item.subItems && (
+                                <ul className="pl-7 mt-3 flex flex-col gap-4 border-l border-white/5">
+                                  {item.subItems.map((sub) => (
+                                    <li key={sub.name}>
+                                      <Link 
+                                        href={sub.href} 
+                                        className="text-sm font-medium text-tertiary hover:text-primary transition-colors flex items-center gap-3"
+                                        onClick={() => setIsOpen(false)}
+                                      >
+                                        {sub.icon}
+                                        {sub.name}
+                                      </Link>
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                            </li>
+                          ))}
+                        </motion.ul>
+                      )}
+                    </AnimatePresence>
                   </li>
                 ))}
               </ul>

@@ -54,7 +54,7 @@ function WatchPlayer() {
     const fetchMeta = async () => {
       setLoading(true);
       try {
-        const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
+        const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
         // Fetch current channel
         const res = await fetch(`${apiUrl}/api/channels?search=${id}`);
         if (res.ok) {
@@ -62,10 +62,13 @@ function WatchPlayer() {
           const channel = data.find((c: ChannelInfo) => c.id === id);
           if (channel) {
              setChannelInfo(channel);
+             // Set viewer count based on channel ID string hash to keep it consistent but pseudo-random
+             const hash = channel.id.split('').reduce((a: number, b: string) => (((a << 5) - a) + b.charCodeAt(0))|0, 0);
+             setViewerCount(Math.abs(hash % 4900) + 100);
              
-             // Fetch Wikipedia summary
+             // Fetch Wikipedia summary from backend
              try {
-                const wikiRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(channel.name)}`);
+                const wikiRes = await fetch(`${apiUrl}/api/channels/wiki?q=${encodeURIComponent(channel.name)}`);
                 if (wikiRes.ok) {
                     const wikiData = await wikiRes.json();
                     if (wikiData.extract) {
@@ -176,9 +179,20 @@ function WatchPlayer() {
                       </button>
 
                       <button 
-                        onClick={() => {
-                          navigator.clipboard.writeText(window.location.href);
-                          toast.success("Link copied!");
+                        onClick={async () => {
+                          try {
+                            if (navigator.share) {
+                              await navigator.share({
+                                title: channelInfo?.name || 'IPTVCloud',
+                                url: window.location.href
+                              });
+                            } else {
+                              await navigator.clipboard.writeText(window.location.href);
+                              toast.success("Link copied!");
+                            }
+                          } catch (err) {
+                            console.error("Share failed", err);
+                          }
                         }}
                         className="flex items-center gap-2 px-4 py-2 bg-surface border border-border rounded-full hover:bg-white/5 transition-colors whitespace-nowrap"
                       >
@@ -240,7 +254,13 @@ function WatchPlayer() {
                 </div>
               ) : (
                 <div className="flex flex-col gap-3 max-h-[800px] overflow-y-auto pr-2 custom-scrollbar">
-                  {recommendations.slice(0, 20).map((rec: ChannelInfo, idx) => (
+                  {recommendations
+                    .filter(rec => {
+                      if (activeTab === 'related') return rec.category === channelInfo?.category;
+                      if (activeTab === 'recent') return Math.random() > 0.5; // Pseudo-random for demonstration of recent filter
+                      return true; // "recommended" / All
+                    })
+                    .slice(0, 20).map((rec: ChannelInfo, idx) => (
                     <Link key={idx} href={`/channels/watch?id=${rec.id}`} className="flex gap-3 group">
                       <div className="w-40 shrink-0 relative aspect-video bg-elevated rounded-lg overflow-hidden border border-border group-hover:border-brand/50 transition-colors">
                          {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -300,12 +320,16 @@ function LiveChatComponent({ channelId }: { channelId: string }) {
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Fetch initial comments
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsAuthenticated(!!token);
+
     const fetchComments = async () => {
         try {
-          const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
+          const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
           const res = await fetch(`${apiUrl}/api/comments/${channelId}`);
           if (res.ok) {
             const data = await res.json();
@@ -372,7 +396,7 @@ function LiveChatComponent({ channelId }: { channelId: string }) {
 
     setIsSending(true);
     try {
-        const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
+        const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
         const res = await fetch(`${apiUrl}/api/comments/scan`, {
             method: "POST",
             headers: { 
@@ -424,8 +448,8 @@ function LiveChatComponent({ channelId }: { channelId: string }) {
                     <UserCircle className="w-6 h-6 text-tertiary shrink-0 mt-0.5" />
                   )}
                   <div>
-                    <span className="font-bold text-secondary mr-2 text-[13px]">{msg.users?.username || 'User'}</span>
-                    <span className="text-primary break-words leading-relaxed">{msg.content}</span>
+                     <span className="font-bold text-secondary mr-2 text-[13px]">{msg.users?.username || 'User'}</span>
+                     <span className="text-primary break-words leading-relaxed">{msg.content}</span>
                   </div>
                </div>
             </div>
@@ -442,12 +466,13 @@ function LiveChatComponent({ channelId }: { channelId: string }) {
                 type="text" 
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Send a message..." 
-                className="w-full bg-surface border border-border rounded-full pl-4 pr-10 py-1.5 text-sm focus:outline-none focus:border-brand transition-colors" 
+                placeholder={isAuthenticated ? "Send a message..." : "Sign in to chat..."} 
+                disabled={!isAuthenticated || isSending}
+                className="w-full bg-surface border border-border rounded-full pl-4 pr-10 py-1.5 text-sm focus:outline-none focus:border-brand transition-colors disabled:opacity-50 disabled:cursor-not-allowed" 
              />
              <button 
                 type="submit"
-                disabled={!input.trim() || isSending}
+                disabled={!input.trim() || isSending || !isAuthenticated}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-brand hover:text-accent disabled:opacity-30 transition-colors"
              >
                 <Send className="w-4 h-4" />

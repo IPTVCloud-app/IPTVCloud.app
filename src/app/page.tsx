@@ -272,9 +272,19 @@ export default function HomePage() {
            </div>
         </section>
 
-        {/* Footer CTA (Mobile) */}
-        <div className="fixed bottom-0 left-0 right-0 p-4 md:hidden z-50 pointer-events-none">
-           <Link href="/account/signup" className="pointer-events-auto flex items-center justify-center gap-2 w-full py-4 bg-brand text-white rounded-2xl font-bold shadow-2xl shadow-brand/40 animate-bounce-slow">
+      </div>
+
+      <CookieConsent />
+
+      <style jsx global>{`
+        @keyframes shimmer {
+          100% { transform: translateX(100%); }
+        }
+      `}</style>
+    </div>
+  );
+}
+ointer-events-auto flex items-center justify-center gap-2 w-full py-4 bg-brand text-white rounded-2xl font-bold shadow-2xl shadow-brand/40 animate-bounce-slow">
               Get Started for Free <ArrowRight className="w-4 h-4" />
            </Link>
         </div>

@@ -1,0 +1,22 @@
+"use client";
+
+import { Heart } from "lucide-react";
+
+export default function FavoritesPage() {
+  return (
+    <div className="max-w-3xl">
+      <div className="flex items-center gap-3 mb-8 pb-4 border-b border-border">
+        <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center text-red-500">
+          <Heart className="w-5 h-5" />
+        </div>
+        <div>
+          <h1 className="text-xl font-medium tracking-tight text-primary">Favorites</h1>
+          <p className="text-sm text-tertiary">Your saved channels and collections.</p>
+        </div>
+      </div>
+      <div className="text-center p-12 bg-surface border border-border rounded-xl">
+        <p className="text-secondary">You haven't favorited any channels yet.</p>
+      </div>
+    </div>
+  );
+}

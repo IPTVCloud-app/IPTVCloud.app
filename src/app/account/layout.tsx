@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { LayoutDashboard, PlaySquare, Heart, Search, Radio, User, Shield, Settings, LogOut } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { LayoutDashboard, PlaySquare, Heart, Search, Radio, User, Shield, Settings, LogOut, Bell, FileText } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { motion } from "framer-motion";
 import { useMousePosition, NodeNetwork } from "../Effects";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function AccountLayout({
   children,
@@ -13,15 +15,29 @@ export default function AccountLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const mouse = useMousePosition();
-  const isAuthPage = pathname === "/account/signin" || pathname === "/account/signup" || pathname === "/account/forgot-password" || pathname === "/account/find-account";
+  const { user, logout, loading } = useAuth();
+  const [mounted, setMounted] = useState(false);
+
+  const isAuthPage = pathname === "/account/signin" || pathname === "/account/signup" || pathname === "/account/forgot-password" || pathname === "/account/find-account" || pathname === "/account/reset-password";
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted && !loading && !user && !isAuthPage) {
+      router.push("/account/signin");
+    }
+  }, [mounted, loading, user, isAuthPage, router]);
 
   const quickActions = [
     { name: "Dashboard", href: "/account", icon: <LayoutDashboard className="w-4 h-4" /> },
-    { name: "Continue Watching", href: "#", icon: <PlaySquare className="w-4 h-4" /> },
-    { name: "Open Favorites", href: "#", icon: <Heart className="w-4 h-4" /> },
-    { name: "Search Channels", href: "#", icon: <Search className="w-4 h-4" /> },
-    { name: "Live Now", href: "#", icon: <Radio className="w-4 h-4" /> },
+    { name: "Continue Watching", href: "/account/history", icon: <PlaySquare className="w-4 h-4" /> },
+    { name: "Open Favorites", href: "/account/favorites", icon: <Heart className="w-4 h-4" /> },
+    { name: "Notifications", href: "/account/notifications", icon: <Bell className="w-4 h-4" /> },
+    { name: "Manage Posts", href: "/account/posts", icon: <FileText className="w-4 h-4" /> },
   ];
 
   const settingsActions = [
@@ -29,6 +45,10 @@ export default function AccountLayout({
     { name: "Privacy Settings", href: "/account/settings/privacy", icon: <Shield className="w-4 h-4" /> },
     { name: "Credentials & Security", href: "/account/settings/credentials", icon: <User className="w-4 h-4" /> },
   ];
+
+  if (!mounted || (loading && !isAuthPage)) {
+    return <div className="min-h-screen bg-page flex items-center justify-center"><div className="w-8 h-8 border-2 border-brand rounded-full border-t-transparent animate-spin"></div></div>;
+  }
 
   if (isAuthPage) {
     return (
@@ -65,6 +85,9 @@ export default function AccountLayout({
       </div>
     );
   }
+
+  // Double check user exists before rendering dashboard layout
+  if (!user && !isAuthPage) return null;
 
   return (
     <div className="flex min-h-[calc(100vh-64px)] bg-page text-primary font-sans">
@@ -115,7 +138,7 @@ export default function AccountLayout({
         </div>
 
         <div className="p-4 border-t border-border">
-          <button className="w-full flex items-center gap-3 px-2 py-2 rounded-md text-sm font-medium text-quaternary hover:text-primary hover:bg-[rgba(255,255,255,0.04)] transition-colors">
+          <button onClick={logout} className="w-full flex items-center gap-3 px-2 py-2 rounded-md text-sm font-medium text-quaternary hover:text-primary hover:bg-[rgba(255,255,255,0.04)] transition-colors">
             <LogOut className="w-4 h-4" />
             Sign Out
           </button>
