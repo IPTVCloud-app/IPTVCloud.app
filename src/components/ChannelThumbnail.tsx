@@ -15,7 +15,7 @@ export function ChannelThumbnail({ channelId, name, className = "", logoUrl }: C
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
+    const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
     const finalUrl = logoUrl || `${apiUrl}/api/channels/thumbnail?id=${channelId}`;
     Promise.resolve().then(() => {
       setImgSrc(finalUrl);

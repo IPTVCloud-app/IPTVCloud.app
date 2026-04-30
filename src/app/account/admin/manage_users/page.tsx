@@ -27,7 +27,7 @@ export default function ManageUsersPage() {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${process.env.PUBLIC_API_URL}/api/admin/users?page=${page}&limit=20&search=${search}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/users?page=${page}&limit=20&search=${search}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) throw new Error('Failed to fetch users');
@@ -53,7 +53,7 @@ export default function ManageUsersPage() {
 const handleAction = async (userId: string, action: 'suspend' | 'mute' | 'restrict', value: string | boolean | number | null) => {
   try {
     const token = localStorage.getItem('token');
-    const res = await fetch(`${process.env.PUBLIC_API_URL}/api/admin/users/${userId}/action`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/users/${userId}/action`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -74,7 +74,7 @@ const handleAction = async (userId: string, action: 'suspend' | 'mute' | 'restri
     if (!confirm('Are you sure you want to purge all comments by this user from the last 24 hours?')) return;
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${process.env.PUBLIC_API_URL}/api/admin/users/${userId}/purge_comments`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/users/${userId}/purge_comments`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });

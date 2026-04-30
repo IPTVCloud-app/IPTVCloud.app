@@ -54,7 +54,7 @@ function ProfileContent() {
 
     const fetchProfile = async () => {
       try {
-        const res = await fetch(`${process.env.PUBLIC_API_URL}/api/social/profile/${username}`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/social/profile/${username}`);
         if (!res.ok) {
           if (res.status === 404) throw new Error('User not found');
           throw new Error('Failed to load profile');
@@ -81,7 +81,7 @@ function ProfileContent() {
       if (!token || !profile || !username) return;
 
       try {
-        const res = await fetch(`${process.env.PUBLIC_API_URL}/api/social/follow/status/${username}`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/social/follow/status/${username}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -107,7 +107,7 @@ function ProfileContent() {
 
     setFollowLoading(true);
     try {
-      const res = await fetch(`${process.env.PUBLIC_API_URL}/api/social/follow/toggle/${username}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/social/follow/toggle/${username}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -230,7 +230,7 @@ function ProfileContent() {
                 <div key={idx} className="bg-white dark:bg-neutral-800 rounded-xl p-4 border border-neutral-200 dark:border-neutral-700 flex items-center gap-4">
                   <div className="w-16 h-10 bg-neutral-200 dark:bg-neutral-700 rounded overflow-hidden flex-shrink-0">
                     <img 
-                      src={`${process.env.PUBLIC_API_URL}/api/channels/thumbnail?id=${item.channel_short_id}`} 
+                      src={`${process.env.NEXT_PUBLIC_API_URL}/api/channels/thumbnail?id=${item.channel_short_id}`} 
                       alt="Thumbnail"
                       className="w-full h-full object-cover"
                       onError={(e) => {

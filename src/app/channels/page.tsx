@@ -50,7 +50,7 @@ export default function ChannelsExplorerPage() {
   useEffect(() => {
     const fetchMetadata = async () => {
       try {
-        const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
+        const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
         const [catRes, langRes, countRes] = await Promise.all([
           fetch(`${apiUrl}/api/channels/categories`),
           fetch(`${apiUrl}/api/channels/languages`),
@@ -82,7 +82,7 @@ export default function ChannelsExplorerPage() {
     else setLoading(true);
 
     try {
-      const apiUrl = (process.env.PUBLIC_API_URL || "").replace(/\/$/, "");
+      const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
       const limit = 40;
       const offset = pageNum * limit;
       let url = `${apiUrl}/api/channels?limit=${limit}&offset=${offset}`;

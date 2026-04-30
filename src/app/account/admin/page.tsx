@@ -29,7 +29,7 @@ export default function AdminDashboard() {
         const token = localStorage.getItem('token');
         if (!token) throw new Error('Unauthorized');
 
-        const res = await fetch(`${process.env.PUBLIC_API_URL}/api/admin/dashboard/stats`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/dashboard/stats`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
