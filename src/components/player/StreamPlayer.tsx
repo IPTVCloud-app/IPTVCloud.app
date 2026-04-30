@@ -62,7 +62,7 @@ export function StreamPlayer({ channelId, onNext, onPrev, isTheaterMode, onToggl
     const video = videoRef.current;
     
     const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
-    const streamUrl = `${apiUrl}/api/channels/stream?id=${channelId}&hls=true`;
+    const streamUrl = `${apiUrl}/api/channels/stream?id=${channelId}`;
 
     const initHls = () => {
       Promise.resolve().then(() => {
