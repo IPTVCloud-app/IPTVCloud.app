@@ -305,6 +305,7 @@ export function StreamPlayer({ channelId, onNext, onPrev, isTheaterMode, onToggl
           onDoubleClick={toggleFullscreen}
           crossOrigin="anonymous"
           playsInline
+          poster={`${(process.env.NEXT_PUBLIC_API_URL || '').replace(/\/$/, '')}/api/channels/thumbnail?id=${channelId}`}
         />
 
         {/* Controls Overlay */}

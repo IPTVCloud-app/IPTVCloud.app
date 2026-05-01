@@ -55,20 +55,19 @@ function WatchPlayer() {
       setLoading(true);
       try {
         const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
-        // Fetch current channel
-        const res = await fetch(`${apiUrl}/api/channels?search=${id}`);
+        // Fetch current channel exactly by ID
+        const res = await fetch(`${apiUrl}/api/channels/${id}`);
         if (res.ok) {
-          const data = await res.json();
-          const channel = data.find((c: ChannelInfo) => c.id === id);
-          if (channel) {
+          const channel = await res.json();
+          if (channel && !channel.error) {
              setChannelInfo(channel);
-             // Set viewer count based on channel ID string hash to keep it consistent but pseudo-random
+             
              const hash = channel.id.split('').reduce((a: number, b: string) => (((a << 5) - a) + b.charCodeAt(0))|0, 0);
              setViewerCount(Math.abs(hash % 4900) + 100);
              
-             // Fetch Wikipedia summary from backend
+             // Fetch Wikipedia summary from backend using exact ID
              try {
-                const wikiRes = await fetch(`${apiUrl}/api/channels/wiki?q=${encodeURIComponent(channel.name)}`);
+                const wikiRes = await fetch(`${apiUrl}/api/channels/wiki?id=${id}`);
                 if (wikiRes.ok) {
                     const wikiData = await wikiRes.json();
                     if (wikiData.extract) {
@@ -80,7 +79,7 @@ function WatchPlayer() {
              }
 
              // Fetch recommendations
-             const recRes = await fetch(`${apiUrl}/api/channels?limit=25&category=${channel.category || ''}`);
+             const recRes = await fetch(`${apiUrl}/api/channels?limit=25&category=${channel.categories?.[0] || channel.category || ''}`);
              if (recRes.ok) {
                const recData = await recRes.json();
                setRecommendations(recData.filter((c: ChannelInfo) => c.id !== id));
@@ -264,7 +263,7 @@ function WatchPlayer() {
                     <Link key={idx} href={`/channels/watch?id=${rec.id}`} className="flex gap-3 group">
                       <div className="w-40 shrink-0 relative aspect-video bg-elevated rounded-lg overflow-hidden border border-border group-hover:border-brand/50 transition-colors">
                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                         <img src={rec.logo || '/brand.png'} alt="" className="w-full h-full object-cover" />
+                         <img src={`${(process.env.NEXT_PUBLIC_API_URL || '').replace(/\/$/, '')}/api/channels/thumbnail?id=${rec.id}`} alt="" className="w-full h-full object-cover" />
                          <div className="absolute bottom-1 right-1 bg-black/80 px-1 py-0.5 rounded text-[10px] font-bold text-white flex items-center gap-1">
                            <Activity className="w-2.5 h-2.5 text-red-500" /> LIVE
                          </div>
