@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Navbar } from "@/components/navigation/Navbar";
 import { Footer } from "@/components/navigation/Footer";
+import { DotMatrixCanvas } from "@/components/layout/DotMatrixCanvas";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
@@ -25,6 +26,7 @@ export default function RootLayout({
     <html lang="en" className={`antialiased dark ${inter.variable}`} suppressHydrationWarning>
       <body className="bg-page text-primary min-h-screen flex flex-col">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+          <DotMatrixCanvas />
           <Navbar />
           <main className="flex-1 w-full">{children}</main>
           <Footer />

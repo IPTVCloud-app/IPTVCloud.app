@@ -1,18 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import {
   AlertTriangle,
   Loader2,
-  Maximize,
-  Minimize,
-  Pause,
-  PictureInPicture2,
-  Play,
-  Volume2,
-  VolumeX,
+  MessageSquare,
 } from "lucide-react";
 import { AmbientBackground } from "./AmbientBackground";
+import { DesktopControls } from "./DesktopControls";
+import { MobileControls } from "./MobileControls";
+import { SettingsMenu } from "./SettingsMenu";
+import { MobileLiveChat } from "./MobileLiveChat";
 
 type StreamPlayerProps = {
   channelId: string;
@@ -20,13 +18,11 @@ type StreamPlayerProps = {
   onToggleTheater: () => void;
 };
 
-type TouchPoint = { x: number; y: number } | null;
-
 export function StreamPlayer({ channelId, isTheaterMode, onToggleTheater }: StreamPlayerProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<any>(null);
-  const touchStartRef = useRef<TouchPoint>(null);
+  const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [isMobileMode, setIsMobileMode] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -38,11 +34,37 @@ export function StreamPlayer({ channelId, isTheaterMode, onToggleTheater }: Stre
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isFloatingMini, setIsFloatingMini] = useState(false);
   const [isPiP, setIsPiP] = useState(false);
+  
+  // Settings & DVR State
   const [availableQualities, setAvailableQualities] = useState<Array<{ label: string; level: number }>>([]);
   const [selectedLevel, setSelectedLevel] = useState(-1);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showControls, setShowControls] = useState(true);
+  const [isAmbientMode, setIsAmbientMode] = useState(true);
+  const [isStableVolume, setIsStableVolume] = useState(true);
+  const [showStats, setShowStats] = useState(false);
+  const [showChat, setShowChat] = useState(false);
 
   const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
   const streamUrl = `${apiUrl}/api/channels/stream?id=${encodeURIComponent(channelId)}`;
+
+  const handleMouseMove = useCallback(() => {
+    setShowControls(true);
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current);
+    }
+    controlsTimeoutRef.current = setTimeout(() => {
+      if (isPlaying && !showSettings) {
+        setShowControls(false);
+      }
+    }, 3000);
+  }, [isPlaying, showSettings]);
+
+  const handleMouseLeave = useCallback(() => {
+    if (isPlaying && !showSettings) {
+      setShowControls(false);
+    }
+  }, [isPlaying, showSettings]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 768px), (pointer: coarse)");
@@ -60,6 +82,49 @@ export function StreamPlayer({ channelId, isTheaterMode, onToggleTheater }: Stre
     document.addEventListener("fullscreenchange", handleFullscreenChange);
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
+
+  // Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if user is typing in an input
+      if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') return;
+
+      switch(e.key.toLowerCase()) {
+        case ' ':
+        case 'k':
+          e.preventDefault();
+          togglePlay();
+          break;
+        case 'm':
+          e.preventDefault();
+          toggleMute();
+          break;
+        case 'f':
+          e.preventDefault();
+          toggleFullscreen();
+          break;
+        case 't':
+          e.preventDefault();
+          onToggleTheater();
+          break;
+        case 'i':
+          e.preventDefault();
+          isPiP || isFloatingMini ? exitMiniPlayer() : enterMiniPlayer();
+          break;
+        case 'arrowup':
+          e.preventDefault();
+          updateVolume(Math.min(1, volume + 0.05));
+          break;
+        case 'arrowdown':
+          e.preventDefault();
+          updateVolume(Math.max(0, volume - 0.05));
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [volume, isPiP, isFloatingMini, onToggleTheater]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -92,8 +157,8 @@ export function StreamPlayer({ channelId, isTheaterMode, onToggleTheater }: Stre
             lowLatencyMode: true,
             autoStartLoad: true,
             backBufferLength: 30,
-            maxBufferLength: 45,
-            maxMaxBufferLength: 90,
+            maxBufferLength: 60,
+            maxMaxBufferLength: 120,
             liveSyncDurationCount: 3,
             liveMaxLatencyDurationCount: 6,
             capLevelToPlayerSize: true,
@@ -118,18 +183,21 @@ export function StreamPlayer({ channelId, isTheaterMode, onToggleTheater }: Stre
             void video.play().catch(() => {});
           });
 
+          hls.on(Hls.Events.FRAG_BUFFERING, () => setIsBuffering(true));
           hls.on(Hls.Events.FRAG_BUFFERED, () => setIsBuffering(false));
           hls.on(Hls.Events.ERROR, (_event, data) => {
             if (!data?.fatal) return;
             if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+              console.warn("HLS Network Error, attempting recovery...");
               hls.startLoad();
               return;
             }
             if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+              console.warn("HLS Media Error, attempting recovery...");
               hls.recoverMediaError();
               return;
             }
-            setError("Playback failed due to stream error.");
+            setError("Playback failed due to a fatal stream error.");
           });
           return;
         }
@@ -225,11 +293,8 @@ export function StreamPlayer({ channelId, isTheaterMode, onToggleTheater }: Stre
         setIsPiP(true);
         setIsFloatingMini(false);
         return;
-      } catch {
-        // fallback handled below
-      }
+      } catch {}
     }
-
     setIsFloatingMini(true);
   };
 
@@ -249,162 +314,111 @@ export function StreamPlayer({ channelId, isTheaterMode, onToggleTheater }: Stre
     }
   };
 
-  const onTouchStart: React.TouchEventHandler<HTMLDivElement> = (event) => {
-    const touch = event.changedTouches[0];
-    if (!touch) return;
-    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
-  };
-
-  const onTouchEnd: React.TouchEventHandler<HTMLDivElement> = (event) => {
-    if (!touchStartRef.current) return;
-    const touch = event.changedTouches[0];
-    if (!touch) return;
-
-    const dx = touch.clientX - touchStartRef.current.x;
-    const dy = touch.clientY - touchStartRef.current.y;
-    const absDx = Math.abs(dx);
-    const absDy = Math.abs(dy);
-    touchStartRef.current = null;
-
-    // Simulated swipe gestures:
-    // - Swipe up/down: enter/exit fullscreen
-    // - Swipe right/left: enter/exit mini player
-    if (absDy > 70 && absDy > absDx) {
-      if (dy < 0) {
-        void toggleFullscreen();
-      } else if (document.fullscreenElement) {
-        void document.exitFullscreen().catch(() => {});
-      }
-      return;
-    }
-
-    if (absDx > 70 && absDx > absDy) {
-      if (dx > 0) {
-        void enterMiniPlayer();
-      } else {
-        void exitMiniPlayer();
-      }
-    }
-  };
-
   return (
     <div
       ref={wrapperRef}
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
-      className={`relative overflow-hidden rounded-2xl border border-border bg-black transition-all duration-300 ${
-        isFloatingMini ? "fixed bottom-4 right-4 z-[80] w-[min(360px,90vw)] shadow-2xl" : "w-full"
-      } ${isFullscreen ? "rounded-none border-0" : ""}`}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className={`relative overflow-hidden bg-black transition-all duration-300 group ${
+        isFloatingMini ? "fixed bottom-4 right-4 z-[80] w-[min(360px,90vw)] shadow-2xl rounded-2xl border border-border" : "w-full rounded-2xl border border-border"
+      } ${isFullscreen ? "rounded-none border-0" : ""} ${!showControls && isPlaying ? "cursor-none" : ""}`}
     >
-      <AmbientBackground videoRef={videoRef} isActive={!isMobileMode && !isFloatingMini} />
+      {isAmbientMode && <AmbientBackground videoRef={videoRef} isActive={!isMobileMode && !isFloatingMini} />}
 
-      <div className="relative aspect-video">
+      <div className="relative aspect-video w-full h-full bg-black">
         <video
           ref={videoRef}
           className="h-full w-full object-cover"
           playsInline
           autoPlay
           onClick={() => {
-            void togglePlay();
+            if (isMobileMode) {
+              setShowControls(!showControls);
+            } else {
+              void togglePlay();
+            }
           }}
         />
 
         {(isLoading || isBuffering) && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/45">
-            <div className="flex items-center gap-2 rounded-full bg-black/70 px-3 py-2 text-xs font-semibold text-white">
-              <Loader2 className="h-4 w-4 animate-spin" />
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/40">
+            <div className="flex items-center gap-2 rounded-full bg-black/80 px-4 py-2 text-sm font-medium text-white shadow-xl backdrop-blur-sm border border-white/10">
+              <Loader2 className="h-5 w-5 animate-spin text-brand" />
               {isLoading ? "Loading stream..." : "Buffering..."}
             </div>
           </div>
         )}
 
         {error && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/60 p-4">
-            <div className="flex max-w-md items-start gap-2 rounded-lg border border-red-400/40 bg-black/85 p-3 text-red-100">
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-              <span className="text-sm">{error}</span>
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+            <div className="flex max-w-md items-start gap-3 rounded-xl border border-red-500/30 bg-red-950/40 p-4 text-red-100 shadow-2xl">
+              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-400" />
+              <div className="flex flex-col gap-1">
+                <span className="font-semibold text-red-200">Stream Error</span>
+                <span className="text-sm opacity-80">{error}</span>
+              </div>
             </div>
           </div>
         )}
-      </div>
 
-      <div className="absolute inset-x-0 bottom-0 z-30 bg-gradient-to-t from-black/90 via-black/35 to-transparent p-2 sm:p-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={() => {
-              void togglePlay();
-            }}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25"
-            aria-label={isPlaying ? "Pause" : "Play"}
-          >
-            {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-          </button>
+        {/* Gradient overlays for controls visibility */}
+        <div className={`absolute inset-x-0 bottom-0 z-20 h-1/2 bg-gradient-to-t from-black/80 via-black/20 to-transparent transition-opacity duration-300 pointer-events-none ${showControls ? "opacity-100" : "opacity-0"}`} />
+        <div className={`absolute inset-x-0 top-0 z-20 h-1/3 bg-gradient-to-b from-black/60 to-transparent transition-opacity duration-300 pointer-events-none ${showControls ? "opacity-100" : "opacity-0"}`} />
 
-          {!isMobileMode && (
-            <>
-              <button
-                onClick={toggleMute}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25"
-                aria-label={isMuted ? "Unmute" : "Mute"}
-              >
-                {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-              </button>
-              <input
-                type="range"
-                min={0}
-                max={1}
-                step={0.05}
-                value={isMuted ? 0 : volume}
-                onChange={(event) => updateVolume(Number.parseFloat(event.target.value))}
-                className="h-1.5 w-24 accent-brand"
-                aria-label="Volume"
-              />
-            </>
+        {/* Controls Overlay */}
+        <div className={`absolute inset-0 z-30 transition-opacity duration-300 ${showControls ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
+          {isMobileMode ? (
+             <MobileControls 
+                isPlaying={isPlaying}
+                togglePlay={togglePlay}
+                isFullscreen={isFullscreen}
+                toggleFullscreen={toggleFullscreen}
+                showSettings={showSettings}
+                setShowSettings={setShowSettings}
+                showChat={showChat}
+                setShowChat={setShowChat}
+                videoRef={videoRef}
+             />
+          ) : (
+            <DesktopControls
+                isPlaying={isPlaying}
+                togglePlay={togglePlay}
+                isMuted={isMuted}
+                toggleMute={toggleMute}
+                volume={volume}
+                updateVolume={updateVolume}
+                isFullscreen={isFullscreen}
+                toggleFullscreen={toggleFullscreen}
+                isTheaterMode={isTheaterMode}
+                onToggleTheater={onToggleTheater}
+                isPiP={isPiP}
+                isFloatingMini={isFloatingMini}
+                enterMiniPlayer={enterMiniPlayer}
+                exitMiniPlayer={exitMiniPlayer}
+                showSettings={showSettings}
+                setShowSettings={setShowSettings}
+                videoRef={videoRef}
+            />
           )}
-
-          {availableQualities.length > 0 && (
-            <select
-              value={selectedLevel}
-              onChange={(event) => applyQuality(event.target.value)}
-              className="h-9 rounded-full border border-white/20 bg-black/50 px-3 text-xs text-white outline-none transition hover:bg-black/70"
-              aria-label="Quality"
-            >
-              <option value={-1}>Auto</option>
-              {availableQualities.map((quality) => (
-                <option key={`${quality.level}-${quality.label}`} value={quality.level}>
-                  {quality.label}
-                </option>
-              ))}
-            </select>
-          )}
-
-          <button
-            onClick={() => {
-              void (isPiP || isFloatingMini ? exitMiniPlayer() : enterMiniPlayer());
-            }}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25"
-            aria-label={isPiP || isFloatingMini ? "Exit mini player" : "Enter mini player"}
-          >
-            <PictureInPicture2 className="h-4 w-4" />
-          </button>
-
-          <button
-            onClick={onToggleTheater}
-            className="rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/25"
-          >
-            {isTheaterMode ? "Exit Theater" : "Theater"}
-          </button>
-
-          <button
-            onClick={() => {
-              void toggleFullscreen();
-            }}
-            className="ml-auto inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25"
-            aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-          >
-            {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
-          </button>
         </div>
+
+        {showSettings && (
+           <SettingsMenu
+              availableQualities={availableQualities}
+              selectedLevel={selectedLevel}
+              applyQuality={applyQuality}
+              isAmbientMode={isAmbientMode}
+              setIsAmbientMode={setIsAmbientMode}
+              isStableVolume={isStableVolume}
+              setIsStableVolume={setIsStableVolume}
+              showStats={showStats}
+              setShowStats={setShowStats}
+              onClose={() => setShowSettings(false)}
+              isMobileMode={isMobileMode}
+           />
+        )}
+        
+        {isMobileMode && <MobileLiveChat isOpen={showChat} onClose={() => setShowChat(false)} />}
       </div>
     </div>
   );
