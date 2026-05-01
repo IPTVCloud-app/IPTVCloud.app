@@ -21,7 +21,6 @@ export function DotMatrixCanvas() {
     // Configuration
     const dotSize = 1;
     const spacing = 24;
-    const connectionRadius = 100;
     const flashlightRadius = 250;
 
     // Adjust these based on the linear design theme
@@ -72,20 +71,21 @@ export function DotMatrixCanvas() {
           const dy = mouseY - y;
           const distance = Math.sqrt(dx * dx + dy * dy);
 
-          // Draw connections
-          if (distance < connectionRadius) {
-            const intensity = 1 - distance / connectionRadius;
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            ctx.lineTo(mouseX, mouseY);
-            ctx.strokeStyle = `rgba(${brandColorRgb}, ${intensity * 0.15})`;
-            ctx.lineWidth = 1;
-            ctx.stroke();
+          // Interaction: Dots move away from cursor (Repulsion)
+          let displayX = x;
+          let displayY = y;
+
+          if (mouseX >= 0 && mouseY >= 0 && distance > 0) {
+            // Implementation based on the example provided:
+            // Shift = (Original - Mouse) / Distance * GridSize
+            // We use spacing as the GridSize.
+            displayX = x + ((x - mouseX) / distance) * (spacing * 0.5);
+            displayY = y + ((y - mouseY) / distance) * (spacing * 0.5);
           }
 
           // Draw the dot
           ctx.beginPath();
-          ctx.arc(x, y, dotSize, 0, Math.PI * 2);
+          ctx.arc(displayX, displayY, dotSize, 0, Math.PI * 2);
 
           if (distance < flashlightRadius) {
             const intensity = 1 - distance / flashlightRadius;
