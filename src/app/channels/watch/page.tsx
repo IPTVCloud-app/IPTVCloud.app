@@ -212,7 +212,7 @@ function WatchPlayer() {
                        {channelInfo?.category || "General"} Category
                     </div>
                     <p className="text-secondary leading-relaxed">
-                      {wikiDescription || `Live broadcast of ${channelInfo?.name}. Available natively through HLS parsing and custom HTML5 video.`}
+                      {wikiDescription || `No available description for ${channelInfo?.name}.`}
                     </p>
                   </div>
                 </>

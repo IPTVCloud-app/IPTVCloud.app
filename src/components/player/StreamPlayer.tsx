@@ -46,6 +46,7 @@ export function StreamPlayer({ channelId, onNext, onPrev, isTheaterMode, onToggl
   
   const [error, setError] = useState<string | null>(null);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const bufferingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const formatTime = (seconds: number) => {
     if (!seconds || isNaN(seconds)) return "0:00";
@@ -76,9 +77,17 @@ export function StreamPlayer({ channelId, onNext, onPrev, isTheaterMode, onToggl
 
       if (Hls.isSupported()) {
         const hls = new Hls({
-          maxBufferLength: 30,
-          maxMaxBufferLength: 600,
-          liveSyncDurationCount: 3,
+          lowLatencyMode: true,
+          enableWorker: true,
+          capLevelToPlayerSize: true,
+          maxBufferLength: 45,
+          maxMaxBufferLength: 120,
+          backBufferLength: 60,
+          liveSyncDurationCount: 6,
+          liveMaxLatencyDurationCount: 12,
+          maxLiveSyncPlaybackRate: 1.15,
+          manifestLoadingTimeOut: 10000,
+          fragLoadingTimeOut: 15000,
         });
         hlsRef.current = hls;
 
@@ -94,6 +103,16 @@ export function StreamPlayer({ channelId, onNext, onPrev, isTheaterMode, onToggl
           });
         });
 
+        hls.on(Hls.Events.FRAG_LOADING, () => {
+          if (bufferingTimeoutRef.current) clearTimeout(bufferingTimeoutRef.current);
+          bufferingTimeoutRef.current = setTimeout(() => setIsBuffering(true), 350);
+        });
+
+        hls.on(Hls.Events.FRAG_BUFFERED, () => {
+          if (bufferingTimeoutRef.current) clearTimeout(bufferingTimeoutRef.current);
+          setIsBuffering(false);
+        });
+
         hls.on(Hls.Events.ERROR, (_event: string, data: ErrorData) => {
           if (data.fatal) {
             switch (data.type) {
@@ -102,7 +121,7 @@ export function StreamPlayer({ channelId, onNext, onPrev, isTheaterMode, onToggl
                   setError(data.response.code === 403 ? "Stream is geo-blocked." : "Stream is offline or unavailable.");
                   setIsBuffering(false);
                 } else {
-                  hls.startLoad();
+                  setTimeout(() => hls.startLoad(), 500);
                 }
                 break;
               case Hls.ErrorTypes.MEDIA_ERROR:
@@ -134,6 +153,7 @@ export function StreamPlayer({ channelId, onNext, onPrev, isTheaterMode, onToggl
     initHls();
 
     return () => {
+      if (bufferingTimeoutRef.current) clearTimeout(bufferingTimeoutRef.current);
       if (hlsRef.current) {
         hlsRef.current.destroy();
         hlsRef.current = null;
@@ -148,8 +168,18 @@ export function StreamPlayer({ channelId, onNext, onPrev, isTheaterMode, onToggl
 
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
-    const handleWaiting = () => setIsBuffering(true);
-    const handlePlaying = () => setIsBuffering(false);
+    const handleWaiting = () => {
+      if (bufferingTimeoutRef.current) clearTimeout(bufferingTimeoutRef.current);
+      bufferingTimeoutRef.current = setTimeout(() => setIsBuffering(true), 350);
+    };
+    const handlePlaying = () => {
+      if (bufferingTimeoutRef.current) clearTimeout(bufferingTimeoutRef.current);
+      setIsBuffering(false);
+    };
+    const handleCanPlay = () => {
+      if (bufferingTimeoutRef.current) clearTimeout(bufferingTimeoutRef.current);
+      setIsBuffering(false);
+    };
     
     const handleTimeUpdate = () => {
       setCurrentTime(video.currentTime);
@@ -168,6 +198,7 @@ export function StreamPlayer({ channelId, onNext, onPrev, isTheaterMode, onToggl
     video.addEventListener("pause", handlePause);
     video.addEventListener("waiting", handleWaiting);
     video.addEventListener("playing", handlePlaying);
+    video.addEventListener("canplay", handleCanPlay);
     video.addEventListener("timeupdate", handleTimeUpdate);
     video.addEventListener("volumechange", handleVolume);
     video.addEventListener("enterpictureinpicture", handleEnterPiP);
@@ -178,10 +209,12 @@ export function StreamPlayer({ channelId, onNext, onPrev, isTheaterMode, onToggl
       video.removeEventListener("pause", handlePause);
       video.removeEventListener("waiting", handleWaiting);
       video.removeEventListener("playing", handlePlaying);
+      video.removeEventListener("canplay", handleCanPlay);
       video.removeEventListener("timeupdate", handleTimeUpdate);
       video.removeEventListener("volumechange", handleVolume);
       video.removeEventListener("enterpictureinpicture", handleEnterPiP);
       video.removeEventListener("leavepictureinpicture", handleLeavePiP);
+      if (bufferingTimeoutRef.current) clearTimeout(bufferingTimeoutRef.current);
     };
   }, []);
 
@@ -305,6 +338,7 @@ export function StreamPlayer({ channelId, onNext, onPrev, isTheaterMode, onToggl
           onDoubleClick={toggleFullscreen}
           crossOrigin="anonymous"
           playsInline
+          preload="auto"
           poster={`${(process.env.NEXT_PUBLIC_API_URL || '').replace(/\/$/, '')}/api/channels/thumbnail?id=${channelId}`}
         />
 
