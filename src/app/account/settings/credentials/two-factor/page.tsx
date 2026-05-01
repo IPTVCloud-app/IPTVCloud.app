@@ -148,7 +148,7 @@ export default function TwoFactorSettingsPage() {
               <input 
                 type="text" placeholder="Enter 6-digit code" maxLength={6} value={authCode}
                 onChange={(e) => setAuthCode(e.target.value)}
-                className="w-full bg-[rgba(255,255,255,0.02)] text-primary border border-input focus:border-red-500 px-4 py-3 rounded-lg text-center tracking-widest font-mono text-lg outline-none transition-all"
+                className="form-input"
               />
               <button 
                 onClick={() => handleVerify('disable')}
@@ -161,7 +161,7 @@ export default function TwoFactorSettingsPage() {
           </div>
         </div>
       ) : (
-        <div className="bg-surface border border-border rounded-xl p-8 text-center shadow-lg">
+        <div className="card">
           <div className="w-16 h-16 bg-brand/10 rounded-full flex items-center justify-center mx-auto mb-4 text-brand">
             <AlertCircle className="w-8 h-8" />
           </div>
@@ -202,12 +202,12 @@ export default function TwoFactorSettingsPage() {
                 <input 
                   type="text" placeholder="Enter 6-digit code" maxLength={6} value={authCode}
                   onChange={(e) => setAuthCode(e.target.value)}
-                  className="w-full bg-[rgba(255,255,255,0.02)] text-primary border border-input focus:border-brand px-4 py-3 rounded-lg text-lg tracking-widest text-center font-mono outline-none transition-all"
+                  className="form-input"
                 />
                 <button 
                   onClick={() => handleVerify('verify')}
                   disabled={authCode.length !== 6 || loading}
-                  className="bg-brand text-white px-4 py-3 rounded-lg font-bold hover:bg-accent transition-colors disabled:opacity-50 shadow-lg shadow-brand/20"
+                  className="btn-brand"
                 >
                   Enable Protection
                 </button>

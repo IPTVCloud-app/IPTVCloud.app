@@ -193,7 +193,7 @@ export function Navbar() {
               </Link>
               <button 
                 onClick={logout}
-                className="flex items-center gap-2 bg-white/5 border border-white/10 text-white px-5 py-2.5 rounded-full text-[13px] font-semibold transition-all hover:bg-white/10 active:scale-95"
+                className="btn-ghost"
               >
                 Logout
               </button>
@@ -203,7 +203,7 @@ export function Navbar() {
               <Link href="/account/signin" className="text-[13px] font-medium text-tertiary hover:text-primary transition-colors flex items-center gap-1.5">
                 Sign In
               </Link>
-              <Link href="/account/signup" className="flex items-center gap-2 bg-brand text-white px-6 py-2.5 rounded-full text-[13px] font-bold transition-all hover:bg-accent shadow-lg shadow-brand/20 active:scale-95">
+              <Link href="/account/signup" className="btn-brand">
                 Get Started
               </Link>
             </>
@@ -314,7 +314,7 @@ export function Navbar() {
                     </Link>
                     <button 
                       onClick={() => { logout(); setIsOpen(false); }}
-                      className="flex justify-center items-center gap-2 bg-zinc-800 text-white py-4 rounded-2xl text-base font-bold"
+                      className="btn-ghost flex justify-center items-center gap-2 py-4 rounded-2xl text-base"
                     >
                       Logout
                     </button>
@@ -323,14 +323,14 @@ export function Navbar() {
                   <>
                     <Link 
                       href="/account/signin" 
-                      className="flex items-center justify-center gap-2 text-base font-bold text-primary py-4 bg-surface border border-border rounded-2xl"
+                      className="card flex items-center justify-center gap-2 text-base font-bold text-primary py-4 rounded-2xl"
                       onClick={() => setIsOpen(false)}
                     >
                       Sign In
                     </Link>
                     <Link 
                       href="/account/signup" 
-                      className="flex justify-center items-center gap-2 bg-brand text-white py-4 rounded-2xl text-base font-bold shadow-xl shadow-brand/20"
+                      className="btn-brand flex justify-center items-center gap-2 py-4 rounded-2xl text-base"
                       onClick={() => setIsOpen(false)}
                     >
                       Get Started

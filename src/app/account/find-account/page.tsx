@@ -47,7 +47,7 @@ export default function FindAccountPage() {
   };
 
   return (
-    <div className="bg-surface border border-border rounded-xl p-8 linear-shadow-card">
+    <div className="card">
       <div className="text-center mb-8">
         <h1 className="text-2xl font-medium tracking-[-0.288px] text-primary mb-2">Find your account</h1>
         <p className="text-sm text-tertiary">Enter your username and we&apos;ll help you identify your registered email.</p>
@@ -77,7 +77,7 @@ export default function FindAccountPage() {
             <button 
               type="submit" 
               disabled={isSubmitting}
-              className="w-full bg-brand text-white px-4 py-2.5 rounded-md text-sm font-medium transition-all hover:bg-accent disabled:opacity-50 mt-2 shadow-[0_2px_10px_rgba(94,106,210,0.3)] hover:-translate-y-0.5 active:translate-y-0"
+              className="btn-brand"
             >
               {isSubmitting ? "Searching..." : "Search Account"}
             </button>
@@ -98,7 +98,7 @@ export default function FindAccountPage() {
               {result.maskedEmail}
             </div>
             <div className="flex flex-col gap-3">
-              <Link href={`/account/signin?email=${encodeURIComponent(result.email)}`} className="w-full bg-brand text-white px-4 py-2.5 rounded-md text-sm font-medium transition-all hover:bg-accent shadow-[0_2px_10px_rgba(94,106,210,0.3)]">
+              <Link href={`/account/signin?email=${encodeURIComponent(result.email)}`} className="btn-brand">
                 Yes, let me sign in
               </Link>
               <button 

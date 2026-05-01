@@ -44,7 +44,7 @@ function CookieConsent() {
     <motion.div 
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      className="fixed bottom-6 left-6 right-6 md:left-auto md:right-6 md:w-96 z-[200] bg-surface/80 backdrop-blur-xl border border-border p-6 rounded-2xl shadow-2xl"
+      className="card fixed bottom-6 left-6 right-6 md:left-auto md:right-6 md:w-96 z-[200] p-6 rounded-2xl shadow-2xl"
     >
       <h3 className="font-bold mb-2">Cookies & Experience</h3>
       <p className="text-xs text-secondary leading-relaxed mb-4">
@@ -53,7 +53,7 @@ function CookieConsent() {
       <div className="flex gap-3">
         <button 
           onClick={accept}
-          className="flex-1 bg-brand text-white py-2 rounded-lg text-xs font-bold hover:bg-accent transition-colors"
+          className="btn-brand"
         >
           Accept All
         </button>
@@ -119,10 +119,10 @@ export default function HomePage() {
               </p>
               
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link href="/channels" className="group px-8 py-4 bg-brand text-white rounded-full font-bold flex items-center gap-2 transition-all hover:bg-accent hover:shadow-[0_0_30px_rgba(94,106,210,0.4)] hover:-translate-y-1">
+                <Link href="/channels" className="btn-brand flex items-center gap-2 hover:-translate-y-1">
                   Start Watching Now <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
-                <Link href="/account/signup" className="px-8 py-4 bg-surface border border-border text-primary rounded-full font-bold transition-all hover:bg-white/5 hover:border-brand/50">
+                <Link href="/account/signup" className="btn-ghost">
                   Create Free Account
                 </Link>
               </div>
@@ -231,7 +231,7 @@ export default function HomePage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
-                  className="flex flex-col gap-4 p-8 rounded-3xl bg-surface/50 backdrop-blur-sm border border-border transition-all hover:border-brand/30 hover:shadow-xl hover:shadow-brand/5 group"
+                  className="card flex flex-col gap-4 p-8 rounded-3xl transition-all hover:border-brand/30 hover:shadow-xl hover:shadow-brand/5 group"
                 >
                    <div className="w-14 h-14 bg-brand/10 rounded-2xl flex items-center justify-center text-brand shrink-0 group-hover:bg-brand group-hover:text-white transition-all duration-500">
                      {feature.icon}

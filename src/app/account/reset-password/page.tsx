@@ -70,7 +70,7 @@ function ResetPasswordForm() {
 
   if (isSuccess) {
     return (
-      <div className="bg-surface border border-border rounded-xl p-8 linear-shadow-card text-center">
+      <div className="card">
         <div className="w-16 h-16 bg-brand/10 text-brand rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_20px_rgba(94,106,210,0.2)]">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         </div>
@@ -84,7 +84,7 @@ function ResetPasswordForm() {
   }
 
   return (
-    <div className="bg-surface border border-border rounded-xl p-8 linear-shadow-card">
+    <div className="card">
       <div className="text-center mb-8">
         <h1 className="text-2xl font-medium tracking-[-0.288px] text-primary mb-2">Set New Password</h1>
         <p className="text-sm text-tertiary">Please enter and confirm your new password below.</p>
@@ -117,7 +117,7 @@ function ResetPasswordForm() {
         <button 
           type="submit" 
           disabled={isSubmitting || !email || !token}
-          className="w-full bg-brand text-white px-4 py-2.5 rounded-md text-sm font-medium transition-all hover:bg-accent disabled:opacity-50 mt-2 shadow-[0_2px_10px_rgba(94,106,210,0.3)] hover:-translate-y-0.5 active:translate-y-0"
+          className="btn-brand"
         >
           {isSubmitting ? "Updating..." : "Reset Password"}
         </button>
@@ -129,7 +129,7 @@ function ResetPasswordForm() {
 export default function ResetPasswordPage() {
   return (
     <Suspense fallback={
-      <div className="bg-surface border border-border rounded-xl p-8 animate-pulse">
+      <div className="card">
         <div className="h-8 w-48 bg-[rgba(255,255,255,0.05)] rounded mx-auto mb-4" />
         <div className="h-4 w-64 bg-[rgba(255,255,255,0.05)] rounded mx-auto mb-8" />
         <div className="space-y-6">

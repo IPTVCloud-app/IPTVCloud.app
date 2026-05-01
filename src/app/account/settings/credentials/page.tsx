@@ -119,7 +119,7 @@ export default function CredentialsSettingsPage() {
 
       <div className="space-y-6">
         {/* Change Password */}
-        <section className="bg-surface border border-border rounded-xl p-6">
+        <section className="card">
           <h2 className="text-sm font-medium text-primary mb-4 flex items-center gap-2">
             <Key className="w-4 h-4 text-tertiary" /> Change Password
           </h2>
@@ -127,17 +127,17 @@ export default function CredentialsSettingsPage() {
             <input 
               type="password" placeholder="Current Password" value={passwordForm.current}
               onChange={(e) => setPasswordForm({...passwordForm, current: e.target.value})}
-              className="w-full bg-[rgba(255,255,255,0.02)] text-primary border border-input focus:border-brand px-3 py-2 rounded-md text-sm outline-none transition-all sm:col-span-2"
+              className="form-input"
             />
             <input 
               type="password" placeholder="New Password" value={passwordForm.new}
               onChange={(e) => setPasswordForm({...passwordForm, new: e.target.value})}
-              className="w-full bg-[rgba(255,255,255,0.02)] text-primary border border-input focus:border-brand px-3 py-2 rounded-md text-sm outline-none transition-all"
+              className="form-input"
             />
             <input 
               type="password" placeholder="Confirm New Password" value={passwordForm.confirm}
               onChange={(e) => setPasswordForm({...passwordForm, confirm: e.target.value})}
-              className="w-full bg-[rgba(255,255,255,0.02)] text-primary border border-input focus:border-brand px-3 py-2 rounded-md text-sm outline-none transition-all"
+              className="form-input"
             />
           </div>
           <button 
@@ -150,7 +150,7 @@ export default function CredentialsSettingsPage() {
         </section>
 
         {/* Change Email */}
-        <section className="bg-surface border border-border rounded-xl p-6">
+        <section className="card">
           <h2 className="text-sm font-medium text-primary mb-4 flex items-center gap-2">
             <Mail className="w-4 h-4 text-tertiary" /> Change Email
           </h2>
@@ -158,12 +158,12 @@ export default function CredentialsSettingsPage() {
             <input 
               type="email" placeholder="New Email Address" value={emailForm.newEmail}
               onChange={(e) => setEmailForm({...emailForm, newEmail: e.target.value})}
-              className="w-full bg-[rgba(255,255,255,0.02)] text-primary border border-input focus:border-brand px-3 py-2 rounded-md text-sm outline-none transition-all"
+              className="form-input"
             />
             <input 
               type="email" placeholder="Confirm New Email" value={emailForm.confirmEmail}
               onChange={(e) => setEmailForm({...emailForm, confirmEmail: e.target.value})}
-              className="w-full bg-[rgba(255,255,255,0.02)] text-primary border border-input focus:border-brand px-3 py-2 rounded-md text-sm outline-none transition-all"
+              className="form-input"
             />
           </div>
           <button 
@@ -176,7 +176,7 @@ export default function CredentialsSettingsPage() {
         </section>
 
         {/* Change Username */}
-        <section className="bg-surface border border-border rounded-xl p-6">
+        <section className="card">
           <h2 className="text-sm font-medium text-primary mb-4 flex items-center gap-2">
             <User className="w-4 h-4 text-tertiary" /> Change Username
           </h2>
@@ -184,7 +184,7 @@ export default function CredentialsSettingsPage() {
             <input 
               type="text" placeholder="New Username" value={usernameForm.newUsername}
               onChange={(e) => setUsernameForm({...usernameForm, newUsername: e.target.value})}
-              className="flex-1 w-full bg-[rgba(255,255,255,0.02)] text-primary border border-input focus:border-brand px-3 py-2 rounded-md text-sm outline-none transition-all"
+              className="form-input"
             />
             <button 
               onClick={() => handleOpenVerify('username')}
@@ -222,14 +222,14 @@ export default function CredentialsSettingsPage() {
            <input 
              type="text" placeholder="Enter 6-digit code" maxLength={6} value={verifyModal.authCode}
              onChange={(e) => setVerifyModal({...verifyModal, authCode: e.target.value})}
-             className="w-full bg-[rgba(255,255,255,0.02)] text-primary border border-input focus:border-brand px-4 py-3 rounded-lg text-lg tracking-widest text-center font-mono outline-none transition-all"
+             className="form-input"
            />
         </div>
         <div className="flex flex-col gap-3">
           <button 
             onClick={executeUpdate}
             disabled={verifyModal.authCode.length !== 6 || loading}
-            className="w-full bg-brand text-white px-4 py-3 rounded-lg font-bold hover:bg-accent disabled:opacity-50 transition-colors shadow-lg shadow-brand/20"
+            className="btn-brand"
           >
             {loading ? "Verifying..." : "Confirm & Update"}
           </button>

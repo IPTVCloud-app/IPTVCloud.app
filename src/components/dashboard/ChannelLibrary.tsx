@@ -44,7 +44,7 @@ export function ChannelLibrary() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {channels.map((c) => (
-          <div key={c.id} className="flex items-center justify-between p-4 bg-surface border border-input rounded-lg hover:border-border transition-colors group cursor-pointer">
+          <div key={c.id} className="form-input">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded bg-elevated flex items-center justify-center relative overflow-hidden">
                 <Play className="w-5 h-5 text-[rgba(255,255,255,0.2)] group-hover:text-brand transition-colors relative z-10" />

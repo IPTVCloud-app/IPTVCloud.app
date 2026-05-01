@@ -45,7 +45,7 @@ export function ChannelSlider({ title, channels }: ChannelSliderProps) {
       >
         {channels.map((channel, idx) => (
           <Link key={idx} href={`/channels/watch?id=${channel.id}`} className="min-w-[240px] md:min-w-[280px] snap-start group/card block">
-            <div className="bg-surface border border-border rounded-xl overflow-hidden hover:border-brand transition-all duration-300 h-full flex flex-col hover:shadow-xl hover:shadow-brand/5 hover:-translate-y-1">
+            <div className="card">
               <div className="relative w-full pt-[56.25%] bg-elevated">
                 <div className="absolute inset-0">
                   <ChannelThumbnail 

@@ -20,7 +20,7 @@ export function WatchHistory() {
         {history.map((item, i) => (
           <div key={i} className="relative pl-6">
             <div className="absolute w-2 h-2 bg-brand rounded-full -left-[4.5px] top-1.5 ring-4 ring-page"></div>
-            <div className="bg-surface border border-input rounded-lg p-4">
+            <div className="form-input">
                <div className="flex justify-between items-start mb-1">
                  <h4 className="font-medium text-[14px] text-primary">{item.title}</h4>
                  <span className="text-[12px] font-mono text-quaternary">{item.time}</span>

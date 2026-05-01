@@ -26,28 +26,28 @@ export function OverviewHeader() {
       </div>
       
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full md:w-auto">
-        <div className="bg-[rgba(255,255,255,0.02)] border border-input rounded-lg p-3 min-w-[120px]">
+        <div className="form-input">
           <div className="flex items-center gap-2 text-quaternary mb-2">
             <Eye className="w-3.5 h-3.5" />
             <span className="text-xs font-mono uppercase">Watch Time</span>
           </div>
           <div className="text-lg font-medium text-primary">0h 0m</div>
         </div>
-        <div className="bg-[rgba(255,255,255,0.02)] border border-input rounded-lg p-3 min-w-[120px]">
+        <div className="form-input">
           <div className="flex items-center gap-2 text-quaternary mb-2">
             <Radio className="w-3.5 h-3.5" />
             <span className="text-xs font-mono uppercase">Active</span>
           </div>
           <div className="text-lg font-medium text-primary text-emerald">0 Streams</div>
         </div>
-        <div className="bg-[rgba(255,255,255,0.02)] border border-input rounded-lg p-3 min-w-[120px]">
+        <div className="form-input">
           <div className="flex items-center gap-2 text-quaternary mb-2">
             <Star className="w-3.5 h-3.5" />
             <span className="text-xs font-mono uppercase">Favorites</span>
           </div>
           <div className="text-lg font-medium text-primary">0</div>
         </div>
-        <div className="bg-[rgba(255,255,255,0.02)] border border-input rounded-lg p-3 min-w-[120px]">
+        <div className="form-input">
           <div className="flex items-center gap-2 text-quaternary mb-2">
             <Smartphone className="w-3.5 h-3.5" />
             <span className="text-xs font-mono uppercase">Devices</span>

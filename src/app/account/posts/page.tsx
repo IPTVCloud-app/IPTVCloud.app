@@ -14,7 +14,7 @@ export default function PostsPage() {
           <p className="text-sm text-tertiary">View and manage your community posts.</p>
         </div>
       </div>
-      <div className="text-center p-12 bg-surface border border-border rounded-xl">
+      <div className="card">
         <p className="text-secondary">You haven't published any posts yet.</p>
       </div>
     </div>

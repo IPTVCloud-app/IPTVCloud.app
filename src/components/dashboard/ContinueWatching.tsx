@@ -16,7 +16,7 @@ export function ContinueWatching() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {streams.map((s, i) => (
-          <div key={i} className="group bg-surface border border-input rounded-lg overflow-hidden cursor-pointer hover:border-border transition-colors">
+          <div key={i} className="form-input">
             <div className="aspect-video bg-elevated relative flex items-center justify-center">
               <Play className="w-8 h-8 text-[rgba(255,255,255,0.2)] group-hover:text-white transition-colors" />
               <div className="absolute bottom-0 left-0 right-0 h-1 bg-[rgba(255,255,255,0.1)]">

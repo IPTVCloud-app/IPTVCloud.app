@@ -200,7 +200,7 @@ export default function ChannelsExplorerPage() {
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute right-0 mt-2 w-80 bg-surface border border-border rounded-xl shadow-2xl z-[60] p-5 overflow-hidden"
+                    className="card absolute right-0 mt-2 w-80 z-[60] p-5 overflow-hidden"
                   >
                     <div className="flex items-center justify-between mb-5 pb-3 border-b border-border">
                       <h3 className="font-bold text-primary flex items-center gap-2">
@@ -260,7 +260,7 @@ export default function ChannelsExplorerPage() {
                         </button>
                         <button 
                           onClick={() => setShowFilters(false)}
-                          className="flex-1 px-4 py-2 bg-brand text-white rounded-lg text-xs font-bold shadow-lg shadow-brand/20 hover:bg-accent transition-colors"
+                          className="btn-brand"
                         >
                           Show Results
                         </button>
@@ -294,7 +294,7 @@ export default function ChannelsExplorerPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {channels.map((channel, idx) => (
             <Link key={`${channel.id}-${idx}`} href={`/channels/watch?id=${channel.id}`} className="group block">
-              <div className="bg-surface border border-border rounded-xl overflow-hidden hover:border-brand transition-all duration-300 h-full flex flex-col hover:shadow-xl hover:shadow-brand/5 hover:-translate-y-1">
+              <div className="card">
                 <div className="relative w-full pt-[56.25%] bg-elevated">
                   <div className="absolute inset-0">
                     <ChannelThumbnail 
@@ -341,7 +341,7 @@ export default function ChannelsExplorerPage() {
 
           {/* Initial Loading Skeletons */}
           {loading && Array.from({ length: 12 }).map((_, i) => (
-            <div key={`skeleton-${i}`} className="bg-surface border border-border rounded-xl overflow-hidden h-[280px]">
+            <div key={`skeleton-${i}`} className="card">
               <div className={`w-full pt-[56.25%] bg-elevated ${SHIMMER_CLASS}`} />
               <div className="p-4 space-y-3">
                 <div className={`h-5 w-3/4 bg-elevated rounded ${SHIMMER_CLASS}`} />

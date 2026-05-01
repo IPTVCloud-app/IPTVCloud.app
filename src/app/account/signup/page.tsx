@@ -95,7 +95,7 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="bg-surface border border-border rounded-xl p-8 linear-shadow-card relative z-10">
+    <div className="card relative z-10">
       <div className="text-center mb-8">
         <h1 className="text-2xl font-medium tracking-[-0.288px] text-primary mb-2 text-display">Create an account</h1>
         <p className="text-sm text-tertiary text-body">Start streaming with IPTVCloud today</p>
@@ -109,42 +109,42 @@ export default function SignUpPage() {
 
       <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-4">
         <div className="grid grid-cols-12 gap-3">
-          <div className="col-span-8 space-y-1.5">
-            <label className="block text-xs font-medium text-secondary tracking-tight">First Name *</label>
+          <div className="col-span-8 form-group">
+            <label className="form-label">First Name *</label>
             <input 
               type="text" 
               {...register("firstName")}
               placeholder="John"
-              className={`w-full bg-[rgba(255,255,255,0.02)] text-primary border ${errors.firstName ? 'border-[#e5484d] focus:border-[#e5484d]' : 'border-input focus:border-accent'} px-3.5 py-2 rounded-md text-sm outline-none transition-all focus:ring-2 focus:ring-[rgba(113,112,255,0.1)]`}
+              className={`form-input ${errors.firstName ? 'form-input--error' : ''}`}
             />
           </div>
-          <div className="col-span-4 space-y-1.5">
-            <label className="block text-xs font-medium text-secondary tracking-tight">M.I.</label>
+          <div className="col-span-4 form-group">
+            <label className="form-label">M.I.</label>
             <input 
               type="text" 
               maxLength={1}
               {...register("middleInitial")}
               placeholder="Q"
-              className="w-full bg-[rgba(255,255,255,0.02)] text-primary border border-input focus:border-accent px-3.5 py-2 rounded-md text-sm outline-none transition-all text-center"
+              className="form-input text-center"
             />
           </div>
         </div>
 
         <div className="grid grid-cols-12 gap-3">
-          <div className="col-span-8 space-y-1.5">
-            <label className="block text-xs font-medium text-secondary tracking-tight">Last Name</label>
+          <div className="col-span-8 form-group">
+            <label className="form-label">Last Name</label>
             <input 
               type="text" 
               {...register("lastName")}
               placeholder="Doe"
-              className="w-full bg-[rgba(255,255,255,0.02)] text-primary border border-input focus:border-accent px-3.5 py-2 rounded-md text-sm outline-none transition-all"
+              className="form-input"
             />
           </div>
-          <div className="col-span-4 space-y-1.5">
-            <label className="block text-xs font-medium text-secondary tracking-tight">Suffix</label>
+          <div className="col-span-4 form-group">
+            <label className="form-label">Suffix</label>
             <select 
               {...register("suffix")}
-              className="w-full bg-surface text-primary border border-input focus:border-accent px-2 py-2 rounded-md text-sm outline-none transition-all appearance-none cursor-pointer"
+              className="form-input appearance-none cursor-pointer"
             >
               <option value="N/A">N/A</option>
               <option value="Jr.">Jr.</option>
@@ -157,60 +157,60 @@ export default function SignUpPage() {
           </div>
         </div>
 
-        <div className="space-y-1.5">
-          <label className="block text-xs font-medium text-secondary tracking-tight">Username *</label>
+        <div className="form-group">
+          <label className="form-label">Username *</label>
           <input 
             type="text" 
             {...register("username")}
             placeholder="johndoe88"
-            className={`w-full bg-[rgba(255,255,255,0.02)] text-primary border ${errors.username ? 'border-[#e5484d] focus:border-[#e5484d]' : 'border-input focus:border-accent'} px-3.5 py-2 rounded-md text-sm outline-none transition-all focus:ring-2 focus:ring-[rgba(113,112,255,0.1)]`}
+            className={`form-input ${errors.username ? 'form-input--error' : ''}`}
           />
         </div>
 
-        <div className="space-y-1.5">
-          <label className="block text-xs font-medium text-secondary tracking-tight">Email *</label>
+        <div className="form-group">
+          <label className="form-label">Email *</label>
           <input 
             type="email" 
             {...register("email")}
             placeholder="name@example.com"
-            className={`w-full bg-[rgba(255,255,255,0.02)] text-primary border ${errors.email ? 'border-[#e5484d] focus:border-[#e5484d]' : 'border-input focus:border-accent'} px-3.5 py-2 rounded-md text-sm outline-none transition-all focus:ring-2 focus:ring-[rgba(113,112,255,0.1)]`}
+            className={`form-input ${errors.email ? 'form-input--error' : ''}`}
           />
         </div>
 
-        <div className="space-y-1.5">
-          <label className="block text-xs font-medium text-secondary tracking-tight">Birthday *</label>
+        <div className="form-group">
+          <label className="form-label">Birthday *</label>
           <input 
             type="date" 
             {...register("birthday")}
-            className={`w-full bg-[rgba(255,255,255,0.02)] text-primary border ${errors.birthday ? 'border-[#e5484d] focus:border-[#e5484d]' : 'border-input focus:border-accent'} px-3.5 py-2 rounded-md text-sm outline-none transition-all focus:ring-2 focus:ring-[rgba(113,112,255,0.1)]`}
+            className={`form-input ${errors.birthday ? 'form-input--error' : ''}`}
           />
         </div>
 
-        <div className="space-y-1.5">
-          <label className="block text-xs font-medium text-secondary tracking-tight">Password *</label>
+        <div className="form-group">
+          <label className="form-label">Password *</label>
           <input 
             type="password" 
             {...register("password")}
             placeholder="••••••••"
-            className={`w-full bg-[rgba(255,255,255,0.02)] text-primary border ${errors.password ? 'border-[#e5484d] focus:border-[#e5484d]' : 'border-input focus:border-accent'} px-3.5 py-2 rounded-md text-sm outline-none transition-all focus:ring-2 focus:ring-[rgba(113,112,255,0.1)]`}
+            className={`form-input ${errors.password ? 'form-input--error' : ''}`}
           />
           <PasswordStrengthBar password={passwordValue} />
         </div>
 
-        <div className="space-y-1.5">
-          <label className="block text-xs font-medium text-secondary tracking-tight">Confirm Password *</label>
+        <div className="form-group">
+          <label className="form-label">Confirm Password *</label>
           <input 
             type="password" 
             {...register("confirmPassword")}
             placeholder="••••••••"
-            className={`w-full bg-[rgba(255,255,255,0.02)] text-primary border ${errors.confirmPassword ? 'border-[#e5484d] focus:border-[#e5484d]' : 'border-input focus:border-accent'} px-3.5 py-2 rounded-md text-sm outline-none transition-all focus:ring-2 focus:ring-[rgba(113,112,255,0.1)]`}
+            className={`form-input ${errors.confirmPassword ? 'form-input--error' : ''}`}
           />
         </div>
 
         <button 
           type="submit" 
           disabled={isSubmitting}
-          className="w-full bg-brand text-white px-4 py-2.5 rounded-md text-sm font-medium transition-all hover:bg-accent disabled:opacity-50 mt-4 shadow-[0_2px_10px_rgba(94,106,210,0.3)] hover:shadow-[0_4px_20px_rgba(94,106,210,0.4)] hover:-translate-y-0.5 active:translate-y-0"
+          className="btn-brand w-full mt-4"
         >
           {isSubmitting ? "Creating account..." : "Sign up"}
         </button>

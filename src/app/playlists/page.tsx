@@ -78,7 +78,7 @@ export default function PlaylistsPage() {
         <ListVideo className="w-16 h-16 text-tertiary mb-4" />
         <h2 className="text-2xl font-bold mb-2">Sign in to view your Playlists</h2>
         <p className="text-secondary mb-6">Keep track of your favorite channels in one place.</p>
-        <Link href="/account/signin" className="px-6 py-2 bg-brand text-white rounded-full font-medium hover:bg-accent transition-colors">
+        <Link href="/account/signin" className="btn-brand">
           Sign In
         </Link>
       </div>
@@ -95,14 +95,14 @@ export default function PlaylistsPage() {
           </div>
           <button 
             onClick={() => toast.success("Creation modal coming soon!")}
-            className="flex items-center gap-2 px-5 py-2.5 bg-brand text-white rounded-full font-medium shadow-lg shadow-brand/20 hover:bg-accent transition-all shrink-0"
+            className="btn-brand"
           >
             <Plus className="w-5 h-5" /> Create Playlist
           </button>
         </div>
 
         {playlists.length === 0 ? (
-          <div className="text-center py-20 bg-surface border border-border rounded-xl">
+          <div className="card">
              <ListVideo className="w-12 h-12 text-tertiary mx-auto mb-3" />
              <h3 className="text-lg font-bold text-primary mb-1">No playlists yet</h3>
              <p className="text-secondary">Click the button above to create your first playlist.</p>
@@ -110,7 +110,7 @@ export default function PlaylistsPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {playlists.map(playlist => (
-              <div key={playlist.id} className="bg-surface border border-border rounded-xl overflow-hidden group hover:border-brand transition-colors">
+              <div key={playlist.id} className="card">
                 <Link href={`/playlists/${playlist.id}`} className="block aspect-[16/9] bg-elevated relative overflow-hidden">
                    <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/10 transition-colors">
                      <ListVideo className="w-10 h-10 text-white/50 group-hover:scale-110 transition-transform" />

@@ -16,7 +16,7 @@ export function ActivitySnapshot() {
       <h2 className="text-lg font-medium tracking-[-0.165px] text-primary mb-4">Recent Activity</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-1 bg-surface border border-border rounded-xl p-6 linear-shadow-card flex flex-col justify-center">
+        <div className="card">
           <h3 className="text-sm font-medium text-secondary mb-6 text-center">Category Breakdown</h3>
           <div className="h-48 w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -53,7 +53,7 @@ export function ActivitySnapshot() {
         </div>
 
         <div className="md:col-span-2 grid grid-rows-2 gap-6">
-          <div className="bg-[rgba(255,255,255,0.02)] border border-input rounded-xl p-6 flex items-center gap-4">
+          <div className="form-input">
             <div className="w-12 h-12 rounded-full bg-[rgba(255,255,255,0.05)] flex items-center justify-center text-accent">
               <Clock className="w-6 h-6" />
             </div>
@@ -64,7 +64,7 @@ export function ActivitySnapshot() {
           </div>
           
           <div className="grid grid-cols-2 gap-6">
-            <div className="bg-[rgba(255,255,255,0.02)] border border-input rounded-xl p-5">
+            <div className="form-input">
               <div className="flex items-center gap-2 mb-3 text-secondary">
                 <Globe className="w-4 h-4" />
                 <span className="text-sm font-medium">Top Region</span>
@@ -72,7 +72,7 @@ export function ActivitySnapshot() {
               <div className="text-xl font-medium text-primary">United States</div>
               <div className="text-xs text-tertiary mt-1">65% of your streams</div>
             </div>
-            <div className="bg-[rgba(255,255,255,0.02)] border border-input rounded-xl p-5">
+            <div className="form-input">
               <div className="flex items-center gap-2 mb-3 text-secondary">
                 <Activity className="w-4 h-4" />
                 <span className="text-sm font-medium">Recent Device</span>

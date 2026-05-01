@@ -14,7 +14,7 @@ export default function HistoryPage() {
           <p className="text-sm text-tertiary">Pick up right where you left off.</p>
         </div>
       </div>
-      <div className="text-center p-12 bg-surface border border-border rounded-xl">
+      <div className="card">
         <p className="text-secondary">Your watch history is currently empty.</p>
       </div>
     </div>

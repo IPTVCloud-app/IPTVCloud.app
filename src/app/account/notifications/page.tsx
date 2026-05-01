@@ -14,7 +14,7 @@ export default function NotificationsPage() {
           <p className="text-sm text-tertiary">Updates and alerts for your account.</p>
         </div>
       </div>
-      <div className="text-center p-12 bg-surface border border-border rounded-xl">
+      <div className="card">
         <p className="text-secondary">You're all caught up! No new notifications.</p>
       </div>
     </div>

@@ -93,7 +93,7 @@ export default function PersonalSettingsPage() {
         <section>
           <h2 className="text-sm font-medium uppercase tracking-widest text-quaternary mb-4">Appearance</h2>
           
-          <div className="bg-surface border border-border rounded-xl p-6 space-y-6">
+          <div className="card">
             <div>
               <label className="flex items-center gap-2 text-sm font-medium text-primary mb-3">
                 <Monitor className="w-4 h-4 text-tertiary" />
@@ -146,7 +146,7 @@ export default function PersonalSettingsPage() {
         <section>
           <h2 className="text-sm font-medium uppercase tracking-widest text-quaternary mb-4">Playback Defaults</h2>
           
-          <div className="bg-surface border border-border rounded-xl p-6 space-y-6">
+          <div className="card">
             <div>
               <label className="flex items-center gap-2 text-sm font-medium text-primary mb-3">
                 <Video className="w-4 h-4 text-tertiary" />
@@ -155,7 +155,7 @@ export default function PersonalSettingsPage() {
               <select 
                 value={settings.playerResolution}
                 onChange={(e) => setSettings({ ...settings, playerResolution: e.target.value })}
-                className="w-full sm:w-64 bg-[rgba(255,255,255,0.02)] text-primary border border-input focus:border-brand px-3 py-2.5 rounded-md text-sm outline-none transition-all cursor-pointer"
+                className="form-input"
               >
                 <option value="default">Auto (Bandwidth Dependent)</option>
                 <option value="1080p">1080p (High)</option>
@@ -186,7 +186,7 @@ export default function PersonalSettingsPage() {
           <button 
             onClick={handleSave}
             disabled={saving}
-            className="bg-brand text-white px-6 py-2 rounded-md text-sm font-medium hover:bg-accent transition-colors disabled:opacity-50"
+            className="btn-brand"
           >
             {saving ? "Saving..." : "Save Preferences"}
           </button>

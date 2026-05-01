@@ -46,7 +46,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="bg-surface border border-border rounded-xl p-8 linear-shadow-card">
+    <div className="card">
       <div className="text-center mb-8">
         <h1 className="text-2xl font-medium tracking-[-0.288px] text-primary mb-2">Forgot Password?</h1>
         <p className="text-sm text-tertiary">Enter your email and we&apos;ll send you a link to reset your password.</p>
@@ -68,7 +68,7 @@ export default function ForgotPasswordPage() {
           <button 
             type="submit" 
             disabled={isSubmitting}
-            className="w-full bg-brand text-white px-4 py-2.5 rounded-md text-sm font-medium transition-all hover:bg-accent disabled:opacity-50 mt-2 shadow-[0_2px_10px_rgba(94,106,210,0.3)] hover:-translate-y-0.5 active:translate-y-0"
+            className="btn-brand"
           >
             {isSubmitting ? "Sending..." : "Send Reset Link"}
           </button>

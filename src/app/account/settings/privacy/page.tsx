@@ -123,7 +123,7 @@ export default function PrivacySettingsPage() {
         </div>
       </div>
 
-      <div className="bg-surface border border-border rounded-xl overflow-hidden mb-8">
+      <div className="card">
         <ToggleItem 
           title="Show Followers" 
           description="Allow others to see the list of people who follow your profile."
@@ -158,7 +158,7 @@ export default function PrivacySettingsPage() {
         <button 
           onClick={handleSave}
           disabled={saving}
-          className="bg-brand text-white px-6 py-2 rounded-md text-sm font-medium hover:bg-accent transition-colors disabled:opacity-50"
+          className="btn-brand"
         >
           {saving ? "Saving..." : "Save Privacy Rules"}
         </button>

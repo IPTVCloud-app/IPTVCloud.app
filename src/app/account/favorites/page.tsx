@@ -14,7 +14,7 @@ export default function FavoritesPage() {
           <p className="text-sm text-tertiary">Your saved channels and collections.</p>
         </div>
       </div>
-      <div className="text-center p-12 bg-surface border border-border rounded-xl">
+      <div className="card">
         <p className="text-secondary">You haven't favorited any channels yet.</p>
       </div>
     </div>

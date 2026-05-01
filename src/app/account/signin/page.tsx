@@ -139,7 +139,7 @@ function SignInForm() {
   };
 
   return (
-    <div className="bg-surface border border-border rounded-xl p-8 linear-shadow-card overflow-hidden relative z-10">
+    <div className="card overflow-hidden relative z-10">
       <AnimatePresence mode="wait">
         {step === "credentials" ? (
           <motion.div
@@ -165,33 +165,33 @@ function SignInForm() {
             )}
 
             <form onSubmit={handleSignIn(onSignInSubmit, onValidationError)} className="space-y-5">
-              <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-secondary tracking-[-0.182px]">Email</label>
+              <div className="form-group">
+                <label className="form-label">Email</label>
                 <input 
                   type="email" 
                   {...registerSignIn("email")}
                   placeholder="name@example.com"
-                  className={`w-full bg-[rgba(255,255,255,0.02)] text-primary border ${signinErrors.email ? 'border-[#e5484d]' : 'border-input focus:border-accent'} px-3.5 py-2.5 rounded-md text-sm outline-none transition-all focus:ring-2 focus:ring-[rgba(113,112,255,0.1)]`}
+                  className={`form-input ${signinErrors.email ? 'form-input--error' : ''}`}
                 />
               </div>
 
-              <div className="space-y-1.5">
+              <div className="form-group">
                 <div className="flex justify-between items-center">
-                  <label className="block text-sm font-medium text-secondary tracking-[-0.182px]">Password</label>
+                  <label className="form-label">Password</label>
                   <Link href="/account/forgot-password" className="text-xs text-tertiary hover:text-primary transition-colors">Forgot password?</Link>
                 </div>
                 <input 
                   type="password" 
                   {...registerSignIn("password")}
                   placeholder="••••••••"
-                  className={`w-full bg-[rgba(255,255,255,0.02)] text-primary border ${signinErrors.password ? 'border-[#e5484d]' : 'border-input focus:border-accent'} px-3.5 py-2.5 rounded-md text-sm outline-none transition-all focus:ring-2 focus:ring-[rgba(113,112,255,0.1)]`}
+                  className={`form-input ${signinErrors.password ? 'form-input--error' : ''}`}
                 />
               </div>
 
               <button 
                 type="submit" 
                 disabled={isSigninSubmitting}
-                className="w-full bg-brand text-white px-4 py-2.5 rounded-md text-sm font-medium transition-all hover:bg-accent disabled:opacity-50 mt-2 shadow-[0_2px_10px_rgba(94,106,210,0.3)] hover:-translate-y-0.5 active:translate-y-0"
+                className="btn-brand w-full mt-2"
               >
                 {isSigninSubmitting ? "Checking credentials..." : "Continue"}
               </button>
@@ -217,13 +217,13 @@ function SignInForm() {
             </div>
 
             <form onSubmit={handleOtp(onOtpSubmit)} className="space-y-6">
-              <div className="space-y-1.5 text-center">
+              <div className="form-group text-center">
                 <input 
                   type="text" 
                   maxLength={6}
                   {...registerOtp("code")}
                   placeholder="000000"
-                  className={`w-full bg-[rgba(255,255,255,0.02)] text-primary border ${otpErrors.code ? 'border-[#e5484d]' : 'border-input focus:border-accent'} px-3.5 py-4 rounded-md text-2xl font-mono tracking-[0.5em] text-center outline-none transition-all focus:ring-2 focus:ring-[rgba(113,112,255,0.1)]`}
+                  className={`form-input py-4 text-2xl font-mono tracking-[0.5em] text-center ${otpErrors.code ? 'form-input--error' : ''}`}
                   autoFocus
                 />
               </div>
@@ -232,7 +232,7 @@ function SignInForm() {
                 <button 
                   type="submit" 
                   disabled={isOtpSubmitting}
-                  className="w-full bg-brand text-white px-4 py-2.5 rounded-md text-sm font-medium transition-all hover:bg-accent disabled:opacity-50 shadow-[0_2px_10px_rgba(94,106,210,0.3)] hover:-translate-y-0.5 active:translate-y-0"
+                  className="btn-brand w-full"
                 >
                   {isOtpSubmitting ? "Verifying..." : "Verify Code"}
                 </button>
@@ -269,7 +269,7 @@ function SignInForm() {
 
 export default function SignInPage() {
   return (
-    <Suspense fallback={<div className="h-96 animate-pulse bg-surface border border-border rounded-xl" />}>
+    <Suspense fallback={<div className="card" />}>
       <SignInForm />
     </Suspense>
   );
