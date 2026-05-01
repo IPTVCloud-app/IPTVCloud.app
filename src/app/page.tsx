@@ -3,15 +3,22 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { 
-  Play, Shield, Zap, Globe, Monitor, 
-  ArrowRight, Heart
+import {
+  ArrowRight,
+  Globe,
+  Heart,
+  Monitor,
+  Play,
+  Radio,
+  Shield,
+  Tv,
+  Zap,
 } from "lucide-react";
 import { API_URL } from "@/lib/api";
 import { ChannelThumbnail } from "@/components/ChannelThumbnail";
-import { useMousePosition, NodeNetwork } from "./Effects";
 
-const SHIMMER_CLASS = "relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent";
+const SHIMMER_CLASS =
+  "relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent";
 
 interface Channel {
   id: string;
@@ -21,11 +28,41 @@ interface Channel {
   country?: string;
 }
 
+const platformStats = [
+  { label: "Global channels", value: "10k+" },
+  { label: "Live regions", value: "120+" },
+  { label: "Playback latency", value: "Low" },
+  { label: "Cloud profiles", value: "Sync" },
+];
+
+const featureCards = [
+  {
+    icon: Monitor,
+    title: "Device continuity",
+    text: "Continue watching across desktop, mobile, and TV without rebuilding your playlist.",
+  },
+  {
+    icon: Shield,
+    title: "Secure sessions",
+    text: "Account access, comments, and favorites use authenticated cloud sessions.",
+  },
+  {
+    icon: Globe,
+    title: "Global discovery",
+    text: "Browse by category, language, and country from one fast channel index.",
+  },
+  {
+    icon: Heart,
+    title: "Personal library",
+    text: "Save favorites and build a cleaner route back to the channels you actually watch.",
+  },
+];
+
 function CookieConsent() {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    const consent = typeof window !== 'undefined' ? localStorage.getItem("cookie-consent") : null;
+    const consent = typeof window !== "undefined" ? localStorage.getItem("cookie-consent") : null;
     if (!consent) {
       Promise.resolve().then(() => {
         setShow(true);
@@ -41,26 +78,20 @@ function CookieConsent() {
   if (!show) return null;
 
   return (
-    <motion.div 
-      initial={{ y: 100, opacity: 0 }}
+    <motion.div
+      initial={{ y: 24, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      className="card fixed bottom-6 left-6 right-6 md:left-auto md:right-6 md:w-96 z-[200] p-6 rounded-2xl shadow-2xl"
+      className="card fixed bottom-4 left-4 right-4 z-[200] p-5 md:left-auto md:right-6 md:w-96"
     >
-      <h3 className="font-bold mb-2">Cookies & Experience</h3>
-      <p className="text-xs text-secondary leading-relaxed mb-4">
-        We use cookies to improve your streaming experience, analyze traffic, and remember your preferences. By continuing, you agree to our cookie policy.
+      <h3 className="text-heading-3 mb-2">Cookies & Experience</h3>
+      <p className="mb-4 text-sm leading-relaxed text-secondary">
+        We use cookies to remember preferences and keep the streaming interface stable between visits.
       </p>
       <div className="flex gap-3">
-        <button 
-          onClick={accept}
-          className="btn-brand"
-        >
+        <button onClick={accept} className="btn-brand">
           Accept All
         </button>
-        <Link 
-          href="/cookies"
-          className="flex-1 bg-white/5 border border-border py-2 rounded-lg text-xs font-bold text-center hover:bg-white/10 transition-colors"
-        >
+        <Link href="/cookies" className="btn-ghost flex-1">
           Learn More
         </Link>
       </div>
@@ -71,7 +102,6 @@ function CookieConsent() {
 export default function HomePage() {
   const [trendingChannels, setTrendingChannels] = useState<Channel[]>([]);
   const [loading, setLoading] = useState(true);
-  const mouse = useMousePosition();
 
   useEffect(() => {
     const fetchTrending = async () => {
@@ -91,181 +121,169 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-page text-primary overflow-x-hidden relative">
-      
-      <div className="relative z-10">
-        {/* Hero Section */}
-        <section className="relative pt-24 pb-16 md:pt-32 md:pb-24 px-6 overflow-hidden">
-          {/* Animated background blobs */}
-          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand/10 blur-[120px] rounded-full animate-pulse" />
-          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/10 blur-[120px] rounded-full animate-pulse delay-700" />
+    <div className="app-page min-h-screen overflow-x-hidden">
+      <section className="section-shell pt-24 pb-16 md:pt-32 md:pb-20">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45 }}
+          className="max-w-3xl"
+        >
+          <span className="badge-subtle mb-5">
+            <Radio className="h-3.5 w-3.5 text-emerald" />
+            Live cloud TV
+          </span>
+          <h1 className="max-w-3xl text-[40px] font-[510] leading-none tracking-[-0.9px] text-primary md:text-[64px] md:tracking-[-1.4px]">
+            Stream global channels from one quiet, fast interface.
+          </h1>
+          <p className="mt-6 max-w-2xl text-body-large text-secondary">
+            IPTVCloud keeps live TV discovery, playback, favorites, and account tools in a minimal cloud app built for daily use.
+          </p>
 
-          <div className="max-w-7xl mx-auto text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand/10 border border-brand/20 text-brand text-xs font-bold uppercase tracking-wider mb-6 mt-8">
-                <Zap className="w-3 h-3 fill-current" /> Next-Gen IPTV Experience
-              </span>
-              <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 bg-gradient-to-r from-white via-white to-white/40 bg-clip-text text-transparent">
-                Watch Everything. <br />
-                <span className="text-brand">Anywhere in the World.</span>
-              </h1>
-              <p className="text-lg md:text-xl text-secondary max-w-2xl mx-auto mb-10 leading-relaxed">
-                Experience ultra-low latency streaming with 10,000+ global channels. 
-                Built on modern cloud architecture for the most stable IPTV experience ever created.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link href="/channels" className="btn-brand flex items-center gap-2 hover:-translate-y-1">
-                  Start Watching Now <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </Link>
-                <Link href="/account/signup" className="btn-ghost">
-                  Create Free Account
-                </Link>
-              </div>
-            </motion.div>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Link href="/channels" className="btn-brand gap-2">
+              Browse Channels <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link href="/account/signup" className="btn-ghost gap-2">
+              Create Account <Tv className="h-4 w-4" />
+            </Link>
           </div>
-        </section>
+        </motion.div>
 
-        {/* Trending Channels Grid */}
-        <section className="py-20 px-6 bg-surface/30 border-y border-border/50 backdrop-blur-sm">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-end justify-between mb-10">
-              <div>
-                <h2 className="text-3xl font-bold mb-2 text-display">Trending Live Now</h2>
-                <p className="text-secondary text-sm">Real-time previews of our most popular global broadcasts.</p>
-              </div>
-              <Link href="/channels" className="text-brand font-medium text-sm hover:text-accent transition-colors flex items-center gap-1">
-                Browse All <ArrowRight className="w-4 h-4" />
-              </Link>
+        <div className="mt-12 grid grid-cols-2 gap-3 md:grid-cols-4">
+          {platformStats.map((item) => (
+            <div key={item.label} className="rounded-lg border border-border bg-surface/45 p-4 backdrop-blur-md">
+              <div className="text-heading-3 text-primary">{item.value}</div>
+              <div className="mt-1 text-sm text-tertiary">{item.label}</div>
             </div>
+          ))}
+        </div>
+      </section>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-              {loading ? (
-                Array.from({ length: 8 }).map((_, i) => (
-                  <div key={i} className="space-y-3">
-                    <div className={`aspect-video bg-elevated rounded-xl ${SHIMMER_CLASS}`} />
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-full bg-elevated ${SHIMMER_CLASS}`} />
-                      <div className="space-y-2 flex-1">
-                        <div className={`h-4 bg-elevated rounded w-3/4 ${SHIMMER_CLASS}`} />
-                        <div className={`h-3 bg-elevated rounded w-1/2 ${SHIMMER_CLASS}`} />
+      <section className="border-y border-border/60 bg-surface/20 py-16 backdrop-blur-sm">
+        <div className="section-shell">
+          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <span className="text-mono-label text-quaternary">Live Index</span>
+              <h2 className="mt-2 text-heading-1 text-primary">Trending now</h2>
+              <p className="mt-2 max-w-xl text-sm leading-relaxed text-secondary">
+                A live sample from the global channel library.
+              </p>
+            </div>
+            <Link href="/channels" className="inline-flex items-center gap-2 text-sm font-[510] text-accent transition-colors hover:text-primary">
+              View all channels <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {loading
+              ? Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className="rounded-lg border border-border bg-surface/50 p-3">
+                    <div className={`aspect-video rounded-md bg-elevated ${SHIMMER_CLASS}`} />
+                    <div className="mt-4 flex items-center gap-3">
+                      <div className={`h-9 w-9 rounded-md bg-elevated ${SHIMMER_CLASS}`} />
+                      <div className="min-w-0 flex-1 space-y-2">
+                        <div className={`h-4 w-3/4 rounded bg-elevated ${SHIMMER_CLASS}`} />
+                        <div className={`h-3 w-1/2 rounded bg-elevated ${SHIMMER_CLASS}`} />
                       </div>
                     </div>
                   </div>
                 ))
-              ) : (
-                trendingChannels.map((channel, idx) => (
+              : trendingChannels.map((channel, idx) => (
                   <motion.div
                     key={channel.id}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: idx * 0.05 }}
+                    initial={{ opacity: 0, y: 12 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-40px" }}
+                    transition={{ delay: idx * 0.03 }}
                   >
-                    <Link href={`/channels/watch?id=${channel.id}`} className="group block space-y-3">
-                      <div className="relative aspect-video rounded-xl overflow-hidden border border-border group-hover:border-brand/50 transition-all shadow-lg group-hover:shadow-brand/10">
-                        <ChannelThumbnail 
-                          channelId={channel.id} 
-                          name={channel.name} 
+                    <Link
+                      href={`/channels/watch?id=${channel.id}`}
+                      className="group block overflow-hidden rounded-lg border border-border bg-surface/50 transition-colors hover:border-brand/50 hover:bg-surface/80"
+                    >
+                      <div className="relative aspect-video bg-elevated">
+                        <ChannelThumbnail
+                          channelId={channel.id}
+                          name={channel.name}
                           logoUrl={channel.logo}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                          className="h-full w-full border-0"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
-                           <div className="w-8 h-8 bg-brand rounded-full flex items-center justify-center text-white shadow-lg">
-                             <Play className="w-4 h-4 fill-current ml-0.5" />
-                           </div>
+                        <div className="absolute left-2 top-2 badge-success text-[10px]">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald" />
+                          LIVE
                         </div>
-                        <div className="absolute top-2 right-2 px-2 py-1 bg-red-600 rounded text-[10px] font-bold text-white flex items-center gap-1 shadow-xl">
-                          <span className="w-1 h-1 rounded-full bg-white animate-pulse" /> LIVE
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/25 opacity-0 transition-opacity group-hover:opacity-100">
+                          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand text-white">
+                            <Play className="h-4 w-4 fill-current" />
+                          </span>
                         </div>
                       </div>
-                      <div className="flex gap-3">
-                        {channel.logo ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={channel.logo} alt="" className="w-10 h-10 object-contain rounded-full bg-white/5 border border-border" />
-                        ) : (
-                          <div className="w-10 h-10 rounded-full bg-brand/10 border border-brand/20 flex items-center justify-center text-brand font-bold shrink-0">
-                             {channel.name[0]}
-                          </div>
-                        )}
-                        <div className="min-w-0">
-                          <h3 className="font-bold text-sm text-primary group-hover:text-brand transition-colors truncate">{channel.name}</h3>
-                          <p className="text-xs text-secondary mt-0.5">{channel.category || 'General'} • {channel.country || 'Global'}</p>
-                        </div>
+                      <div className="p-4">
+                        <h3 className="line-clamp-2 text-sm font-[590] leading-snug text-primary transition-colors group-hover:text-accent">
+                          {channel.name}
+                        </h3>
+                        <p className="mt-2 text-xs text-tertiary">
+                          {channel.category || "General"} / {channel.country || "Global"}
+                        </p>
                       </div>
                     </Link>
                   </motion.div>
-                ))
-              )}
-            </div>
+                ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Feature Section */}
-        <section className="py-32 px-6">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-20">
-              <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight text-display">
-                Powerful Features <br />
-                <span className="text-brand">Tailored for Viewers.</span>
-              </h2>
-              <p className="text-secondary max-w-2xl mx-auto">
-                Everything you need for a world-class streaming experience, packed into one beautiful interface.
+      <section className="section-shell py-20">
+        <div className="mb-10 max-w-2xl">
+          <span className="text-mono-label text-quaternary">Core Tools</span>
+          <h2 className="mt-2 text-heading-1 text-primary">Built for repeat viewing</h2>
+          <p className="mt-3 text-body-small text-secondary">
+            Minimal controls, fast discovery, and account features that stay out of the way during playback.
+          </p>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {featureCards.map((feature) => {
+            const Icon = feature.icon;
+            return (
+              <div key={feature.title} className="card p-5">
+                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-md border border-brand/20 bg-brand/10 text-accent">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <h3 className="text-heading-3 text-primary">{feature.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-secondary">{feature.text}</p>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="section-shell pb-24">
+        <div className="border-t border-border pt-10">
+          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+            <div>
+              <span className="badge-subtle mb-4">
+                <Zap className="h-3.5 w-3.5" />
+                Ready when you are
+              </span>
+              <h2 className="text-heading-1 text-primary">Open the live channel index.</h2>
+              <p className="mt-2 max-w-xl text-sm leading-relaxed text-secondary">
+                Start with live channels, then sign in when you want saved favorites and profile history.
               </p>
             </div>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {[
-                { icon: <Monitor />, title: "Multi-Device Sync", text: "Watch on your TV, phone, or laptop. Your history and playlists sync everywhere." },
-                { icon: <Shield />, title: "Secure & Anonymous", text: "Military-grade encryption for all connections. No logs, no tracking, just content." },
-                { icon: <Globe />, title: "Geo-Bypass Engine", text: "Access content from any region with our integrated global proxy network." },
-                { icon: <Heart />, title: "Community Focused", text: "Real-time chat, follow your favorite channels, and create custom collections." }
-              ].map((feature, i) => (
-                <motion.div 
-                  key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
-                  className="card flex flex-col gap-4 p-8 rounded-3xl transition-all hover:border-brand/30 hover:shadow-xl hover:shadow-brand/5 group"
-                >
-                   <div className="w-14 h-14 bg-brand/10 rounded-2xl flex items-center justify-center text-brand shrink-0 group-hover:bg-brand group-hover:text-white transition-all duration-500">
-                     {feature.icon}
-                   </div>
-                   <div>
-                     <h3 className="font-bold text-xl mb-3 text-display">{feature.title}</h3>
-                     <p className="text-secondary text-sm leading-relaxed">{feature.text}</p>
-                   </div>
-                </motion.div>
-              ))}
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Link href="/channels" className="btn-brand gap-2">
+                Start Watching <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link href="/account/signin" className="btn-ghost">
+                Sign In
+              </Link>
             </div>
           </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="py-20 px-6">
-           <div className="max-w-5xl mx-auto rounded-[3rem] bg-gradient-to-br from-brand to-accent p-12 md:p-20 text-center relative overflow-hidden shadow-2xl shadow-brand/20">
-              <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
-              <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 relative z-10 text-display">Ready to level up your TV?</h2>
-              <p className="text-white/80 text-lg mb-10 max-w-xl mx-auto relative z-10 text-body">Join 50,000+ active streamers today. No hidden fees, cancel anytime.</p>
-              <Link href="/account/signup" className="inline-flex items-center gap-2 px-10 py-5 bg-white text-brand rounded-full font-bold text-lg hover:scale-105 transition-transform shadow-xl relative z-10 active:scale-95">
-                Get Started for Free <ArrowRight className="w-4 h-4" />
-              </Link>
-           </div>
-        </section>
-      </div>
+        </div>
+      </section>
 
       <CookieConsent />
-
-      <style jsx global>{`
-        @keyframes shimmer {
-          100% { transform: translateX(100%); }
-        }
-      `}</style>
     </div>
   );
 }

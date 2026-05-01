@@ -15,7 +15,7 @@ export default function NotificationsPage() {
         </div>
       </div>
       <div className="card">
-        <p className="text-secondary">You're all caught up! No new notifications.</p>
+        <p className="text-secondary">You&apos;re all caught up! No new notifications.</p>
       </div>
     </div>
   );

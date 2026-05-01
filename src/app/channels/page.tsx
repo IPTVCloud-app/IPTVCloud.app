@@ -2,7 +2,26 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { Search, Filter, Globe, Radio, X, Languages, MapPin } from "lucide-react";
+import {
+  Baby,
+  Clapperboard,
+  Dumbbell,
+  Film,
+  Filter,
+  Gamepad2,
+  Landmark,
+  Languages,
+  MapPin,
+  MonitorPlay,
+  Music2,
+  Newspaper,
+  Radio,
+  Search,
+  Tags,
+  Trophy,
+  X,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { ChannelThumbnail } from "@/components/ChannelThumbnail";
 import { useInView } from "react-intersection-observer";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,6 +36,8 @@ interface Channel {
   quality: string;
   language: string;
   status?: string;
+  description?: string;
+  categories?: string[];
 }
 
 interface MetadataItem {
@@ -25,6 +46,44 @@ interface MetadataItem {
 }
 
 const SHIMMER_CLASS = "relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent";
+
+const CATEGORY_ICON_RULES: Array<[RegExp, LucideIcon]> = [
+  [/news|weather|local/i, Newspaper],
+  [/sport|football|soccer|basketball|fight|racing/i, Trophy],
+  [/movie|cinema|film/i, Film],
+  [/music|radio/i, Music2],
+  [/kids|children|family/i, Baby],
+  [/fitness|health|workout/i, Dumbbell],
+  [/game|gaming|esport/i, Gamepad2],
+  [/documentary|history|culture/i, Landmark],
+  [/series|entertainment|show/i, Clapperboard],
+  [/live|tv|general/i, MonitorPlay],
+];
+
+function formatTagLabel(value?: string) {
+  if (!value) return "";
+  return value
+    .replace(/[_-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function getCategoryIcon(category?: string) {
+  const Icon = CATEGORY_ICON_RULES.find(([pattern]) => pattern.test(category || ""))?.[1] || Tags;
+  return <Icon className="h-3.5 w-3.5" />;
+}
+
+function getChannelSummary(channel: Channel) {
+  if (channel.description?.trim()) return channel.description.trim();
+
+  const category = formatTagLabel(channel.categories?.[0] || channel.category) || "live";
+  const country = formatTagLabel(channel.country) || "global";
+  const language = formatTagLabel(channel.language);
+  const languagePart = language ? ` with ${language} programming` : "";
+
+  return `${channel.name} is a ${category.toLowerCase()} channel from ${country}${languagePart}.`;
+}
 
 export default function ChannelsExplorerPage() {
   const [channels, setChannels] = useState<Channel[]>([]);
@@ -35,12 +94,12 @@ export default function ChannelsExplorerPage() {
   const [selectedLanguage, setSelectedLanguage] = useState("All");
   const [selectedCountry, setSelectedCountry] = useState("All");
   
-  const [categories, setCategories] = useState<MetadataItem[]>([]);
+  const [categories, setCategories] = useState<MetadataItem[]>([{ code: "All", name: "All" }]);
   const [languages, setLanguages] = useState<MetadataItem[]>([]);
   const [countries, setCountries] = useState<MetadataItem[]>([]);
   
   const [showFilters, setShowFilters] = useState(false);
-  const [_page, setPage] = useState(0);
+  const [, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   
   const { ref, inView } = useInView({ threshold: 0 });
@@ -154,18 +213,21 @@ export default function ChannelsExplorerPage() {
   ].filter(Boolean).length;
 
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-page text-primary p-4 md:p-8 lg:p-12">
+    <div className="app-page min-h-[calc(100vh-64px)] px-4 py-8 text-primary md:px-8 lg:px-12">
       <div className="max-w-[1400px] mx-auto">
         
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
           <div>
-            <h1 className="text-3xl font-medium tracking-tight text-primary mb-2 text-display">Channel Explorer</h1>
-            <p className="text-secondary text-body">Discover thousands of live channels globally.</p>
+            <span className="text-mono-label text-quaternary">Live Library</span>
+            <h1 className="mt-2 text-heading-1 text-primary">Channel Explorer</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-secondary">
+              Discover live channels by category, language, and country.
+            </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="relative w-full md:w-72">
+          <div className="flex w-full flex-col gap-3 sm:flex-row md:w-auto md:items-center">
+            <div className="relative w-full md:w-80">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-tertiary" />
               <input 
                 type="text" 
@@ -179,7 +241,7 @@ export default function ChannelsExplorerPage() {
             <div className="relative" ref={filterRef}>
               <button 
                 onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-md text-sm font-medium transition-all border ${
+                className={`flex w-full items-center justify-center gap-2 rounded-md border px-4 py-2.5 text-sm font-medium transition-colors sm:w-auto ${
                   showFilters || activeFilterCount > 0
                     ? "btn-primary border-none" 
                     : "btn-ghost"
@@ -200,7 +262,7 @@ export default function ChannelsExplorerPage() {
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="card absolute right-0 mt-2 w-80 z-[60] p-5 overflow-hidden"
+                    className="card absolute right-0 z-[60] mt-2 w-[min(20rem,calc(100vw-2rem))] overflow-hidden p-5"
                   >
                     <div className="flex items-center justify-between mb-5 pb-3 border-b border-border">
                       <h3 className="font-bold text-primary flex items-center gap-2">
@@ -274,80 +336,110 @@ export default function ChannelsExplorerPage() {
         </div>
 
         {/* Categories Bar */}
-        <div className="flex overflow-x-auto gap-2 mb-8 pb-2 no-scrollbar">
+        <div className="no-scrollbar mb-8 flex gap-2 overflow-x-auto pb-2">
           {categories.map((cat) => (
             <button
               key={cat.code}
               onClick={() => setSelectedCategory(cat.code)}
-              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 ${
+              className={`inline-flex min-h-9 items-center gap-2 whitespace-nowrap rounded-full border px-3.5 py-2 text-sm font-[510] transition-colors ${
                 selectedCategory === cat.code 
-                  ? "btn-primary border-none" 
-                  : "btn-ghost"
+                  ? "border-brand bg-brand text-white" 
+                  : "border-border bg-surface/50 text-secondary hover:border-[var(--border-secondary)] hover:bg-surface hover:text-primary"
               }`}
             >
+              {cat.code === "All" ? <Tags className="h-3.5 w-3.5" /> : getCategoryIcon(cat.name)}
               {cat.name}
             </button>
           ))}
         </div>
 
         {/* Channel Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {channels.map((channel, idx) => (
-            <Link key={`${channel.id}-${idx}`} href={`/channels/watch?id=${channel.id}`} className="group block">
-              <div className="card">
-                <div className="relative w-full pt-[56.25%] bg-elevated">
-                  <div className="absolute inset-0">
-                    <ChannelThumbnail 
-                      channelId={channel.id} 
-                      name={channel.name} 
-                      logoUrl={channel.logo}
-                      className="w-full h-full"
-                    />
+            <Link key={`${channel.id}-${idx}`} href={`/channels/watch?id=${channel.id}`} className="group block h-full">
+              <article className="flex h-full flex-col overflow-hidden rounded-lg border border-border bg-surface/50 backdrop-blur-md transition-colors hover:border-brand/50 hover:bg-surface/80">
+                <div className="relative aspect-video bg-elevated">
+                  <ChannelThumbnail
+                    channelId={channel.id}
+                    name={channel.name}
+                    logoUrl={channel.logo}
+                    className="h-full w-full border-0"
+                  />
+                  <div className="absolute left-2 top-2 badge-success text-[10px]">
+                    <Radio className="h-3 w-3" /> LIVE
                   </div>
-                  <div className="absolute top-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-sm rounded text-[10px] font-medium text-white flex items-center gap-1 border border-white/10">
-                    <Radio className="w-3 h-3 text-emerald animate-pulse" /> LIVE
-                  </div>
+                  {channel.quality && (
+                    <div className="absolute right-2 top-2 rounded-full border border-white/10 bg-black/55 px-2 py-1 text-[10px] font-[510] text-white backdrop-blur-sm">
+                      {formatTagLabel(channel.quality)}
+                    </div>
+                  )}
                 </div>
                 
-                <div className="p-4 flex-1 flex flex-col">
-                  <div className="flex items-start gap-3 mb-3">
+                <div className="flex flex-1 flex-col p-4">
+                  <div className="mb-3 flex items-start gap-3">
                     {channel.logo ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={channel.logo} alt="" className="w-8 h-8 object-contain shrink-0 rounded bg-white/5 p-1 border border-border/50" />
+                      <img src={channel.logo} alt="" className="h-9 w-9 shrink-0 rounded-md border border-border bg-white/5 object-contain p-1" />
                     ) : (
-                      <div className="w-8 h-8 rounded-full bg-brand/10 border border-brand/20 flex items-center justify-center text-brand font-bold shrink-0 text-xs uppercase">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-brand/20 bg-brand/10 text-xs font-[590] uppercase text-brand">
                         {channel.name.substring(0, 1)}
                       </div>
                     )}
-                    <h3 className="font-medium text-[15px] leading-snug line-clamp-2 group-hover:text-brand transition-colors flex-1">{channel.name}</h3>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="line-clamp-2 text-[15px] font-[590] leading-snug text-primary transition-colors group-hover:text-accent">
+                        {channel.name}
+                      </h3>
+                      <p className="mt-1 text-[11px] text-tertiary">
+                        {formatTagLabel(channel.country) || "Global"}
+                      </p>
+                    </div>
                   </div>
+
+                  <p className="mb-4 line-clamp-2 text-xs leading-relaxed text-secondary">
+                    {getChannelSummary(channel)}
+                  </p>
                   
-                  <div className="mt-auto flex items-center flex-wrap gap-2 text-[11px] text-tertiary">
+                  <div className="mt-auto flex flex-wrap gap-2">
                     {channel.category && (
-                      <span className="px-2 py-1 badge-subtle">
-                        {channel.category}
+                      <span className="badge-subtle">
+                        {getCategoryIcon(channel.category)}
+                        {formatTagLabel(channel.category)}
+                      </span>
+                    )}
+                    {channel.language && (
+                      <span className="badge-subtle">
+                        <Languages className="h-3.5 w-3.5" />
+                        {formatTagLabel(channel.language)}
                       </span>
                     )}
                     {channel.country && (
-                      <span className="flex items-center gap-1 px-2 py-1 badge-subtle">
-                        <Globe className="w-3 h-3 text-brand/70" /> {channel.country}
+                      <span className="badge-subtle">
+                        <MapPin className="h-3.5 w-3.5" />
+                        {formatTagLabel(channel.country)}
                       </span>
                     )}
                   </div>
                 </div>
-              </div>
+              </article>
             </Link>
           ))}
 
           {/* Initial Loading Skeletons */}
           {loading && Array.from({ length: 12 }).map((_, i) => (
-            <div key={`skeleton-${i}`} className="card">
-              <div className={`w-full pt-[56.25%] bg-elevated ${SHIMMER_CLASS}`} />
-              <div className="p-4 space-y-3">
-                <div className={`h-5 w-3/4 bg-elevated rounded ${SHIMMER_CLASS}`} />
+            <div key={`skeleton-${i}`} className="overflow-hidden rounded-lg border border-border bg-surface/50">
+              <div className={`aspect-video bg-elevated ${SHIMMER_CLASS}`} />
+              <div className="space-y-4 p-4">
+                <div className="flex items-start gap-3">
+                  <div className={`h-9 w-9 rounded-md bg-elevated ${SHIMMER_CLASS}`} />
+                  <div className="flex-1 space-y-2">
+                    <div className={`h-4 w-3/4 rounded bg-elevated ${SHIMMER_CLASS}`} />
+                    <div className={`h-3 w-1/3 rounded bg-elevated ${SHIMMER_CLASS}`} />
+                  </div>
+                </div>
+                <div className={`h-8 w-full rounded bg-elevated ${SHIMMER_CLASS}`} />
                 <div className="flex gap-2">
-                  <div className={`h-6 w-20 bg-elevated rounded-md ${SHIMMER_CLASS}`} />
-                  <div className={`h-6 w-20 bg-elevated rounded-md ${SHIMMER_CLASS}`} />
+                  <div className={`h-6 w-20 rounded-full bg-elevated ${SHIMMER_CLASS}`} />
+                  <div className={`h-6 w-20 rounded-full bg-elevated ${SHIMMER_CLASS}`} />
                 </div>
               </div>
             </div>
@@ -379,12 +471,6 @@ export default function ChannelsExplorerPage() {
           </div>
         )}
       </div>
-
-      <style jsx global>{`
-        @keyframes shimmer {
-          100% { transform: translateX(100%); }
-        }
-      `}</style>
     </div>
   );
 }

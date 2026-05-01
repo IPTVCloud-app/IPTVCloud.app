@@ -67,7 +67,7 @@ export function Footer() {
   ];
 
   return (
-    <footer className="bg-page border-t border-border/50 pt-20 pb-10 px-6 relative z-10">
+    <footer className="app-chrome border-t border-border/50 pt-20 pb-10 px-6 relative z-20">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
           
@@ -85,7 +85,7 @@ export function Footer() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-surface border border-border flex items-center justify-center text-secondary hover:text-brand hover:border-brand/50 transition-all cursor-pointer"
+                  className="w-10 h-10 rounded-full bg-surface border border-border flex items-center justify-center text-secondary hover:text-brand hover:border-brand/50 transition-colors cursor-pointer"
                   title={social.name}
                 >
                   {social.icon}

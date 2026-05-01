@@ -3,10 +3,8 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { LayoutDashboard, PlaySquare, Heart, Search, Radio, User, Shield, Settings, LogOut, Bell, FileText } from "lucide-react";
+import { LayoutDashboard, PlaySquare, Heart, User, Shield, Settings, LogOut, Bell, FileText } from "lucide-react";
 import { Logo } from "@/components/Logo";
-import { motion } from "framer-motion";
-import { useMousePosition, NodeNetwork } from "../Effects";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function AccountLayout({
@@ -16,14 +14,15 @@ export default function AccountLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const mouse = useMousePosition();
   const { user, logout, loading } = useAuth();
   const [mounted, setMounted] = useState(false);
 
   const isAuthPage = pathname === "/account/signin" || pathname === "/account/signup" || pathname === "/account/forgot-password" || pathname === "/account/find-account" || pathname === "/account/reset-password";
+  const isSignupPage = pathname === "/account/signup";
 
   useEffect(() => {
-    setMounted(true);
+    const timer = window.setTimeout(() => setMounted(true), 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -52,31 +51,8 @@ export default function AccountLayout({
 
   if (isAuthPage) {
     return (
-      <div className="min-h-[calc(100vh-64px)] flex flex-col items-center justify-center bg-page p-4 relative overflow-hidden">
-        {/* Interactive Background Effects */}
-        <div className="fixed inset-0 pointer-events-none z-0">
-          <NodeNetwork />
-          <motion.div 
-            className="absolute inset-0"
-            animate={{ x: mouse.x * -0.5, y: mouse.y * -0.5 }}
-            transition={{ type: "spring", stiffness: 50, damping: 20 }}
-          >
-            <div className="absolute inset-0 bg-[radial-gradient(circle,_var(--dot-color)_1px,_transparent_1px)] bg-[size:32px_32px]"></div>
-          </motion.div>
-        </div>
-
-        {/* Improved Spotlight Cursor Effect */}
-        <motion.div
-          className="fixed inset-0 z-10 pointer-events-none"
-          style={{
-            background: [
-              `radial-gradient(600px at ${mouse.rawX}px ${mouse.rawY}px, var(--dot-color), transparent 80%)`,
-              `radial-gradient(300px at ${mouse.rawX}px ${mouse.rawY}px, rgba(113, 112, 255, 0.05), transparent 60%)`
-            ].join(', ')
-          }}
-        />
-
-        <div className="w-full max-w-md relative z-20">
+      <div className="app-page min-h-[calc(100vh-64px)] flex flex-col items-center justify-center p-4 md:p-8">
+        <div className={`w-full ${isSignupPage ? "max-w-2xl" : "max-w-md"}`}>
           <div className="flex justify-center mb-8">
             <Link href="/"><Logo /></Link>
           </div>

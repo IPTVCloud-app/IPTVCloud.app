@@ -95,21 +95,21 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="card relative z-10">
+    <div className="card w-full p-6 md:p-8">
       <div className="text-center mb-8">
-        <h1 className="text-2xl font-medium tracking-[-0.288px] text-primary mb-2 text-display">Create an account</h1>
-        <p className="text-sm text-tertiary text-body">Start streaming with IPTVCloud today</p>
+        <h1 className="text-heading-2 text-primary mb-2">Create an account</h1>
+        <p className="text-sm text-tertiary">Start streaming with IPTVCloud today</p>
       </div>
 
       {authError && (
-        <div className="mb-6 p-3 rounded-lg bg-panel border border-border text-sm text-center font-medium" style={{color: '#e5484d'}}>
+        <div className="mb-6 rounded-md border border-border bg-panel p-3 text-center text-sm font-medium" style={{color: '#e5484d'}}>
           {authError}
         </div>
       )}
 
       <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-4">
-        <div className="grid grid-cols-12 gap-3">
-          <div className="col-span-8 form-group">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-12">
+          <div className="form-group sm:col-span-8">
             <label className="form-label">First Name *</label>
             <input 
               type="text" 
@@ -118,7 +118,7 @@ export default function SignUpPage() {
               className={`form-input ${errors.firstName ? 'form-input--error' : ''}`}
             />
           </div>
-          <div className="col-span-4 form-group">
+          <div className="form-group sm:col-span-4">
             <label className="form-label">M.I.</label>
             <input 
               type="text" 
@@ -130,8 +130,8 @@ export default function SignUpPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-12 gap-3">
-          <div className="col-span-8 form-group">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-12">
+          <div className="form-group sm:col-span-8">
             <label className="form-label">Last Name</label>
             <input 
               type="text" 
@@ -140,7 +140,7 @@ export default function SignUpPage() {
               className="form-input"
             />
           </div>
-          <div className="col-span-4 form-group">
+          <div className="form-group sm:col-span-4">
             <label className="form-label">Suffix</label>
             <select 
               {...register("suffix")}

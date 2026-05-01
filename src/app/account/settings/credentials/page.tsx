@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { User, Mail, Lock, Key, Smartphone, X, ShieldAlert } from "lucide-react";
+import { User, Mail, Key, Smartphone, X, ShieldAlert } from "lucide-react";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -234,7 +234,7 @@ export default function CredentialsSettingsPage() {
             {loading ? "Verifying..." : "Confirm & Update"}
           </button>
           <button onClick={requestOtp} className="text-xs text-brand font-medium hover:underline text-center">
-            Don't have an app? Send Email OTP
+            Don&apos;t have an app? Send Email OTP
           </button>
         </div>
       </Modal>

@@ -153,10 +153,12 @@ function WatchPlayer() {
     recommendationOffsetRef.current = 0;
     hasMoreRecommendationsRef.current = true;
     loadingRecommendationsRef.current = false;
-    setRecommendations([]);
-    setHasMoreRecommendations(true);
-    setLoadingRecommendations(false);
-    void fetchRecommendationPage(true);
+    Promise.resolve().then(() => {
+      setRecommendations([]);
+      setHasMoreRecommendations(true);
+      setLoadingRecommendations(false);
+      void fetchRecommendationPage(true);
+    });
   }, [fetchRecommendationPage, id, recommendationCategory]);
 
   useEffect(() => {
@@ -472,7 +474,7 @@ function LiveChatComponent({ channelId }: { channelId: string }) {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    setIsAuthenticated(!!token);
+    Promise.resolve().then(() => setIsAuthenticated(!!token));
 
     const fetchComments = async () => {
       try {

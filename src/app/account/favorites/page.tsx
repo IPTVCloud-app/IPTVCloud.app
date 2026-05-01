@@ -15,7 +15,7 @@ export default function FavoritesPage() {
         </div>
       </div>
       <div className="card">
-        <p className="text-secondary">You haven't favorited any channels yet.</p>
+        <p className="text-secondary">You haven&apos;t favorited any channels yet.</p>
       </div>
     </div>
   );

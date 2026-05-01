@@ -15,7 +15,7 @@ export default function PostsPage() {
         </div>
       </div>
       <div className="card">
-        <p className="text-secondary">You haven't published any posts yet.</p>
+        <p className="text-secondary">You haven&apos;t published any posts yet.</p>
       </div>
     </div>
   );

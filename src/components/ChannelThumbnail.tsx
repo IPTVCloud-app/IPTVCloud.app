@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Play } from 'lucide-react';
+import type Hls from 'hls.js';
 
 interface ChannelThumbnailProps {
   channelId: string;
@@ -16,7 +17,7 @@ export function ChannelThumbnail({ channelId, name, className = "", logoUrl }: C
   const [isHovering, setIsHovering] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const hlsRef = useRef<any>(null);
+  const hlsRef = useRef<Hls | null>(null);
 
   const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
 
@@ -30,18 +31,10 @@ export function ChannelThumbnail({ channelId, name, className = "", logoUrl }: C
 
   // Hover timer effect
   useEffect(() => {
-    let timeout: NodeJS.Timeout;
-    if (isHovering) {
-      timeout = setTimeout(() => {
-        setShowPreview(true);
-      }, 5000); // 5 seconds hover
-    } else {
-      setShowPreview(false);
-      if (hlsRef.current) {
-        hlsRef.current.destroy();
-        hlsRef.current = null;
-      }
-    }
+    if (!isHovering) return;
+    const timeout = setTimeout(() => {
+      setShowPreview(true);
+    }, 5000); // 5 seconds hover
     return () => clearTimeout(timeout);
   }, [isHovering]);
 
@@ -84,11 +77,20 @@ export function ChannelThumbnail({ channelId, name, className = "", logoUrl }: C
 
   const BROKEN_ICON = `data:image/svg+xml;charset=utf-8,${encodeURIComponent('<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="12" fill="#141414"/><path d="M35 35L65 65M65 35L35 65" stroke="#333" stroke-width="4" stroke-linecap="round"/></svg>')}`;
 
+  const handleMouseLeave = () => {
+    setIsHovering(false);
+    setShowPreview(false);
+    if (hlsRef.current) {
+      hlsRef.current.destroy();
+      hlsRef.current = null;
+    }
+  };
+
   return (
     <div 
       className={`relative bg-surface border border-border overflow-hidden group ${className}`}
       onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
+      onMouseLeave={handleMouseLeave}
     >
       {showPreview && (
         <video 

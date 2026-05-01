@@ -49,7 +49,7 @@ export default function ForgotPasswordPage() {
     <div className="card">
       <div className="text-center mb-8">
         <h1 className="text-2xl font-medium tracking-[-0.288px] text-primary mb-2">Forgot Password?</h1>
-        <p className="text-sm text-tertiary">Enter your email and we'll send you a link to reset your password.</p>
+        <p className="text-sm text-tertiary">Enter your email and we&apos;ll send you a link to reset your password.</p>
       </div>
 
       {!isSent ? (
@@ -83,12 +83,12 @@ export default function ForgotPasswordPage() {
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
           </div>
           <h3 className="text-lg font-medium text-primary mb-2">Check your email</h3>
-          <p className="text-sm text-tertiary mb-8">We've sent a password reset link to your email address.</p>
+          <p className="text-sm text-tertiary mb-8">We&apos;ve sent a password reset link to your email address.</p>
           <button 
             onClick={() => setIsSent(false)}
             className="text-xs text-accent hover:text-brand transition-colors font-medium"
           >
-            Didn't receive it? Try again
+            Didn&apos;t receive it? Try again
           </button>
         </motion.div>
       )}

@@ -1,4 +1,4 @@
-import { Maximize, Minimize, Pause, PictureInPicture2, Play, Settings, SkipBack, SkipForward, Subtitles, Volume2, VolumeX } from "lucide-react";
+import { Maximize, Minimize, Pause, PictureInPicture2, Play, Settings, SkipBack, SkipForward, Subtitles, Theater, Volume2, VolumeX } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { SeekBar } from "./SeekBar";
 
@@ -60,13 +60,6 @@ export function DesktopControls({
       video.removeEventListener("durationchange", handleDurationChange);
     };
   }, [videoRef]);
-
-  const handleSeek = (time: number) => {
-    if (videoRef.current) {
-      videoRef.current.currentTime = time;
-      setCurrentTime(time);
-    }
-  };
 
   const skipForward = () => {
       if (videoRef.current) {
@@ -160,8 +153,15 @@ export function DesktopControls({
             <PictureInPicture2 className="w-5 h-5" />
           </button>
           
-          <button onClick={onToggleTheater} className="px-3 py-1.5 text-sm font-semibold tracking-wide border border-white/20 rounded-md text-white/80 hover:text-white hover:bg-white/10 transition-all mx-1">
-            {isTheaterMode ? 'Exit Theater' : 'Theater mode'}
+          <button
+            onClick={onToggleTheater}
+            className={`p-2 transition-colors ${
+              isTheaterMode ? "text-white" : "text-white/70 hover:text-white"
+            }`}
+            aria-label={isTheaterMode ? "Exit theater mode" : "Enter theater mode"}
+            title={isTheaterMode ? "Exit theater mode" : "Theater mode"}
+          >
+            <Theater className="w-5 h-5" />
           </button>
 
           <button onClick={toggleFullscreen} className="p-2 text-white hover:scale-110 transition-transform" aria-label="Fullscreen">

@@ -4,8 +4,8 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import {
   AlertTriangle,
   Loader2,
-  MessageSquare,
 } from "lucide-react";
+import type Hls from "hls.js";
 import { AmbientBackground } from "./AmbientBackground";
 import { DesktopControls } from "./DesktopControls";
 import { MobileControls } from "./MobileControls";
@@ -18,10 +18,21 @@ type StreamPlayerProps = {
   onToggleTheater: () => void;
 };
 
+type DocumentWithPictureInPicture = Document & {
+  pictureInPictureEnabled?: boolean;
+  pictureInPictureElement?: Element | null;
+  exitPictureInPicture?: () => Promise<void>;
+};
+
+type VideoWithPictureInPicture = HTMLVideoElement & {
+  disablePictureInPicture?: boolean;
+  requestPictureInPicture?: () => Promise<unknown>;
+};
+
 export function StreamPlayer({ channelId, isTheaterMode, onToggleTheater }: StreamPlayerProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const hlsRef = useRef<any>(null);
+  const hlsRef = useRef<Hls | null>(null);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [isMobileMode, setIsMobileMode] = useState(false);
@@ -66,6 +77,68 @@ export function StreamPlayer({ channelId, isTheaterMode, onToggleTheater }: Stre
     }
   }, [isPlaying, showSettings]);
 
+  const togglePlay = useCallback(async () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) {
+      await video.play().catch(() => {});
+      return;
+    }
+    video.pause();
+  }, []);
+
+  const toggleMute = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = !video.muted;
+    setIsMuted(video.muted);
+  }, []);
+
+  const updateVolume = useCallback((nextVolume: number) => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.volume = nextVolume;
+    video.muted = nextVolume === 0;
+    setVolume(nextVolume);
+    setIsMuted(nextVolume === 0);
+  }, []);
+
+  const toggleFullscreen = useCallback(async () => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+
+    if (document.fullscreenElement) {
+      await document.exitFullscreen().catch(() => {});
+      return;
+    }
+    await wrapper.requestFullscreen().catch(() => {});
+  }, []);
+
+  const enterMiniPlayer = useCallback(async () => {
+    const video = videoRef.current as VideoWithPictureInPicture | null;
+    if (!video) return;
+
+    const pipDocument = document as DocumentWithPictureInPicture;
+    if (pipDocument.pictureInPictureEnabled && !video.disablePictureInPicture && video.requestPictureInPicture) {
+      try {
+        await video.requestPictureInPicture();
+        setIsPiP(true);
+        setIsFloatingMini(false);
+        return;
+      } catch {}
+    }
+    setIsFloatingMini(true);
+  }, []);
+
+  const exitMiniPlayer = useCallback(async () => {
+    const pipDocument = document as DocumentWithPictureInPicture;
+    if (pipDocument.pictureInPictureElement && pipDocument.exitPictureInPicture) {
+      await pipDocument.exitPictureInPicture().catch(() => {});
+    }
+    setIsPiP(false);
+    setIsFloatingMini(false);
+  }, []);
+
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 768px), (pointer: coarse)");
     const updateMobileMode = () => setIsMobileMode(mediaQuery.matches);
@@ -93,7 +166,7 @@ export function StreamPlayer({ channelId, isTheaterMode, onToggleTheater }: Stre
         case ' ':
         case 'k':
           e.preventDefault();
-          togglePlay();
+          void togglePlay();
           break;
         case 'm':
           e.preventDefault();
@@ -101,7 +174,7 @@ export function StreamPlayer({ channelId, isTheaterMode, onToggleTheater }: Stre
           break;
         case 'f':
           e.preventDefault();
-          toggleFullscreen();
+          void toggleFullscreen();
           break;
         case 't':
           e.preventDefault();
@@ -109,7 +182,11 @@ export function StreamPlayer({ channelId, isTheaterMode, onToggleTheater }: Stre
           break;
         case 'i':
           e.preventDefault();
-          isPiP || isFloatingMini ? exitMiniPlayer() : enterMiniPlayer();
+          if (isPiP || isFloatingMini) {
+            void exitMiniPlayer();
+          } else {
+            void enterMiniPlayer();
+          }
           break;
         case 'arrowup':
           e.preventDefault();
@@ -124,7 +201,18 @@ export function StreamPlayer({ channelId, isTheaterMode, onToggleTheater }: Stre
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [volume, isPiP, isFloatingMini, onToggleTheater]);
+  }, [
+    enterMiniPlayer,
+    exitMiniPlayer,
+    isFloatingMini,
+    isPiP,
+    onToggleTheater,
+    toggleFullscreen,
+    toggleMute,
+    togglePlay,
+    updateVolume,
+    volume,
+  ]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -244,66 +332,6 @@ export function StreamPlayer({ channelId, isTheaterMode, onToggleTheater }: Stre
       video.removeEventListener("pause", handlePause);
     };
   }, []);
-
-  const togglePlay = async () => {
-    const video = videoRef.current;
-    if (!video) return;
-    if (video.paused) {
-      await video.play().catch(() => {});
-      return;
-    }
-    video.pause();
-  };
-
-  const toggleMute = () => {
-    const video = videoRef.current;
-    if (!video) return;
-    video.muted = !video.muted;
-    setIsMuted(video.muted);
-  };
-
-  const updateVolume = (nextVolume: number) => {
-    const video = videoRef.current;
-    if (!video) return;
-    video.volume = nextVolume;
-    video.muted = nextVolume === 0;
-    setVolume(nextVolume);
-    setIsMuted(nextVolume === 0);
-  };
-
-  const toggleFullscreen = async () => {
-    const wrapper = wrapperRef.current;
-    if (!wrapper) return;
-
-    if (document.fullscreenElement) {
-      await document.exitFullscreen().catch(() => {});
-      return;
-    }
-    await wrapper.requestFullscreen().catch(() => {});
-  };
-
-  const enterMiniPlayer = async () => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    if ((document as any).pictureInPictureEnabled && !video.disablePictureInPicture) {
-      try {
-        await (video as any).requestPictureInPicture();
-        setIsPiP(true);
-        setIsFloatingMini(false);
-        return;
-      } catch {}
-    }
-    setIsFloatingMini(true);
-  };
-
-  const exitMiniPlayer = async () => {
-    if (document.pictureInPictureElement) {
-      await (document as any).exitPictureInPicture?.().catch(() => {});
-    }
-    setIsPiP(false);
-    setIsFloatingMini(false);
-  };
 
   const applyQuality = (value: string) => {
     const nextLevel = Number.parseInt(value, 10);

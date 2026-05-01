@@ -28,7 +28,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <DotMatrixCanvas />
           <Navbar />
-          <main className="flex-1 w-full">{children}</main>
+          <main className="relative z-10 flex-1 w-full">{children}</main>
           <Footer />
         </ThemeProvider>
       </body>

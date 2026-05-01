@@ -94,10 +94,10 @@ export function Navbar() {
 
   return (
     <>
-      <nav className={`sticky top-0 z-[100] flex items-center justify-between px-6 md:px-12 py-4 transition-all duration-300 ${
+      <nav className={`sticky top-0 z-[100] flex items-center justify-between px-6 md:px-12 py-4 app-chrome transition-all duration-300 ${
         isScrolled 
-          ? "bg-page/80 backdrop-blur-xl border-b border-border/50 shadow-2xl" 
-          : "bg-transparent border-b border-transparent"
+          ? "border-b border-border/70 shadow-subtle" 
+          : "border-b border-border/50"
       }`}>
         <div className="flex items-center gap-10">
           <Logo />
@@ -130,7 +130,7 @@ export function Navbar() {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute top-full left-0 mt-1 w-64 bg-surface/90 backdrop-blur-2xl border border-border rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-2 z-[110]"
+                      className="absolute top-full left-0 mt-1 w-64 bg-surface/95 backdrop-blur-2xl border border-border rounded-lg shadow-elevated p-2 z-[110]"
                     >
                       {link.dropdown.map((item) => (
                         <div 
@@ -141,7 +141,7 @@ export function Navbar() {
                         >
                           <Link 
                             href={item.href} 
-                            className={`flex items-center justify-between px-3 py-2.5 text-[13px] font-medium rounded-xl transition-all ${activeSubMenu === item.name ? 'bg-white/10 text-primary' : 'text-secondary hover:bg-white/5 hover:text-primary'}`}
+                            className={`flex items-center justify-between px-3 py-2.5 text-[13px] font-medium rounded-md transition-all ${activeSubMenu === item.name ? 'bg-hover text-primary' : 'text-secondary hover:bg-hover hover:text-primary'}`}
                           >
                             <div className="flex items-center gap-3">
                                <span className="text-tertiary group-hover:text-primary transition-colors">{item.icon}</span>
@@ -158,13 +158,13 @@ export function Navbar() {
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: 10 }}
                                 transition={{ duration: 0.15 }}
-                                className="absolute left-full top-0 ml-1 w-56 bg-surface/95 backdrop-blur-2xl border border-border rounded-2xl shadow-2xl p-2 z-[120]"
+                                className="absolute left-full top-0 ml-1 w-56 bg-surface/95 backdrop-blur-2xl border border-border rounded-lg shadow-elevated p-2 z-[120]"
                               >
                                 {item.subItems?.map((sub) => (
                                   <Link 
                                     key={sub.name} 
                                     href={sub.href}
-                                    className="flex items-center gap-3 px-3 py-2.5 text-[13px] font-medium text-secondary hover:bg-white/5 hover:text-primary rounded-xl transition-all"
+                                    className="flex items-center gap-3 px-3 py-2.5 text-[13px] font-medium text-secondary hover:bg-hover hover:text-primary rounded-md transition-all"
                                   >
                                     <span className="text-tertiary hover:text-primary transition-colors">{sub.icon}</span>
                                     {sub.name}
@@ -211,7 +211,7 @@ export function Navbar() {
         </div>
 
         {/* Mobile Hamburger */}
-        <button className="md:hidden text-white p-2.5 bg-white/5 border border-white/10 rounded-full" onClick={() => setIsOpen(!isOpen)}>
+        <button className="md:hidden text-primary p-2.5 bg-surface border border-border rounded-full" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle navigation">
           {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
       </nav>
@@ -224,11 +224,11 @@ export function Navbar() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="md:hidden fixed inset-0 top-0 bg-page z-[200] overflow-y-auto"
+            className="md:hidden fixed inset-0 top-0 bg-page-solid z-[200] overflow-y-auto"
           >
-            <div className="flex items-center justify-between px-6 py-4 border-b border-border/50 sticky top-0 bg-page/90 backdrop-blur-xl z-10">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border/50 sticky top-0 app-chrome z-10">
               <Logo />
-              <button className="text-white p-2.5 bg-white/5 border border-white/10 rounded-full" onClick={() => setIsOpen(false)}>
+              <button className="text-primary p-2.5 bg-surface border border-border rounded-full" onClick={() => setIsOpen(false)} aria-label="Close navigation">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -307,14 +307,14 @@ export function Navbar() {
                   <>
                     <Link 
                       href="/account" 
-                      className="flex items-center justify-center gap-2 text-base font-bold text-primary py-4 bg-surface border border-border rounded-2xl"
+                      className="flex items-center justify-center gap-2 text-base font-bold text-primary py-4 bg-surface border border-border rounded-lg"
                       onClick={() => setIsOpen(false)}
                     >
                       Dashboard
                     </Link>
                     <button 
                       onClick={() => { logout(); setIsOpen(false); }}
-                      className="btn-ghost flex justify-center items-center gap-2 py-4 rounded-2xl text-base"
+                      className="btn-ghost flex justify-center items-center gap-2 py-4 rounded-lg text-base"
                     >
                       Logout
                     </button>
@@ -323,14 +323,14 @@ export function Navbar() {
                   <>
                     <Link 
                       href="/account/signin" 
-                      className="card flex items-center justify-center gap-2 text-base font-bold text-primary py-4 rounded-2xl"
+                      className="card flex items-center justify-center gap-2 text-base font-bold text-primary py-4 rounded-lg"
                       onClick={() => setIsOpen(false)}
                     >
                       Sign In
                     </Link>
                     <Link 
                       href="/account/signup" 
-                      className="btn-brand flex justify-center items-center gap-2 py-4 rounded-2xl text-base"
+                      className="btn-brand flex justify-center items-center gap-2 py-4 rounded-lg text-base"
                       onClick={() => setIsOpen(false)}
                     >
                       Get Started

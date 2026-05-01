@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
 
 export function DotMatrixCanvas() {
@@ -14,21 +14,23 @@ export function DotMatrixCanvas() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let animationFrameId: number;
+    let animationFrameId: number | null = null;
+    let lastFrame = 0;
     let width = window.innerWidth;
     let height = window.innerHeight;
+    let dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
+    const shouldAnimate = !reducedMotion && !coarsePointer;
 
-    // Configuration
     const dotSize = 1;
     const spacing = 24;
-    const flashlightRadius = 250;
+    const flashlightRadius = 220;
 
-    // Adjust these based on the linear design theme
-    // Dark mode: #f7f8f8 (Primary Text), Light mode: #1a1a1e
     const isDark = resolvedTheme === "dark";
     const baseColorRgb = isDark ? "255, 255, 255" : "0, 0, 0";
-    const brandColorRgb = "113, 112, 255"; // #7170ff (Accent Violet)
-    const baseOpacity = isDark ? 0.03 : 0.05;
+    const brandColorRgb = "113, 112, 255";
+    const baseOpacity = isDark ? 0.035 : 0.045;
 
     let mouseX = -1000;
     let mouseY = -1000;
@@ -36,12 +38,13 @@ export function DotMatrixCanvas() {
     const resize = () => {
       width = window.innerWidth;
       height = window.innerHeight;
-      canvas.width = width;
-      canvas.height = height;
+      dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
-
-    window.addEventListener("resize", resize);
-    resize();
 
     const handleMouseMove = (e: MouseEvent) => {
       mouseX = e.clientX;
@@ -71,19 +74,14 @@ export function DotMatrixCanvas() {
           const dy = mouseY - y;
           const distance = Math.sqrt(dx * dx + dy * dy);
 
-          // Interaction: Dots move away from cursor (Repulsion)
           let displayX = x;
           let displayY = y;
 
-          if (mouseX >= 0 && mouseY >= 0 && distance > 0) {
-            // Implementation based on the example provided:
-            // Shift = (Original - Mouse) / Distance * GridSize
-            // We use spacing as the GridSize.
+          if (shouldAnimate && mouseX >= 0 && mouseY >= 0 && distance > 0) {
             displayX = x + ((x - mouseX) / distance) * (spacing * 0.5);
             displayY = y + ((y - mouseY) / distance) * (spacing * 0.5);
           }
 
-          // Draw the dot
           ctx.beginPath();
           ctx.arc(displayX, displayY, dotSize, 0, Math.PI * 2);
 
@@ -98,33 +96,50 @@ export function DotMatrixCanvas() {
         }
       }
 
-      // Flashlight gradient overlay
-      if (mouseX >= 0 && mouseY >= 0) {
+      if (shouldAnimate && mouseX >= 0 && mouseY >= 0) {
         const gradient = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, flashlightRadius);
-        gradient.addColorStop(0, `rgba(${brandColorRgb}, 0.08)`);
+        gradient.addColorStop(0, `rgba(${brandColorRgb}, 0.07)`);
         gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
         
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, width, height);
       }
-
-      animationFrameId = requestAnimationFrame(draw);
     };
 
-    draw();
+    const animate = (time: number) => {
+      if (time - lastFrame > 33) {
+        draw();
+        lastFrame = time;
+      }
+      animationFrameId = requestAnimationFrame(animate);
+    };
+
+    const handleResize = () => {
+      resize();
+      if (!shouldAnimate) draw();
+    };
+
+    window.addEventListener("resize", handleResize);
+    if (shouldAnimate) {
+      resize();
+      animationFrameId = requestAnimationFrame(animate);
+    } else {
+      resize();
+      draw();
+    }
 
     return () => {
-      window.removeEventListener("resize", resize);
+      window.removeEventListener("resize", handleResize);
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseleave", handleMouseLeave);
-      cancelAnimationFrame(animationFrameId);
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
     };
   }, [resolvedTheme]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-[-1]"
+      className="fixed inset-0 pointer-events-none z-0 opacity-80"
       style={{ display: "block" }}
     />
   );

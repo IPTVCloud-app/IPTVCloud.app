@@ -139,7 +139,7 @@ function SignInForm() {
   };
 
   return (
-    <div className="card overflow-hidden relative z-10">
+    <div className="card w-full overflow-hidden p-6 md:p-8">
       <AnimatePresence mode="wait">
         {step === "credentials" ? (
           <motion.div
@@ -150,15 +150,15 @@ function SignInForm() {
             transition={{ duration: 0.3 }}
           >
             <div className="text-center mb-8">
-              <h1 className="text-2xl font-medium tracking-[-0.288px] text-primary mb-2 text-display">Welcome back</h1>
-              <p className="text-sm text-tertiary text-body">Sign in to your IPTVCloud account</p>
+              <h1 className="text-heading-2 text-primary mb-2">Welcome back</h1>
+              <p className="text-sm text-tertiary">Sign in to your IPTVCloud account</p>
             </div>
 
             {authError && (
               <motion.div 
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-6 p-3 rounded-lg bg-panel border border-border text-sm text-center font-medium"
+                className="mb-6 rounded-md border border-border bg-panel p-3 text-center text-sm font-medium"
                 style={{ color: '#e5484d' }}
               >
                 {authError}
@@ -213,7 +213,7 @@ function SignInForm() {
             transition={{ duration: 0.3 }}
           >
             <div className="text-center mb-8">
-              <h1 className="text-2xl font-medium tracking-[-0.288px] text-primary mb-2">Verify your identity</h1>
+              <h1 className="text-heading-2 text-primary mb-2">Verify your identity</h1>
               <p className="text-sm text-tertiary">Enter the 6-digit code sent to <span className="text-secondary font-medium">{email}</span></p>
             </div>
 
@@ -224,7 +224,7 @@ function SignInForm() {
                   maxLength={6}
                   {...registerOtp("code")}
                   placeholder="000000"
-                  className={`form-input py-4 text-2xl font-mono tracking-[0.5em] text-center ${otpErrors.code ? 'form-input--error' : ''}`}
+                  className={`form-input py-4 text-center font-mono text-2xl tracking-[0.45em] ${otpErrors.code ? 'form-input--error' : ''}`}
                   autoFocus
                 />
               </div>
