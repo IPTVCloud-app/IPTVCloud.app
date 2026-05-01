@@ -310,12 +310,16 @@ export default function ChannelsExplorerPage() {
                 </div>
                 
                 <div className="p-4 flex-1 flex flex-col">
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <h3 className="font-medium text-[15px] leading-snug line-clamp-2 group-hover:text-brand transition-colors">{channel.name}</h3>
-                    {channel.logo && (
+                  <div className="flex items-start gap-3 mb-3">
+                    {channel.logo ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={channel.logo} alt="" className="w-8 h-8 object-contain shrink-0 rounded bg-white/5 p-1 border border-border/50" />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-brand/10 border border-brand/20 flex items-center justify-center text-brand font-bold shrink-0 text-xs uppercase">
+                        {channel.name.substring(0, 1)}
+                      </div>
                     )}
+                    <h3 className="font-medium text-[15px] leading-snug line-clamp-2 group-hover:text-brand transition-colors flex-1">{channel.name}</h3>
                   </div>
                   
                   <div className="mt-auto flex items-center flex-wrap gap-2 text-[11px] text-tertiary">
