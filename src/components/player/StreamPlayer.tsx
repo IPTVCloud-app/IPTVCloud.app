@@ -183,7 +183,6 @@ export function StreamPlayer({ channelId, isTheaterMode, onToggleTheater }: Stre
             void video.play().catch(() => {});
           });
 
-          hls.on(Hls.Events.FRAG_BUFFERING, () => setIsBuffering(true));
           hls.on(Hls.Events.FRAG_BUFFERED, () => setIsBuffering(false));
           hls.on(Hls.Events.ERROR, (_event, data) => {
             if (!data?.fatal) return;

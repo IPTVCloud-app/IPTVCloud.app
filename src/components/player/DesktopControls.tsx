@@ -91,7 +91,7 @@ export function DesktopControls({
 
   return (
     <div className="absolute bottom-0 inset-x-0 px-4 pb-2 pt-8 flex flex-col gap-2 pointer-events-auto">
-      <SeekBar currentTime={currentTime} duration={duration} onSeek={handleSeek} />
+      <SeekBar videoRef={videoRef} isLive={true} />
       
       <div className="flex items-center justify-between">
         {/* Left Controls */}
