@@ -13,6 +13,7 @@
 
   --color-page: var(--bg-page);
   --color-surface: var(--bg-surface);
+  --color-panel: var(--bg-panel);
   --color-elevated: var(--bg-elevated);
   --color-hover: var(--bg-hover);
   
@@ -27,16 +28,23 @@
   --color-success: var(--success);
   --color-emerald: var(--emerald);
 
+  --shadow-ring: var(--shadow-ring);
+  --shadow-subtle: var(--shadow-subtle);
+  --shadow-card: var(--shadow-card);
+  --shadow-elevated: var(--shadow-elevated);
+  --shadow-dialog: var(--shadow-dialog);
+
   --font-sans: 'Inter', -apple-system, system-ui, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   --font-mono: 'Berkeley Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 }
 
 /*
-  Light Mode Variables (Default)
+  Light Mode Variables (from preview.html)
 */
 :root {
   --bg-page: #f7f8f8;
   --bg-surface: #ffffff;
+  --bg-panel: #f3f4f5;
   --bg-elevated: #ffffff;
   --bg-hover: #f3f4f5;
   --text-primary: #1a1a1e;
@@ -52,15 +60,23 @@
   --border-secondary: #c0c6d0;
   --border-subtle: #e6e6e6;
   --border-standard: rgba(0, 0, 0, 0.08);
+  
+  --shadow-ring: rgba(0,0,0,0.08) 0px 0px 0px 1px;
+  --shadow-subtle: rgba(0,0,0,0.04) 0px 2px 4px 0px;
+  --shadow-card: rgba(0,0,0,0.08) 0px 0px 0px 1px, rgba(0,0,0,0.04) 0px 2px 4px 0px;
+  --shadow-elevated: rgba(0,0,0,0.08) 0px 0px 0px 1px, rgba(0,0,0,0.06) 0px 4px 12px 0px;
+  --shadow-dialog: rgba(0,0,0,0) 0px 8px 2px 0px, rgba(0,0,0,0.02) 0px 5px 2px 0px, rgba(0,0,0,0.04) 0px 3px 2px 0px, rgba(0,0,0,0.06) 0px 1px 1px 0px, rgba(0,0,0,0.08) 0px 0px 1px 0px;
+  
   --radius: 0.5rem;
 }
 
 /*
-  Dark Mode Variables
+  Dark Mode Variables (from preview-dark.html)
 */
 .dark {
   --bg-page: #08090a;
   --bg-surface: #0f1011;
+  --bg-panel: #191a1b;
   --bg-elevated: #191a1b;
   --bg-hover: #28282c;
   --text-primary: #f7f8f8;
@@ -76,6 +92,12 @@
   --border-secondary: #34343a;
   --border-subtle: rgba(255, 255, 255, 0.05);
   --border-standard: rgba(255, 255, 255, 0.08);
+
+  --shadow-ring: rgba(0,0,0,0.2) 0px 0px 0px 1px;
+  --shadow-subtle: rgba(0,0,0,0.03) 0px 1.2px 0px 0px;
+  --shadow-card: rgba(0,0,0,0.2) 0px 0px 0px 1px, rgba(0,0,0,0.3) 0px 2px 4px 0px;
+  --shadow-elevated: rgba(0,0,0,0.4) 0px 2px 4px 0px, rgba(0,0,0,0.2) 0px 0px 0px 1px;
+  --shadow-dialog: rgba(0,0,0,0) 0px 8px 2px 0px, rgba(0,0,0,0.01) 0px 5px 2px 0px, rgba(0,0,0,0.04) 0px 3px 2px 0px, rgba(0,0,0,0.07) 0px 1px 1px 0px, rgba(0,0,0,0.08) 0px 0px 1px 0px;
 }
 
 @layer base {
@@ -121,20 +143,8 @@
   scrollbar-color: var(--border-primary) var(--bg-page);
 }
 
-/* Custom utilities based on DESIGN.md */
+/* Custom Typography Utilities based on DESIGN.md */
 @layer utilities {
-  .linear-shadow-subtle {
-    box-shadow: rgba(0,0,0,0.03) 0px 1.2px 0px 0px;
-  }
-  .linear-shadow-card {
-    box-shadow: rgba(0,0,0,0.2) 0px 0px 0px 1px, rgba(0,0,0,0.3) 0px 2px 4px 0px;
-  }
-  .linear-shadow-elevated {
-    box-shadow: rgba(0,0,0,0.4) 0px 2px 4px 0px, rgba(0,0,0,0.2) 0px 0px 0px 1px;
-  }
-  .linear-inset {
-    box-shadow: inset rgba(0,0,0,0.2) 0px 0px 12px 0px;
-  }
   .text-display {
     font-weight: 510;
     line-height: 1.0;

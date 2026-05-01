@@ -93,18 +93,6 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-page text-primary overflow-x-hidden relative">
       
-      {/* Interactive Background Effects */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <NodeNetwork />
-        <motion.div 
-          className="absolute inset-0"
-          animate={{ x: mouse.x * -0.3, y: mouse.y * -0.3 }}
-          transition={{ type: "spring", stiffness: 50, damping: 20 }}
-        >
-          <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
-        </motion.div>
-      </div>
-
       <div className="relative z-10">
         {/* Hero Section */}
         <section className="relative pt-24 pb-16 md:pt-32 md:pb-24 px-6 overflow-hidden">
