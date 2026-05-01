@@ -264,7 +264,7 @@ function WatchPlayer() {
                         </span>
                       </div>
 
-                      <button className="ml-4 shrink-0 rounded-full bg-primary px-5 py-2 text-sm font-bold text-page transition-colors hover:bg-white/90">
+                      <button className="ml-4 shrink-0 btn-primary">
                         Follow
                       </button>
                     </div>
@@ -276,7 +276,7 @@ function WatchPlayer() {
                           toast.success(isFavorite ? "Removed from Favorites" : "Added to Favorites");
                         }}
                         className={`flex items-center gap-2 whitespace-nowrap rounded-full border px-4 py-2 transition-colors ${
-                          isFavorite ? "border-brand bg-brand/10 text-brand" : "border-border bg-surface hover:bg-white/5"
+                          isFavorite ? "border-brand bg-brand/10 text-brand" : "border-border bg-surface hover:bg-hover"
                         }`}
                       >
                         <Star className={`h-4 w-4 ${isFavorite ? "fill-current" : ""}`} />
@@ -299,7 +299,7 @@ function WatchPlayer() {
                             console.error("Share failed:", shareErr);
                           }
                         }}
-                        className="flex items-center gap-2 whitespace-nowrap rounded-full border border-border bg-surface px-4 py-2 transition-colors hover:bg-white/5"
+                        className="flex items-center gap-2 whitespace-nowrap rounded-full border border-border bg-surface px-4 py-2 transition-colors hover:bg-hover"
                       >
                         <Share2 className="h-4 w-4" />
                         <span className="text-sm font-medium">Share</span>
@@ -307,7 +307,7 @@ function WatchPlayer() {
 
                       <button
                         onClick={() => toast.success("Select a playlist to add to.")}
-                        className="flex items-center gap-2 whitespace-nowrap rounded-full border border-border bg-surface px-4 py-2 transition-colors hover:bg-white/5"
+                        className="flex items-center gap-2 whitespace-nowrap rounded-full border border-border bg-surface px-4 py-2 transition-colors hover:bg-hover"
                       >
                         <PlusCircle className="h-4 w-4" />
                         <span className="text-sm font-medium">Add to Playlist</span>
@@ -315,7 +315,7 @@ function WatchPlayer() {
                     </div>
                   </div>
 
-                  <div className="mt-4 cursor-pointer rounded-xl border border-border bg-surface p-4 text-sm transition-colors hover:bg-white/5">
+                  <div className="mt-4 card cursor-pointer transition-colors">
                     <div className="mb-2 flex items-center gap-2 font-bold">
                       {(channelInfo?.categories?.[0] || channelInfo?.category || "General") as string} Category
                     </div>
@@ -345,8 +345,8 @@ function WatchPlayer() {
                   onClick={() => setActiveTab("recommended")}
                   className={`whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                     activeTab === "recommended"
-                      ? "bg-primary text-page"
-                      : "border border-border bg-surface text-secondary hover:bg-white/5"
+                      ? "btn-primary border-none"
+                      : "btn-ghost"
                   }`}
                 >
                   All
@@ -355,8 +355,8 @@ function WatchPlayer() {
                   onClick={() => setActiveTab("related")}
                   className={`whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                     activeTab === "related"
-                      ? "bg-primary text-page"
-                      : "border border-border bg-surface text-secondary hover:bg-white/5"
+                      ? "btn-primary border-none"
+                      : "btn-ghost"
                   }`}
                 >
                   Related
@@ -365,8 +365,8 @@ function WatchPlayer() {
                   onClick={() => setActiveTab("recent")}
                   className={`whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                     activeTab === "recent"
-                      ? "bg-primary text-page"
-                      : "border border-border bg-surface text-secondary hover:bg-white/5"
+                      ? "btn-primary border-none"
+                      : "btn-ghost"
                   }`}
                 >
                   Recently Watched
@@ -397,7 +397,7 @@ function WatchPlayer() {
                           className="h-full w-full object-cover"
                         />
                         <div className="absolute bottom-1 right-1 flex items-center gap-1 rounded bg-black/80 px-1 py-0.5 text-[10px] font-bold text-white">
-                          <Activity className="h-2.5 w-2.5 text-red-500" /> LIVE
+                          <Activity className="h-2.5 w-2.5 text-emerald" /> LIVE
                         </div>
                       </div>
                       <div className="flex min-w-0 flex-1 flex-col py-0.5">
@@ -411,7 +411,7 @@ function WatchPlayer() {
                   ))}
 
                   {!loadingRecommendations && filteredRecommendations.length === 0 && (
-                    <div className="rounded-lg border border-border bg-surface p-4 text-center text-sm text-secondary">
+                    <div className="card p-4 text-center text-sm text-secondary">
                       No channels found for this tab.
                     </div>
                   )}
@@ -571,13 +571,13 @@ function LiveChatComponent({ channelId }: { channelId: string }) {
   };
 
   return (
-    <div className="flex h-[500px] flex-col rounded-xl border border-border bg-surface">
+    <div className="card flex h-[500px] flex-col">
       <div className="flex items-center justify-between rounded-t-xl border-b border-border bg-page/50 p-3">
         <div className="flex items-center gap-2 text-sm font-bold text-primary">
           <MessageSquare className="h-4 w-4" /> Live Chat
         </div>
         <div className="flex items-center gap-1.5 text-xs font-medium text-secondary">
-          <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-500" /> {messages.length + 120}
+          <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald" /> {messages.length + 120}
         </div>
       </div>
 
@@ -613,7 +613,7 @@ function LiveChatComponent({ channelId }: { channelId: string }) {
               onChange={(event) => setInput(event.target.value)}
               placeholder={isAuthenticated ? "Send a message..." : "Sign in to chat..."}
               disabled={!isAuthenticated || isSending}
-              className="w-full rounded-full border border-border bg-surface py-1.5 pl-4 pr-10 text-sm transition-colors focus:border-brand focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              className="form-input rounded-full pl-4 pr-10 py-1.5"
             />
             <button
               type="submit"
@@ -636,3 +636,4 @@ export default function WatchPage() {
     </Suspense>
   );
 }
+

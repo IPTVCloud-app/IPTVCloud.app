@@ -90,19 +90,19 @@ const handleAction = async (userId: string, action: 'suspend' | 'mute' | 'restri
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Manage Users</h1>
-          <p className="text-neutral-500 dark:text-neutral-400">View and moderate user accounts</p>
+          <h1 className="text-heading-2 text-primary">Manage Users</h1>
+          <p className="text-body-small text-tertiary">View and moderate user accounts</p>
         </div>
         <Link 
           href="/account/admin"
-          className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+          className="btn-ghost text-body"
         >
           &larr; Back to Dashboard
         </Link>
       </div>
 
-      <div className="bg-white dark:bg-neutral-800 rounded-xl border border-neutral-200 dark:border-neutral-700 overflow-hidden shadow-sm">
-        <div className="p-4 border-b border-neutral-200 dark:border-neutral-700">
+      <div className="card">
+        <div className="p-4 border-b border-primary">
           <input
             type="text"
             placeholder="Search by username..."
@@ -111,13 +111,13 @@ const handleAction = async (userId: string, action: 'suspend' | 'mute' | 'restri
               setSearch(e.target.value);
               setPage(1);
             }}
-            className="w-full max-w-md px-4 py-2 bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="form-input"
           />
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-neutral-50 dark:bg-neutral-900/50 text-neutral-500 dark:text-neutral-400 font-medium">
+          <table className="w-full text-left text-meta whitespace-nowrap">
+            <thead className="bg-panel text-tertiary font-medium">
               <tr>
                 <th className="px-6 py-4">Username</th>
                 <th className="px-6 py-4">Role</th>
@@ -125,52 +125,52 @@ const handleAction = async (userId: string, action: 'suspend' | 'mute' | 'restri
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-200 dark:divide-neutral-700 text-neutral-900 dark:text-white">
+            <tbody className="divide-y divide-primary text-primary">
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-neutral-500">Loading users...</td>
+                  <td colSpan={4} className="px-6 py-8 text-center text-tertiary">Loading users...</td>
                 </tr>
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-neutral-500">No users found.</td>
+                  <td colSpan={4} className="px-6 py-8 text-center text-tertiary">No users found.</td>
                 </tr>
               ) : (
                 users.map(user => (
-                  <tr key={user.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
+                  <tr key={user.id} className="hover:bg-panel transition-colors">
                     <td className="px-6 py-4">
                       <div className="font-medium">{user.username}</div>
-                      <div className="text-xs text-neutral-500">{user.email}</div>
+                      <div className="text-caption text-tertiary">{user.email}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        user.role === 'admin' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' :
-                        user.role === 'moderator' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
-                        'bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-400'
+                      <span className={`px-2 py-1 rounded-full text-caption font-medium ${
+                        user.role === 'admin' ? 'badge-brand' :
+                        user.role === 'moderator' ? 'badge-accent' :
+                        'badge-subtle'
                       }`}>
                         {user.role}
                       </span>
                     </td>
                     <td className="px-6 py-4 space-y-1">
                       {user.suspended_until && new Date(user.suspended_until) > new Date() && (
-                        <span className="block text-xs text-red-500 font-medium">Suspended until {new Date(user.suspended_until).toLocaleDateString()}</span>
+                        <span className="block text-caption font-medium" style={{color: 'var(--brand)'}}>Suspended until {new Date(user.suspended_until).toLocaleDateString()}</span>
                       )}
                       {user.is_muted && (
-                        <span className="block text-xs text-orange-500 font-medium">Muted</span>
+                        <span className="block text-caption font-medium text-brand">Muted</span>
                       )}
                       {user.is_restricted && (
-                        <span className="block text-xs text-neutral-500 font-medium">Shadow-banned</span>
+                        <span className="block text-caption text-tertiary font-medium">Shadow-banned</span>
                       )}
                       {!user.suspended_until && !user.is_muted && !user.is_restricted && (
-                        <span className="block text-xs text-green-500 font-medium">Active</span>
+                        <span className="block text-caption text-success font-medium">Active</span>
                       )}
                     </td>
                     <td className="px-6 py-4 text-right space-x-2">
                       <button 
                         onClick={() => handleAction(user.id, 'mute', !user.is_muted)}
-                        className={`text-xs px-3 py-1 rounded border font-medium transition-colors ${
+                        className={`text-caption px-3 py-1 rounded border font-medium transition-colors ${
                           user.is_muted 
-                            ? 'border-orange-500 text-orange-500 bg-orange-50 dark:bg-orange-500/10' 
-                            : 'border-neutral-200 text-neutral-600 hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800'
+                            ? 'border-brand text-brand bg-surface' 
+                            : 'border-primary text-secondary hover:bg-panel'
                         }`}
                       >
                         {user.is_muted ? 'Unmute' : 'Mute'}
@@ -178,10 +178,10 @@ const handleAction = async (userId: string, action: 'suspend' | 'mute' | 'restri
                       
                       <button 
                         onClick={() => handleAction(user.id, 'restrict', !user.is_restricted)}
-                        className={`text-xs px-3 py-1 rounded border font-medium transition-colors ${
+                        className={`text-caption px-3 py-1 rounded border font-medium transition-colors ${
                           user.is_restricted 
-                            ? 'border-neutral-500 text-neutral-500 bg-neutral-100 dark:bg-neutral-800' 
-                            : 'border-neutral-200 text-neutral-600 hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800'
+                            ? 'border-secondary text-secondary bg-panel' 
+                            : 'border-primary text-secondary hover:bg-panel'
                         }`}
                         title="Shadow ban"
                       >
@@ -200,10 +200,10 @@ const handleAction = async (userId: string, action: 'suspend' | 'mute' | 'restri
                             }
                           }
                         }}
-                        className={`text-xs px-3 py-1 rounded border font-medium transition-colors ${
+                        className={`text-caption px-3 py-1 rounded border font-medium transition-colors ${
                           user.suspended_until && new Date(user.suspended_until) > new Date()
-                            ? 'border-red-500 text-red-500 bg-red-50 dark:bg-red-500/10' 
-                            : 'border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-900/30'
+                            ? 'border-brand text-brand bg-surface' 
+                            : 'border-primary text-secondary hover:bg-panel'
                         }`}
                       >
                         {user.suspended_until && new Date(user.suspended_until) > new Date() ? 'Lift Suspension' : 'Suspend'}
@@ -211,7 +211,7 @@ const handleAction = async (userId: string, action: 'suspend' | 'mute' | 'restri
 
                       <button 
                         onClick={() => handlePurge(user.id)}
-                        className="text-xs px-3 py-1 rounded border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-900/30 font-medium transition-colors ml-2"
+                        className="text-caption px-3 py-1 rounded border border-primary text-secondary hover:bg-panel font-medium transition-colors ml-2"
                         title="Delete comments from last 24h"
                       >
                         Purge 24h
@@ -226,19 +226,19 @@ const handleAction = async (userId: string, action: 'suspend' | 'mute' | 'restri
         
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="p-4 border-t border-neutral-200 dark:border-neutral-700 flex items-center justify-between">
+          <div className="p-4 border-t border-primary flex items-center justify-between">
             <button 
               disabled={page === 1}
               onClick={() => setPage(p => p - 1)}
-              className="text-sm text-neutral-600 dark:text-neutral-400 disabled:opacity-50"
+              className="text-meta text-secondary disabled:opacity-50"
             >
               Previous
             </button>
-            <span className="text-sm text-neutral-500">Page {page} of {totalPages}</span>
+            <span className="text-meta text-tertiary">Page {page} of {totalPages}</span>
             <button 
               disabled={page === totalPages}
               onClick={() => setPage(p => p + 1)}
-              className="text-sm text-neutral-600 dark:text-neutral-400 disabled:opacity-50"
+              className="text-meta text-secondary disabled:opacity-50"
             >
               Next
             </button>
@@ -248,3 +248,4 @@ const handleAction = async (userId: string, action: 'suspend' | 'mute' | 'restri
     </div>
   );
 }
+

@@ -142,7 +142,7 @@ export default function TwoFactorSettingsPage() {
           </p>
           
           <div className="max-w-sm mx-auto bg-page border border-border p-6 rounded-2xl">
-            <h3 className="text-sm font-bold text-primary mb-2 text-left text-red-500">Disable 2FA</h3>
+            <h3 className="text-sm font-bold text-primary mb-2 text-left" style={{color: '#e5484d'}}>Disable 2FA</h3>
             <p className="text-xs text-tertiary text-left mb-4">To disable Two-Factor Authentication, please enter a code from your authenticator app.</p>
             <div className="flex flex-col gap-3">
               <input 
@@ -153,7 +153,8 @@ export default function TwoFactorSettingsPage() {
               <button 
                 onClick={() => handleVerify('disable')}
                 disabled={authCode.length !== 6 || loading}
-                className="bg-red-500 text-white hover:bg-red-600 px-4 py-3 rounded-lg font-bold transition-colors disabled:opacity-50"
+                className="px-4 py-3 rounded-lg font-bold transition-colors disabled:opacity-50 text-white"
+                style={{backgroundColor: '#e5484d'}}
               >
                 Disable Protection
               </button>

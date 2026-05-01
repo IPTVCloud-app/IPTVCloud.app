@@ -71,7 +71,7 @@ function ResetPasswordForm() {
   if (isSuccess) {
     return (
       <div className="card">
-        <div className="w-16 h-16 bg-brand/10 text-brand rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_20px_rgba(94,106,210,0.2)]">
+        <div className="w-16 h-16 bg-brand/10 text-brand rounded-full flex items-center justify-center mx-auto mb-6 shadow-elevated">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         </div>
         <h3 className="text-xl font-medium text-primary mb-2">Password Reset!</h3>
@@ -91,33 +91,33 @@ function ResetPasswordForm() {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-        <div className="space-y-1.5">
-          <label className="block text-sm font-medium text-secondary tracking-[-0.182px]">New Password</label>
+        <div className="form-group">
+          <label className="form-label">New Password</label>
           <input 
             type="password" 
             {...register("password")}
             placeholder="••••••••"
-            className={`w-full bg-[rgba(255,255,255,0.02)] text-primary border ${errors.password ? 'border-[#e5484d]' : 'border-input focus:border-accent'} px-3.5 py-2.5 rounded-md text-sm outline-none transition-all focus:ring-2 focus:ring-[rgba(113,112,255,0.1)]`}
+            className={`form-input ${errors.password ? 'form-input--error' : ''}`}
           />
-          {errors.password && <p className="text-[11px] text-[#e5484d] mt-1">{errors.password.message}</p>}
+          {errors.password && <p className="form-state-label" style={{color: '#e5484d'}}>{errors.password.message}</p>}
           <PasswordStrengthBar password={passwordValue} />
         </div>
 
-        <div className="space-y-1.5">
-          <label className="block text-sm font-medium text-secondary tracking-[-0.182px]">Confirm New Password</label>
+        <div className="form-group">
+          <label className="form-label">Confirm New Password</label>
           <input 
             type="password" 
             {...register("confirmPassword")}
             placeholder="••••••••"
-            className={`w-full bg-[rgba(255,255,255,0.02)] text-primary border ${errors.confirmPassword ? 'border-[#e5484d]' : 'border-input focus:border-accent'} px-3.5 py-2.5 rounded-md text-sm outline-none transition-all focus:ring-2 focus:ring-[rgba(113,112,255,0.1)]`}
+            className={`form-input ${errors.confirmPassword ? 'form-input--error' : ''}`}
           />
-          {errors.confirmPassword && <p className="text-[11px] text-[#e5484d] mt-1">{errors.confirmPassword.message}</p>}
+          {errors.confirmPassword && <p className="form-state-label" style={{color: '#e5484d'}}>{errors.confirmPassword.message}</p>}
         </div>
 
         <button 
           type="submit" 
           disabled={isSubmitting || !email || !token}
-          className="btn-brand"
+          className="btn-brand w-full"
         >
           {isSubmitting ? "Updating..." : "Reset Password"}
         </button>
@@ -130,11 +130,11 @@ export default function ResetPasswordPage() {
   return (
     <Suspense fallback={
       <div className="card">
-        <div className="h-8 w-48 bg-[rgba(255,255,255,0.05)] rounded mx-auto mb-4" />
-        <div className="h-4 w-64 bg-[rgba(255,255,255,0.05)] rounded mx-auto mb-8" />
+        <div className="h-8 w-48 bg-panel rounded mx-auto mb-4" />
+        <div className="h-4 w-64 bg-panel rounded mx-auto mb-8" />
         <div className="space-y-6">
-          <div className="h-10 bg-[rgba(255,255,255,0.05)] rounded w-full" />
-          <div className="h-10 bg-[rgba(255,255,255,0.05)] rounded w-full" />
+          <div className="h-10 bg-panel rounded w-full" />
+          <div className="h-10 bg-panel rounded w-full" />
           <div className="h-10 bg-brand/20 rounded w-full mt-4" />
         </div>
       </div>

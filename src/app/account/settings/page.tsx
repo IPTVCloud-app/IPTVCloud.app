@@ -107,7 +107,7 @@ export default function PersonalSettingsPage() {
                     className={`flex items-center justify-center gap-2 py-2.5 rounded-lg border text-sm font-medium transition-colors ${
                       settings.themeMode === mode 
                         ? "bg-brand/10 border-brand text-brand" 
-                        : "bg-[rgba(255,255,255,0.02)] border-border text-secondary hover:border-accent"
+                        : "bg-panel border-border text-secondary hover:border-accent"
                     }`}
                   >
                     {mode === 'system' && <Monitor className="w-4 h-4" />}

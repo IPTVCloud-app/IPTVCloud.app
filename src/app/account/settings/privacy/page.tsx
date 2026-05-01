@@ -20,14 +20,14 @@ interface ToggleItemProps {
 }
 
 const ToggleItem = ({ title, description, icon, checked, onChange }: ToggleItemProps) => (
-  <div className="flex items-start justify-between p-5 border-b border-border last:border-0 hover:bg-[rgba(255,255,255,0.01)] transition-colors">
+  <div className="flex items-start justify-between p-5 border-b border-border last:border-0 hover:bg-hover transition-colors">
     <div className="flex gap-3 pr-6">
-      <div className="w-8 h-8 rounded-full bg-[rgba(255,255,255,0.03)] flex items-center justify-center text-tertiary mt-1">
+      <div className="w-8 h-8 rounded-full bg-panel flex items-center justify-center text-tertiary mt-1">
         {icon}
       </div>
       <div>
-        <h3 className="text-sm font-medium text-primary mb-1">{title}</h3>
-        <p className="text-xs text-tertiary leading-relaxed">{description}</p>
+        <h3 className="text-body font-medium text-primary mb-1">{title}</h3>
+        <p className="text-caption text-tertiary leading-relaxed">{description}</p>
       </div>
     </div>
     <label className="relative inline-flex items-center cursor-pointer mt-1 flex-shrink-0">
@@ -37,7 +37,7 @@ const ToggleItem = ({ title, description, icon, checked, onChange }: ToggleItemP
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
       />
-      <div className="w-9 h-5 bg-border rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-brand after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+      <div className="w-9 h-5 bg-border rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-brand after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-surface after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
     </label>
   </div>
 );

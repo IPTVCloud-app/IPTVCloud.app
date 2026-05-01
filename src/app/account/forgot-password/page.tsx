@@ -49,26 +49,26 @@ export default function ForgotPasswordPage() {
     <div className="card">
       <div className="text-center mb-8">
         <h1 className="text-2xl font-medium tracking-[-0.288px] text-primary mb-2">Forgot Password?</h1>
-        <p className="text-sm text-tertiary">Enter your email and we&apos;ll send you a link to reset your password.</p>
+        <p className="text-sm text-tertiary">Enter your email and we'll send you a link to reset your password.</p>
       </div>
 
       {!isSent ? (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          <div className="space-y-1.5">
-            <label className="block text-sm font-medium text-secondary tracking-[-0.182px]">Email</label>
+          <div className="form-group">
+            <label className="form-label">Email</label>
             <input 
               type="email" 
               {...register("email")}
               placeholder="name@example.com"
-              className={`w-full bg-[rgba(255,255,255,0.02)] text-primary border ${errors.email ? 'border-[#e5484d]' : 'border-input focus:border-accent'} px-3.5 py-2.5 rounded-md text-sm outline-none transition-all focus:ring-2 focus:ring-[rgba(113,112,255,0.1)]`}
+              className={`form-input ${errors.email ? 'form-input--error' : ''}`}
             />
-            {errors.email && <p className="text-[11px] text-[#e5484d] mt-1">{errors.email.message}</p>}
+            {errors.email && <p className="form-state-label" style={{color: '#e5484d'}}>{errors.email.message}</p>}
           </div>
 
           <button 
             type="submit" 
             disabled={isSubmitting}
-            className="btn-brand"
+            className="btn-brand w-full"
           >
             {isSubmitting ? "Sending..." : "Send Reset Link"}
           </button>
@@ -79,16 +79,16 @@ export default function ForgotPasswordPage() {
           animate={{ opacity: 1, scale: 1 }}
           className="text-center py-4"
         >
-          <div className="w-16 h-16 bg-brand/10 text-brand rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_20px_rgba(94,106,210,0.2)]">
+          <div className="w-16 h-16 bg-brand/10 text-brand rounded-full flex items-center justify-center mx-auto mb-6 shadow-elevated">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
           </div>
           <h3 className="text-lg font-medium text-primary mb-2">Check your email</h3>
-          <p className="text-sm text-tertiary mb-8">We&apos;ve sent a password reset link to your email address.</p>
+          <p className="text-sm text-tertiary mb-8">We've sent a password reset link to your email address.</p>
           <button 
             onClick={() => setIsSent(false)}
             className="text-xs text-accent hover:text-brand transition-colors font-medium"
           >
-            Didn&apos;t receive it? Try again
+            Didn't receive it? Try again
           </button>
         </motion.div>
       )}

@@ -61,16 +61,16 @@ export default function AccountLayout({
             animate={{ x: mouse.x * -0.5, y: mouse.y * -0.5 }}
             transition={{ type: "spring", stiffness: 50, damping: 20 }}
           >
-            <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(circle,_var(--dot-color)_1px,_transparent_1px)] bg-[size:32px_32px]"></div>
           </motion.div>
         </div>
 
         {/* Improved Spotlight Cursor Effect */}
         <motion.div
           className="fixed inset-0 z-10 pointer-events-none"
-          animate={{
+          style={{
             background: [
-              `radial-gradient(600px at ${mouse.rawX}px ${mouse.rawY}px, rgba(94, 106, 210, 0.08), transparent 80%)`,
+              `radial-gradient(600px at ${mouse.rawX}px ${mouse.rawY}px, var(--dot-color), transparent 80%)`,
               `radial-gradient(300px at ${mouse.rawX}px ${mouse.rawY}px, rgba(113, 112, 255, 0.05), transparent 60%)`
             ].join(', ')
           }}
@@ -103,8 +103,8 @@ export default function AccountLayout({
                     href={action.href} 
                     className={`flex items-center gap-3 px-2 py-2 rounded-md text-sm font-medium transition-colors ${
                       pathname === action.href 
-                        ? "text-primary bg-[rgba(255,255,255,0.06)] shadow-sm shadow-black/5" 
-                        : "text-secondary hover:text-primary hover:bg-[rgba(255,255,255,0.04)]"
+                        ? "text-primary bg-hover shadow-sm shadow-black/5" 
+                        : "text-secondary hover:text-primary hover:bg-panel"
                     }`}
                   >
                     <span className={pathname === action.href ? "text-brand" : "text-tertiary"}>{action.icon}</span>
@@ -124,8 +124,8 @@ export default function AccountLayout({
                     href={action.href} 
                     className={`flex items-center gap-3 px-2 py-2 rounded-md text-sm font-medium transition-colors ${
                       pathname === action.href 
-                        ? "text-primary bg-[rgba(255,255,255,0.06)]" 
-                        : "text-secondary hover:text-primary hover:bg-[rgba(255,255,255,0.04)]"
+                        ? "text-primary bg-hover" 
+                        : "text-secondary hover:text-primary hover:bg-panel"
                     }`}
                   >
                     <span className={pathname === action.href ? "text-brand" : "text-tertiary"}>{action.icon}</span>
@@ -138,7 +138,7 @@ export default function AccountLayout({
         </div>
 
         <div className="p-4 border-t border-border">
-          <button onClick={logout} className="w-full flex items-center gap-3 px-2 py-2 rounded-md text-sm font-medium text-quaternary hover:text-primary hover:bg-[rgba(255,255,255,0.04)] transition-colors">
+          <button onClick={logout} className="w-full flex items-center gap-3 px-2 py-2 rounded-md text-sm font-medium text-quaternary hover:text-primary hover:bg-panel transition-colors">
             <LogOut className="w-4 h-4" />
             Sign Out
           </button>

@@ -158,7 +158,8 @@ function SignInForm() {
               <motion.div 
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-6 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-xs text-center font-medium"
+                className="mb-6 p-3 rounded-lg bg-panel border border-border text-sm text-center font-medium"
+                style={{ color: '#e5484d' }}
               >
                 {authError}
               </motion.div>

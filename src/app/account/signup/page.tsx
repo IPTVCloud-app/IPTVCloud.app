@@ -102,7 +102,7 @@ export default function SignUpPage() {
       </div>
 
       {authError && (
-        <div className="mb-6 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-xs text-center font-medium">
+        <div className="mb-6 p-3 rounded-lg bg-panel border border-border text-sm text-center font-medium" style={{color: '#e5484d'}}>
           {authError}
         </div>
       )}

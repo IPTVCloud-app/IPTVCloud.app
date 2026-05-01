@@ -172,23 +172,23 @@ export default function ChannelsExplorerPage() {
                 placeholder="Search channels..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-surface border border-border focus:border-brand pl-10 pr-4 py-2.5 rounded-lg text-sm outline-none transition-all"
+                className="form-input pl-10 pr-4"
               />
             </div>
             
             <div className="relative" ref={filterRef}>
               <button 
                 onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all border ${
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-md text-sm font-medium transition-all border ${
                   showFilters || activeFilterCount > 0
-                    ? "bg-brand border-brand text-white shadow-lg shadow-brand/20" 
-                    : "bg-surface border-border text-secondary hover:border-accent"
+                    ? "btn-primary border-none" 
+                    : "btn-ghost"
                 }`}
               >
                 <Filter className="w-4 h-4" /> 
                 Filters
                 {activeFilterCount > 0 && (
-                  <span className="ml-1 px-1.5 py-0.5 bg-white text-brand rounded-full text-[10px] font-bold">
+                  <span className="ml-1 px-1.5 py-0.5 badge-brand text-[10px]">
                     {activeFilterCount}
                   </span>
                 )}
@@ -220,7 +220,7 @@ export default function ChannelsExplorerPage() {
                         <select 
                           value={selectedLanguage}
                           onChange={(e) => setSelectedLanguage(e.target.value)}
-                          className="w-full bg-page border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-brand transition-colors appearance-none cursor-pointer"
+                          className="form-input appearance-none cursor-pointer"
                         >
                           <option value="All">All Languages</option>
                           {languages.map(lang => (
@@ -237,7 +237,7 @@ export default function ChannelsExplorerPage() {
                         <select 
                           value={selectedCountry}
                           onChange={(e) => setSelectedCountry(e.target.value)}
-                          className="w-full bg-page border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-brand transition-colors appearance-none cursor-pointer"
+                          className="form-input appearance-none cursor-pointer"
                         >
                           <option value="All">All Countries</option>
                           {countries.map(country => (
@@ -254,7 +254,7 @@ export default function ChannelsExplorerPage() {
                             setSelectedCategory("All");
                             setSearchQuery("");
                           }}
-                          className="flex-1 px-4 py-2 bg-page border border-border rounded-lg text-xs font-bold text-secondary hover:bg-hover transition-colors"
+                          className="flex-1 btn-ghost"
                         >
                           Reset All
                         </button>
@@ -279,10 +279,10 @@ export default function ChannelsExplorerPage() {
             <button
               key={cat.code}
               onClick={() => setSelectedCategory(cat.code)}
-              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap border transition-all duration-200 ${
+              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 ${
                 selectedCategory === cat.code 
-                  ? "bg-brand border-brand text-white shadow-lg shadow-brand/20" 
-                  : "bg-surface border-border text-secondary hover:border-accent"
+                  ? "btn-primary border-none" 
+                  : "btn-ghost"
               }`}
             >
               {cat.name}
@@ -305,7 +305,7 @@ export default function ChannelsExplorerPage() {
                     />
                   </div>
                   <div className="absolute top-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-sm rounded text-[10px] font-medium text-white flex items-center gap-1 border border-white/10">
-                    <Radio className="w-3 h-3 text-red-500 animate-pulse" /> LIVE
+                    <Radio className="w-3 h-3 text-emerald animate-pulse" /> LIVE
                   </div>
                 </div>
                 
@@ -324,12 +324,12 @@ export default function ChannelsExplorerPage() {
                   
                   <div className="mt-auto flex items-center flex-wrap gap-2 text-[11px] text-tertiary">
                     {channel.category && (
-                      <span className="px-2 py-1 bg-page border border-border rounded-md">
+                      <span className="px-2 py-1 badge-subtle">
                         {channel.category}
                       </span>
                     )}
                     {channel.country && (
-                      <span className="flex items-center gap-1 px-2 py-1 bg-page border border-border rounded-md">
+                      <span className="flex items-center gap-1 px-2 py-1 badge-subtle">
                         <Globe className="w-3 h-3 text-brand/70" /> {channel.country}
                       </span>
                     )}
@@ -388,3 +388,4 @@ export default function ChannelsExplorerPage() {
     </div>
   );
 }
+

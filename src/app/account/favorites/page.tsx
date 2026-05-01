@@ -6,7 +6,7 @@ export default function FavoritesPage() {
   return (
     <div className="max-w-3xl">
       <div className="flex items-center gap-3 mb-8 pb-4 border-b border-border">
-        <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center text-red-500">
+        <div className="w-10 h-10 rounded-lg bg-emerald/10 flex items-center justify-center text-emerald">
           <Heart className="w-5 h-5" />
         </div>
         <div>

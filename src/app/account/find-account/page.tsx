@@ -69,9 +69,9 @@ export default function FindAccountPage() {
                 type="text" 
                 {...register("username")}
                 placeholder="johndoe88"
-                className={`w-full bg-[rgba(255,255,255,0.02)] text-primary border ${errors.username ? 'border-[#e5484d]' : 'border-input focus:border-accent'} px-3.5 py-2.5 rounded-md text-sm outline-none transition-all focus:ring-2 focus:ring-[rgba(113,112,255,0.1)]`}
+                className={`w-full bg-panel text-primary border ${errors.username ? 'border-red-500' : 'border-input focus:border-accent'} px-3.5 py-2.5 rounded-md text-sm outline-none transition-all focus:ring-2 focus:ring-brand/20`}
               />
-              {errors.username && <p className="text-[11px] text-[#e5484d] mt-1">{errors.username.message}</p>}
+              {errors.username && <p className="text-[11px]" style={{color: '#e5484d'}} >{errors.username.message}</p>}
             </div>
 
             <button 
@@ -94,7 +94,7 @@ export default function FindAccountPage() {
             </div>
             <h3 className="text-lg font-medium text-primary mb-2">Is this you?</h3>
             <p className="text-sm text-tertiary mb-6">We found an account associated with:</p>
-            <div className="bg-[rgba(255,255,255,0.03)] border border-border rounded-lg py-3 px-4 mb-8 font-mono text-secondary">
+            <div className="bg-surface border border-border rounded-lg py-3 px-4 mb-8 font-mono text-secondary">
               {result.maskedEmail}
             </div>
             <div className="flex flex-col gap-3">
